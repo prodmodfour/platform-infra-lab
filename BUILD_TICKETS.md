@@ -660,7 +660,7 @@ Commit when complete.
 
 ## 020 — Add security guide
 
-Status: TODO
+Status: DONE
 
 Create `docs/security.md`.
 

@@ -25,6 +25,7 @@ required_paths=(
   docs/operations.md
   docs/runbook.md
   docs/cost-notes.md
+  docs/security.md
   docs/secrets.md
   docs/service-examples.md
   docs/decisions
@@ -434,6 +435,23 @@ grep -qi "Cleanup checklist" docs/cost-notes.md
 grep -qi "How to avoid accidental spend" docs/cost-notes.md
 grep -qi "optional, manual, user-owned, and can incur cost" docs/cost-notes.md
 grep -qi "No exact current AWS prices are claimed" docs/cost-notes.md
+
+echo "== Security documentation checks =="
+grep -qi "Security scope and assumptions" docs/security.md
+grep -qi "No committed secrets" docs/security.md
+grep -qi "No Terraform state in git" docs/security.md
+grep -qi "IAM role separation" docs/security.md
+grep -qi "Least-privilege intent" docs/security.md
+grep -qi "Private database/cache" docs/security.md
+grep -qi "Public ALB boundary" docs/security.md
+grep -qi "Secret reference pattern" docs/security.md
+grep -qi "CI validation-only posture" docs/security.md
+grep -qi "Manual apply warnings" docs/security.md
+grep -qi "Production hardening gaps" docs/security.md
+grep -qi "Access review checklist" docs/security.md
+grep -qi "Threat model summary" docs/security.md
+grep -qi "optional, manual, user-owned, and can incur cost" docs/security.md
+grep -qi "validation-only" docs/security.md
 
 echo "== shell syntax checks =="
 for script in scripts/*.sh; do
