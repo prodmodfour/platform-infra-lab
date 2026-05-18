@@ -687,7 +687,7 @@ Commit when complete.
 
 ## 021 — Add review guide
 
-Status: TODO
+Status: DONE
 
 Create `docs/review-guide.md`.
 

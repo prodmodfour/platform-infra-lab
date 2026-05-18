@@ -26,6 +26,7 @@ required_paths=(
   docs/runbook.md
   docs/cost-notes.md
   docs/security.md
+  docs/review-guide.md
   docs/secrets.md
   docs/service-examples.md
   docs/decisions
@@ -452,6 +453,20 @@ grep -qi "Access review checklist" docs/security.md
 grep -qi "Threat model summary" docs/security.md
 grep -qi "optional, manual, user-owned, and can incur cost" docs/security.md
 grep -qi "validation-only" docs/security.md
+
+echo "== Review guide documentation checks =="
+grep -qi "Suggested 10-minute review path" docs/review-guide.md
+grep -qi "Suggested 30-minute review path" docs/review-guide.md
+grep -qi "Important modules to inspect" docs/review-guide.md
+grep -qi "Important docs to inspect" docs/review-guide.md
+grep -qi "What the project demonstrates" docs/review-guide.md
+grep -qi "What is intentionally out of scope" docs/review-guide.md
+grep -qi "How it complements the three backend repos" docs/review-guide.md
+grep -q "carbon-platform-api" docs/review-guide.md
+grep -q "job-runner-platform" docs/review-guide.md
+grep -q "multi-tenant-saas-api" docs/review-guide.md
+grep -q "infra/terraform/modules/ecs-service" docs/review-guide.md
+grep -q "scripts/quality-gate.sh" docs/review-guide.md
 
 echo "== shell syntax checks =="
 for script in scripts/*.sh; do
