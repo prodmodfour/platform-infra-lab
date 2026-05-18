@@ -541,7 +541,7 @@ Commit when complete.
 
 ## 016 — Add deployment guide
 
-Status: TODO
+Status: DONE
 
 Create `docs/deployment.md`.
 

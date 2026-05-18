@@ -20,6 +20,7 @@ required_paths=(
   scripts
   scripts/check-doc-links.sh
   docs
+  docs/deployment.md
   docs/secrets.md
   docs/service-examples.md
   docs/decisions
@@ -348,6 +349,21 @@ for architecture_term in "Application Load Balancer" "ECS" "RDS PostgreSQL" "Red
   grep -q "$architecture_term" docs/diagrams/aws-container-platform.md
   grep -q "$architecture_term" docs/architecture.md
 done
+
+echo "== Deployment documentation checks =="
+grep -qi "Pre-deploy checklist" docs/deployment.md
+grep -qi "Required local tools" docs/deployment.md
+grep -qi "Run validation" docs/deployment.md
+grep -qi "Initialise Terraform manually" docs/deployment.md
+grep -qi "Review a plan" docs/deployment.md
+grep -qi "Manual apply warning" docs/deployment.md
+grep -qi "Service image update flow" docs/deployment.md
+grep -qi "Environment promotion approach" docs/deployment.md
+grep -qi "Migration considerations" docs/deployment.md
+grep -qi "Post-deploy checks" docs/deployment.md
+grep -qi "optional, manual, user-owned, and can incur cost" docs/deployment.md
+grep -q "terraform init -backend=false" docs/deployment.md
+grep -q "terraform plan" docs/deployment.md
 
 echo "== shell syntax checks =="
 for script in scripts/*.sh; do
