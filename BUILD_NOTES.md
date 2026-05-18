@@ -2,7 +2,7 @@
 
 ## Current state
 
-Tickets 000 and 001 are complete. The repository now has the initial public-safe skeleton plus reusable validation guardrails for public-safety, forbidden Terraform/local secret files, no automated cloud mutations, and Terraform formatting/validation when Terraform is installed.
+Tickets 000, 001, and 002 are complete. The repository now has the initial public-safe skeleton, reusable validation guardrails, and Terraform repository convention documentation for modules and environments.
 
 The next run should start with the lowest-numbered TODO ticket in `BUILD_TICKETS.md`.
 
@@ -23,22 +23,21 @@ Do not add automated cloud mutation commands such as `terraform apply`, `terrafo
 
 ## Latest cycle notes
 
-Changed in ticket 001:
+Changed in ticket 002:
 
-- Added `scripts/check-public-safety.sh` to scan the working tree for unsafe local env files, private key files/material, AWS credential-looking files/content, and non-placeholder 12-digit account IDs.
-- Added `scripts/check-no-terraform-state.sh` to reject Terraform state, generated plan files, real `.tfvars` files, and local `.env` files.
-- Added `scripts/check-no-cloud-mutations.sh` to scan scripts and CI-style automation files for Terraform/cloud mutation commands while allowing documentation-only warnings.
-- Added `scripts/check-terraform.sh` to run `terraform fmt -recursive -check`, `terraform init -backend=false`, and `terraform validate` for Terraform environments when Terraform is available.
-- Added `scripts/self-test-guardrails.sh` with temporary-fixture self-checks for the guardrails.
-- Updated `scripts/quality-gate.sh` to run the new guardrails and self-tests.
-- Updated `README.md` and `docs/security.md` with the current validation/security guardrail behavior.
+- Added `infra/terraform/README.md` with repository-wide Terraform layout, naming, tagging, module, environment, backend, safety, and validation conventions.
+- Added `infra/terraform/modules/README.md` with reusable module structure, interface, naming/tagging, security, cost, and validation expectations.
+- Added `infra/terraform/environments/README.md` with environment root structure, dev/prod conventions, example variable file guidance, backend example policy, validation-only workflow, and manual apply policy.
+- Updated `scripts/quality-gate.sh` to require the Terraform convention documentation and check for key safety/convention topics.
+- Marked ticket 002 as DONE in `BUILD_TICKETS.md`.
 
 Limitations:
 
-- Terraform modules and environments are not implemented yet, so Terraform init/validate has no environments to validate.
+- Terraform environment skeletons are not implemented yet; ticket 003 should add `dev` and `prod` roots.
+- Terraform modules are not implemented yet; later tickets should add module code and per-module READMEs.
 - Terraform is not installed in the local environment used for this cycle; the Terraform guardrail warns and skips locally by design.
 - GitHub Actions CI is still deferred to ticket 014.
 
 ## Next recommended ticket
 
-Ticket 002.
+Ticket 003.

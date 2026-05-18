@@ -97,7 +97,7 @@ Commit when complete.
 
 ## 002 — Add Terraform repository conventions
 
-Status: TODO
+Status: DONE
 
 Create:
 

@@ -22,8 +22,11 @@ required_paths=(
   docs/diagrams
   infra
   infra/terraform
+  infra/terraform/README.md
   infra/terraform/modules
+  infra/terraform/modules/README.md
   infra/terraform/environments
+  infra/terraform/environments/README.md
 )
 
 for path in "${required_paths[@]}"; do
@@ -38,6 +41,18 @@ grep -qi "no committed secrets" README.md
 grep -qi "No Terraform state" README.md
 grep -qi "manual apply.*can incur" README.md
 grep -qi "backend/platform/SRE" README.md
+
+echo "== Terraform convention documentation checks =="
+grep -qi "backend.example.tf" infra/terraform/README.md
+grep -qi "terraform.tfvars.example" infra/terraform/README.md
+grep -qi "Never commit Terraform state" infra/terraform/README.md
+grep -qi "validation-only" infra/terraform/README.md
+grep -qi "manual apply" infra/terraform/README.md
+grep -qi "Module interface conventions" infra/terraform/modules/README.md
+grep -qi "common_tags" infra/terraform/modules/README.md
+grep -qi "Backend examples" infra/terraform/environments/README.md
+grep -qi "terraform.tfvars.example" infra/terraform/environments/README.md
+grep -qi "Validation-only workflow" infra/terraform/environments/README.md
 
 echo "== shell syntax checks =="
 for script in scripts/*.sh; do
