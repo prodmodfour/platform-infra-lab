@@ -1,6 +1,6 @@
 # Dev Terraform environment
 
-This root module is the public-safe `dev` environment for `platform-infra-lab`. It establishes provider configuration, backend examples, variable defaults, outputs, naming, tagging, and the first concrete module: the shared network module.
+This root module is the public-safe `dev` environment for `platform-infra-lab`. It establishes provider configuration, backend examples, variable defaults, outputs, naming, tagging, the shared network module, and the shared security-groups module.
 
 ## Current scope
 
@@ -12,8 +12,11 @@ The dev environment now wires `../../modules/network` with cost-aware defaults:
 - internet gateway and public route table
 - one private route table per private subnet
 - NAT gateway disabled by default
+- security groups for the future public ALB, private ECS services, private PostgreSQL, and optional Redis cache
+- public ingress limited to the future ALB edge on HTTP by default
+- private service-to-database rules scoped by security group reference rather than public CIDRs
 
-Future tickets add security groups, IAM, ECS service patterns, load balancing, RDS PostgreSQL, optional Redis, and observability.
+Future tickets add IAM, ECS service patterns, load balancing, RDS PostgreSQL, optional Redis resources, and observability.
 
 ## Dev posture
 
@@ -23,16 +26,18 @@ Dev is intentionally small and cost-aware:
 - NAT gateway usage defaults to disabled until private egress is explicitly needed
 - log retention defaults to a short demo-friendly window for future log groups
 - deletion protection defaults to disabled for disposable lab experiments
-- Redis/cache usage defaults to disabled
+- Redis/cache usage defaults to disabled, so the Redis security group is omitted by default
 - default ECS desired count is one task for future service examples
 
 These are placeholders for review and validation, not a production recommendation.
 
 ## Network review notes
 
-Public subnets are intended for internet-facing components only. Private subnets are intended for workloads and stateful services that should not receive public IP addresses. Security group rules are intentionally deferred to a later ticket so subnet placement and traffic boundaries can be reviewed separately.
+Public subnets are intended for internet-facing components only. Private subnets are intended for workloads and stateful services that should not receive public IP addresses.
 
-If NAT is enabled for a real dev experiment, it can create ongoing cloud cost. Keep it disabled unless the workload needs private outbound internet access, and clean up user-owned resources after review.
+The security group boundary is intentionally narrow: internet CIDRs reach only the ALB security group, the ALB reaches ECS services only on the service port, ECS services reach PostgreSQL only on port 5432, and Redis rules are created only when Redis is enabled. No public database or cache ingress is modeled.
+
+If NAT is enabled for a real dev experiment, it can create ongoing cloud cost. Keep it disabled unless the workload needs private outbound internet access, and clean up user-owned resources after review. Real workloads may also need reviewed egress through VPC endpoints, NAT, or narrow outbound rules for image pulls, logging, and AWS APIs.
 
 ## Public-safety notes
 

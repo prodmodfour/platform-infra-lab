@@ -20,7 +20,12 @@ infra/terraform/
 ├── README.md
 ├── modules/
 │   ├── README.md
-│   └── network/
+│   ├── network/
+│   │   ├── main.tf
+│   │   ├── variables.tf
+│   │   ├── outputs.tf
+│   │   └── README.md
+│   └── security-groups/
 │       ├── main.tf
 │       ├── variables.tf
 │       ├── outputs.tf
@@ -45,7 +50,7 @@ infra/terraform/
         └── README.md
 ```
 
-The `dev` and `prod` environment roots now both wire the shared `network` module. Future tickets add the remaining modules and continue wiring the same module set into both environments.
+The `dev` and `prod` environment roots now both wire the shared `network` and `security-groups` modules. Future tickets add the remaining modules and continue wiring the same module set into both environments.
 
 ## Naming guidance
 
@@ -117,6 +122,7 @@ Interface expectations:
 Implemented modules:
 
 - `modules/network` — VPC, public/private subnets, internet gateway, route tables, and optional NAT gateway.
+- `modules/security-groups` — public ALB, private ECS service, private PostgreSQL, and optional private Redis security group boundaries.
 
 See `modules/README.md` for detailed module interface conventions.
 

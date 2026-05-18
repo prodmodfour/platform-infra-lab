@@ -78,6 +78,36 @@ output "nat_gateway_id" {
   value       = module.network.nat_gateway_id
 }
 
+output "security_group_defaults" {
+  description = "Security group boundary inputs passed to the security-groups module."
+  value       = local.security_group_defaults
+}
+
+output "load_balancer_security_group_id" {
+  description = "Security group ID for the future public Application Load Balancer."
+  value       = module.security_groups.load_balancer_security_group_id
+}
+
+output "ecs_service_security_group_id" {
+  description = "Security group ID for future private ECS services."
+  value       = module.security_groups.ecs_service_security_group_id
+}
+
+output "rds_postgres_security_group_id" {
+  description = "Security group ID for future private PostgreSQL/RDS resources."
+  value       = module.security_groups.rds_postgres_security_group_id
+}
+
+output "redis_cache_security_group_id" {
+  description = "Security group ID for future private Redis/ElastiCache resources when enabled; null otherwise."
+  value       = module.security_groups.redis_cache_security_group_id
+}
+
+output "security_group_rule_summary" {
+  description = "Review-friendly summary of security group traffic boundaries."
+  value       = module.security_groups.rule_summary
+}
+
 output "platform_defaults" {
   description = "Cost and availability defaults that future modules will consume."
   value       = local.platform_defaults

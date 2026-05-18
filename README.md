@@ -30,7 +30,7 @@ This repository must remain safe to publish and safe to review.
 
 ## Current status
 
-Bootstrap skeleton, validation guardrails, Terraform conventions, dev/prod Terraform environments, and the shared network module are in place. Remaining Terraform modules, diagrams, and detailed operating documentation will be added ticket-by-ticket.
+Bootstrap skeleton, validation guardrails, Terraform conventions, dev/prod Terraform environments, the shared network module, and the shared security-groups module are in place. Remaining Terraform modules, diagrams, and detailed operating documentation will be added ticket-by-ticket.
 
 ## Quick start validation
 
@@ -72,7 +72,8 @@ The quality gate checks shell syntax, repository structure, public-safety rules,
 └── infra/
     └── terraform/
         ├── modules/
-        │   └── network/
+        │   ├── network/
+        │   └── security-groups/
         └── environments/
             ├── dev/
             └── prod/
@@ -81,6 +82,7 @@ The quality gate checks shell syntax, repository structure, public-safety rules,
 ## Planned architecture themes
 
 - VPC with public and private subnet intent implemented by the network module.
+- Security group boundaries for public ALB ingress, private ECS services, private PostgreSQL/RDS, and optional private Redis/ElastiCache.
 - Public Application Load Balancer in front of private ECS/Fargate services.
 - Private PostgreSQL/RDS and optional Redis/ElastiCache patterns.
 - Secret references via AWS-native services rather than committed secret values.

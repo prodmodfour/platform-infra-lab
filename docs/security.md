@@ -16,6 +16,16 @@ The network module separates public and private subnet intent:
 - public subnets are for future internet-facing edge resources such as an ALB
 - private subnets are for future ECS services, databases, and caches
 - private subnets do not map public IP addresses on launch
-- database/cache security group rules are not implemented yet and are intentionally deferred to the security-group ticket
 
-Future content will document IAM role separation, least-privilege intent, private database/cache access, public ALB boundaries, secret references, validation-only CI, and production hardening gaps.
+The security-groups module now models explicit traffic boundaries:
+
+- public IPv4 ingress is allowed only to the future ALB security group
+- the ALB security group can reach the ECS service security group only on the configured service port
+- ECS services can reach the PostgreSQL/RDS security group only on the configured database port
+- ECS services can reach the Redis/ElastiCache security group only when Redis is enabled
+- PostgreSQL and Redis security groups do not receive public CIDR ingress rules
+- private data-store rules use security group references rather than broad VPC CIDR access
+
+The current egress model is intentionally strict and incomplete for real workloads. Future ECS services may need reviewed egress through VPC endpoints, NAT, or narrow rules for image pulls, logs, secret references, telemetry, and third-party APIs.
+
+Future content will document IAM role separation, least-privilege intent, secret references, validation-only CI, and production hardening gaps.

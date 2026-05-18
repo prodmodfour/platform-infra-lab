@@ -29,6 +29,10 @@ required_paths=(
   infra/terraform/modules/network/variables.tf
   infra/terraform/modules/network/outputs.tf
   infra/terraform/modules/network/README.md
+  infra/terraform/modules/security-groups/main.tf
+  infra/terraform/modules/security-groups/variables.tf
+  infra/terraform/modules/security-groups/outputs.tf
+  infra/terraform/modules/security-groups/README.md
   infra/terraform/environments
   infra/terraform/environments/README.md
   infra/terraform/environments/dev/providers.tf
@@ -90,6 +94,22 @@ grep -qi "NAT gateway" infra/terraform/modules/network/README.md
 for env in dev prod; do
   grep -q 'module "network"' "infra/terraform/environments/$env/main.tf"
   grep -q 'output "vpc_id"' "infra/terraform/environments/$env/outputs.tf"
+done
+
+echo "== Terraform security group boundary checks =="
+grep -q 'resource "aws_security_group" "load_balancer"' infra/terraform/modules/security-groups/main.tf
+grep -q 'resource "aws_security_group" "ecs_service"' infra/terraform/modules/security-groups/main.tf
+grep -q 'resource "aws_security_group" "rds_postgres"' infra/terraform/modules/security-groups/main.tf
+grep -q 'resource "aws_security_group" "redis_cache"' infra/terraform/modules/security-groups/main.tf
+grep -q 'resource "aws_vpc_security_group_ingress_rule" "ecs_from_alb"' infra/terraform/modules/security-groups/main.tf
+grep -q 'resource "aws_vpc_security_group_ingress_rule" "rds_from_ecs"' infra/terraform/modules/security-groups/main.tf
+grep -q 'resource "aws_vpc_security_group_ingress_rule" "redis_from_ecs"' infra/terraform/modules/security-groups/main.tf
+grep -qi "PostgreSQL and Redis do not accept public ingress" infra/terraform/modules/security-groups/README.md
+grep -qi "Traffic boundaries" infra/terraform/modules/security-groups/README.md
+for env in dev prod; do
+  grep -q 'module "security_groups"' "infra/terraform/environments/$env/main.tf"
+  grep -q 'output "load_balancer_security_group_id"' "infra/terraform/environments/$env/outputs.tf"
+  grep -q 'output "rds_postgres_security_group_id"' "infra/terraform/environments/$env/outputs.tf"
 done
 
 echo "== shell syntax checks =="

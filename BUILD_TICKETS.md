@@ -190,7 +190,7 @@ Commit when complete.
 
 ## 005 — Add security groups module or security group resources
 
-Status: TODO
+Status: DONE
 
 Add infrastructure for security group boundaries.
 

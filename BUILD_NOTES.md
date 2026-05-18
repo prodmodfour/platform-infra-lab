@@ -2,15 +2,15 @@
 
 ## Current state
 
-Tickets 000, 001, 002, 003, and 004 are complete. The repository now has the public-safe skeleton, validation guardrails, Terraform conventions, dev/prod Terraform environment roots, and a shared AWS network module wired into both environments.
+Tickets 000, 001, 002, 003, 004, and 005 are complete. The repository now has the public-safe skeleton, validation guardrails, Terraform conventions, dev/prod Terraform environment roots, the shared AWS network module, and a shared security-groups module wired into both environments.
 
 The next run should start with the lowest-numbered TODO ticket in `BUILD_TICKETS.md`.
 
 ## Quality gates
 
 - `bash scripts/quality-gate.sh` — passed.
-  - Terraform was installed locally for this cycle.
   - `scripts/check-terraform.sh` ran `terraform fmt -recursive -check`, `terraform init -backend=false`, and `terraform validate` for both `dev` and `prod` using a temporary copy of the Terraform tree.
+  - Guardrails for public safety, no Terraform state/plan/real tfvars files, no secret-like files, and no cloud mutation automation passed.
 
 ## Public-safety notes
 
@@ -24,25 +24,30 @@ Do not add automated cloud mutation commands such as `terraform apply`, `terrafo
 
 ## Latest cycle notes
 
-Changed in ticket 004:
+Changed in ticket 005:
 
-- Added `infra/terraform/modules/network/` with `main.tf`, `variables.tf`, `outputs.tf`, and `README.md`.
-- Modeled a VPC, public subnets, private subnets, an internet gateway, public/private route tables, public internet routing, optional single NAT gateway, and NAT-backed private egress routes when enabled.
-- Added public-safe module inputs for naming, environment, VPC/subnet CIDRs, availability zones, NAT enablement, DNS behavior, and common tags.
-- Added outputs for VPC ID/CIDR, public/private subnet IDs and CIDRs, route table IDs, internet gateway ID, NAT enablement, and NAT gateway ID.
-- Wired the network module into both `infra/terraform/environments/dev/` and `infra/terraform/environments/prod/`.
-- Updated dev/prod outputs and README files to describe the implemented network resources and NAT posture.
-- Updated Terraform documentation, top-level README, architecture placeholder, cost notes, and security notes to reflect the implemented network module.
-- Updated `scripts/quality-gate.sh` to require the network module files and sanity-check network module wiring.
-- Marked ticket 004 as DONE in `BUILD_TICKETS.md`.
+- Added `infra/terraform/modules/security-groups/` with `main.tf`, `variables.tf`, `outputs.tf`, and `README.md`.
+- Modeled security groups for the future public Application Load Balancer, private ECS services, private PostgreSQL/RDS, and optional private Redis/ElastiCache cache.
+- Added explicit standalone ingress/egress rule resources for:
+  - public IPv4 CIDRs to the ALB security group only on configured ALB edge ports
+  - ALB security group to ECS service security group only on the service port
+  - ECS service security group to PostgreSQL/RDS security group only on the database port
+  - ECS service security group to Redis cache security group only when Redis is enabled
+- Ensured database and cache security groups do not include public ingress rules.
+- Wired the security-groups module into both `infra/terraform/environments/dev/` and `infra/terraform/environments/prod/`.
+- Added environment variables, example values, and outputs for ALB ingress CIDRs/ports, service port, database port, Redis port, and security group IDs.
+- Updated Terraform documentation, environment READMEs, top-level README, architecture notes, security notes, and cost notes to describe the implemented security group boundaries.
+- Updated `scripts/quality-gate.sh` to require the security-groups module files and sanity-check security group wiring.
+- Marked ticket 005 as DONE in `BUILD_TICKETS.md`.
 
 Limitations:
 
-- Security groups are intentionally not implemented yet; ticket 005 should add load balancer, service, database, and cache traffic boundaries.
-- The network module uses one optional shared NAT gateway when enabled. Production use should review per-availability-zone NAT gateways, VPC endpoints, flow logs, IPv6, CIDR sizing, and account-specific availability-zone support.
-- No load balancer, ECS, RDS, Redis, IAM, or observability resources exist yet; they remain deferred to later tickets.
+- No IAM, load balancer, ECS service, RDS, Redis, or observability resources are implemented yet; these remain deferred to later tickets.
+- The security group model uses one shared ECS service security group and one shared service port. Future service modules may need per-service security groups or ports if services have different exposure or data-store access patterns.
+- The ECS egress model is intentionally strict and currently covers only database and optional cache access. Real workloads may need reviewed VPC endpoints, NAT egress, or narrow outbound rules for ECR image pulls, CloudWatch Logs, secret references, telemetry, AWS APIs, or third-party APIs.
+- The ALB edge currently models HTTP ingress by default. Production use should review HTTPS-only ingress, certificate management, WAF, trusted CIDRs, IPv6, flow logs, and threat-detection requirements.
 - GitHub Actions CI is still deferred to ticket 014.
 
 ## Next recommended ticket
 
-Ticket 005.
+Ticket 006.

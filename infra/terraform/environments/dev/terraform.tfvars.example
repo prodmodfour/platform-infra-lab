@@ -17,6 +17,12 @@ deletion_protection_enabled   = false
 enable_redis                  = false
 service_desired_count_default = 1
 
+alb_ingress_cidrs = ["0.0.0.0/0"]
+alb_ingress_ports = [80]
+service_port      = 8080
+database_port     = 5432
+redis_port        = 6379
+
 additional_tags = {
   Owner   = "portfolio-demo"
   CostUse = "lab-validation"

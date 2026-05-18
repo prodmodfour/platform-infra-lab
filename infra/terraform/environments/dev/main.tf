@@ -28,9 +28,18 @@ locals {
     service_desired_count_default = var.service_desired_count_default
   }
 
+  security_group_defaults = {
+    alb_ingress_cidrs = var.alb_ingress_cidrs
+    alb_ingress_ports = var.alb_ingress_ports
+    service_port      = var.service_port
+    database_port     = var.database_port
+    enable_redis      = var.enable_redis
+    redis_port        = var.redis_port
+  }
+
   planned_module_contract = {
     network         = "implemented-ticket-004"
-    security_groups = "ticket-005"
+    security_groups = "implemented-ticket-005"
     iam             = "ticket-006"
     ecs_service     = "ticket-007"
     load_balancer   = "ticket-008"
@@ -51,4 +60,19 @@ module "network" {
   private_subnet_cidrs = var.private_subnet_cidrs
   enable_nat_gateway   = var.enable_nat_gateway
   common_tags          = local.common_tags
+}
+
+module "security_groups" {
+  source = "../../modules/security-groups"
+
+  name_prefix       = local.name_prefix
+  environment       = local.environment
+  vpc_id            = module.network.vpc_id
+  alb_ingress_cidrs = var.alb_ingress_cidrs
+  alb_ingress_ports = var.alb_ingress_ports
+  service_port      = var.service_port
+  database_port     = var.database_port
+  enable_redis      = var.enable_redis
+  redis_port        = var.redis_port
+  common_tags       = local.common_tags
 }
