@@ -24,7 +24,7 @@ Both environments use the same public-safe fake image names under `public.ecr.aw
 | --- | --- |
 | Fake image | `public.ecr.aws/example/carbon-platform-api:demo` |
 | Listener paths | `/carbon*`, `/carbon/*` |
-| Expected health path | `/health` |
+| Expected health path | `/healthz` |
 | Placeholder environment variables | `APP_ENV`, `SERVICE_NAME`, `LOG_LEVEL`, `DATABASE_MODE` |
 | Secret references | `DATABASE_URL` as a Secrets Manager reference only |
 | Database/cache needs | Requires private PostgreSQL through a `DATABASE_URL` reference. No Redis/Valkey dependency is modeled in the committed example. |
@@ -50,7 +50,7 @@ Both environments use the same public-safe fake image names under `public.ecr.aw
 | --- | --- |
 | Fake image | `public.ecr.aws/example/multi-tenant-saas-api:demo` |
 | Listener paths | `/saas*`, `/saas/*` |
-| Expected health path | `/ready` |
+| Expected health path | `/readyz` |
 | Placeholder environment variables | `APP_ENV`, `SERVICE_NAME`, `LOG_LEVEL`, `TENANCY_MODE`, `DATABASE_MODE` |
 | Secret references | `DATABASE_URL`, `JWT_SIGNING_KEY` as Secrets Manager references only |
 | Database/cache needs | Requires private PostgreSQL through a `DATABASE_URL` reference. Redis/Valkey can be used by a real design for sessions, rate limits, or tenant cache entries. |
