@@ -21,8 +21,8 @@ Each environment must include:
 
 Current environments:
 
-- `dev` — cost-aware lab defaults such as disabled NAT, two public/private subnet pairs, HTTP ALB listener wiring, shorter log retention, disabled cache resources/cache security group, one task per demo ECS service, a small single-AZ private PostgreSQL instance, dev-scoped metadata-only Secrets Manager references, and empty alarm action lists.
-- `prod` — production-intent examples such as three public/private subnet pairs, enabled NAT, HTTP ALB listener wiring, longer log retention, deletion protection, enabled private Redis cache with one replica/Multi-AZ intent, two tasks per demo ECS service, a Multi-AZ private PostgreSQL instance, prod-scoped metadata-only Secrets Manager references, and empty alarm action lists until a user-owned environment supplies routing ARNs.
+- `dev` — cost-aware lab defaults such as disabled NAT, two public/private subnet pairs, HTTP ALB listener wiring, shorter log retention, disabled cache resources/cache security group, one task per demo ECS service, public-safe service profile metadata, a small single-AZ private PostgreSQL instance, dev-scoped metadata-only Secrets Manager references, and empty alarm action lists.
+- `prod` — production-intent examples such as three public/private subnet pairs, enabled NAT, HTTP ALB listener wiring, longer log retention, deletion protection, enabled private Redis cache with one replica/Multi-AZ intent, two tasks per demo ECS service, public-safe service profile metadata, a Multi-AZ private PostgreSQL instance, prod-scoped metadata-only Secrets Manager references, and empty alarm action lists until a user-owned environment supplies routing ARNs.
 
 Do not commit real `.tfvars` files, real backend configuration, generated plan files, Terraform state, local credentials, or local `.env` files.
 
@@ -44,7 +44,7 @@ Each environment root should:
 
 `prod` should demonstrate production intent rather than guarantee production readiness. Examples include higher availability settings, stronger log retention, deletion protection for stateful services, private Multi-AZ PostgreSQL, an optional private Redis cache with replicas/Multi-AZ intent, tighter scaling and alarm thresholds, and clear notes about remaining hardening work.
 
-Both environments must remain public-safe and should use generic demo services only. Current service examples are `carbon-platform-api`, `job-runner-platform`, and `multi-tenant-saas-api`, all using fake `public.ecr.aws/example/...:demo` images.
+Both environments must remain public-safe and should use generic demo services only. Current service examples are `carbon-platform-api`, `job-runner-platform`, and `multi-tenant-saas-api`, all using fake `public.ecr.aws/example/...:demo` images. The `service_example_profiles` variable documents each service's health path, placeholder environment variables, database/cache needs, secret references, metrics/logging expectations, and deployment notes without copying application code.
 
 ## Variable files
 

@@ -353,6 +353,11 @@ output "ecs_service_defaults" {
   value       = local.ecs_service_defaults
 }
 
+output "service_example_catalog" {
+  description = "Public-safe catalog of the portfolio ECS service examples, including health paths, placeholder environment variables, secret reference keys, database/cache needs, and observability expectations."
+  value       = local.service_example_catalog
+}
+
 output "ecs_cluster_name" {
   description = "Name of the shared ECS cluster for private Fargate services."
   value       = aws_ecs_cluster.platform.name

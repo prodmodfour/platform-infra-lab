@@ -19,6 +19,7 @@ required_paths=(
   scripts
   docs
   docs/secrets.md
+  docs/service-examples.md
   docs/decisions
   docs/diagrams
   infra
@@ -242,6 +243,40 @@ for env in dev prod; do
   grep -q 'job-runner-platform' "infra/terraform/environments/$env/terraform.tfvars.example"
   grep -q 'multi-tenant-saas-api' "infra/terraform/environments/$env/terraform.tfvars.example"
   grep -q 'create_ecs_listener_rules = true' "infra/terraform/environments/$env/terraform.tfvars.example"
+done
+
+echo "== Service example catalog checks =="
+grep -qi "Service examples" docs/service-examples.md
+grep -qi "Expected health path" docs/service-examples.md
+grep -qi "Placeholder environment variables" docs/service-examples.md
+grep -qi "Secret references" docs/service-examples.md
+grep -qi "Database/cache needs" docs/service-examples.md
+grep -qi "Metrics/logging expectations" docs/service-examples.md
+grep -qi "Deployment notes" docs/service-examples.md
+for service in carbon-platform-api job-runner-platform multi-tenant-saas-api; do
+  grep -q "$service" docs/service-examples.md
+  grep -q "$service" docs/architecture.md
+  grep -q "$service" README.md
+  for env in dev prod; do
+    grep -q "$service" "infra/terraform/environments/$env/variables.tf"
+    grep -q "$service" "infra/terraform/environments/$env/terraform.tfvars.example"
+  done
+done
+for env in dev prod; do
+  grep -q 'variable "service_example_profiles"' "infra/terraform/environments/$env/variables.tf"
+  grep -q 'service_example_catalog' "infra/terraform/environments/$env/main.tf"
+  grep -q 'output "service_example_catalog"' "infra/terraform/environments/$env/outputs.tf"
+  grep -q 'service_example_profiles = {' "infra/terraform/environments/$env/terraform.tfvars.example"
+  grep -q 'expected_health_path' "infra/terraform/environments/$env/terraform.tfvars.example"
+  grep -q 'placeholder_environment_keys' "infra/terraform/environments/$env/terraform.tfvars.example"
+  grep -q 'database_requirement' "infra/terraform/environments/$env/terraform.tfvars.example"
+  grep -q 'cache_requirement' "infra/terraform/environments/$env/terraform.tfvars.example"
+  grep -q 'metrics_expectations' "infra/terraform/environments/$env/terraform.tfvars.example"
+  grep -q 'logging_expectations' "infra/terraform/environments/$env/terraform.tfvars.example"
+  grep -q 'deployment_notes' "infra/terraform/environments/$env/terraform.tfvars.example"
+  grep -q 'public.ecr.aws/example/carbon-platform-api:demo' "infra/terraform/environments/$env/terraform.tfvars.example"
+  grep -q 'public.ecr.aws/example/job-runner-platform:demo' "infra/terraform/environments/$env/terraform.tfvars.example"
+  grep -q 'public.ecr.aws/example/multi-tenant-saas-api:demo' "infra/terraform/environments/$env/terraform.tfvars.example"
 done
 
 echo "== Terraform observability module checks =="

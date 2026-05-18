@@ -10,6 +10,7 @@ This document is a living placeholder for the target AWS/Terraform architecture.
 - `infra/terraform/modules/secrets-manager-references` models metadata-only AWS Secrets Manager secret containers and reference outputs for ECS task-definition secret injection. It creates no secret versions or values.
 - `infra/terraform/modules/load-balancer` models an internet-facing Application Load Balancer, required HTTP listener, optional HTTPS listener variables, optional access-log references, and listener outputs for service rules.
 - `infra/terraform/modules/ecs-service` models a private Fargate service with task definition, ECS service, CloudWatch log group, ALB target group, listener rule, health checks, and desired-count autoscaling.
+- `docs/service-examples.md` and the environment `service_example_profiles` variables document public-safe service-specific health paths, placeholder environment variables, database/cache needs, secret references, metrics/logging expectations, and deployment notes.
 - `infra/terraform/modules/rds-postgres` models a private RDS PostgreSQL instance with a private DB subnet group, no public accessibility, backup/deletion-protection settings, storage variables, log exports, optional monitoring settings, and RDS-managed Secrets Manager master credentials.
 - `infra/terraform/modules/redis-cache` models an optional private ElastiCache Redis/Valkey-style replication group with a private subnet group, private security group input, enable/disable behavior, encryption settings, snapshots, and replica/Multi-AZ variables.
 - `infra/terraform/modules/observability` models a CloudWatch dashboard, ALB 5xx alarm, per-service unhealthy-target alarms, per-service ECS CPU/memory alarms, RDS CPU/free-storage alarms, and ECS log-group naming conventions.
@@ -33,6 +34,7 @@ Current ECS service intent:
 - a shared ECS cluster exists per environment
 - `carbon-platform-api`, `job-runner-platform`, and `multi-tenant-saas-api` are modeled as private Fargate services
 - each service uses a fake `public.ecr.aws/example/...:demo` image and no application code is copied into this repo
+- service profiles document the expected health path, placeholder environment variables, secret reference names, database/cache needs, metrics/logging expectations, and deployment notes for each portfolio app
 - task definitions use the execution role for image pulls, log delivery, and ECS-managed secret injection, plus a separate application task role
 - each service has a CloudWatch log group, target group, target-group health check, container health check, deployment circuit breaker, listener rule, and autoscaling settings
 - listener rules use the load-balancer module's HTTP listener ARN by default and forward service path patterns to private Fargate target groups

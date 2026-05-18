@@ -23,6 +23,7 @@ The prod environment now wires `../../modules/network` with production-intent de
 - a shared ECS cluster for private Fargate services
 - ECS service examples for `carbon-platform-api`, `job-runner-platform`, and `multi-tenant-saas-api`
 - fake public image URIs under `public.ecr.aws/example/...:demo`
+- `service_example_profiles` metadata and `service_example_catalog` output documenting health paths, placeholder environment variables, database/cache needs, secret references, metrics/logging expectations, and deployment notes
 - per-service CloudWatch log groups, task definitions, services, target groups, health checks, and desired-count autoscaling
 - ALB listener rules that forward path patterns from the HTTP listener to each service target group
 - ECS service secret inputs populated from Secrets Manager ARNs emitted by the secret-reference module; per-service extra references stay empty in committed examples
@@ -35,7 +36,7 @@ The prod environment now wires `../../modules/network` with production-intent de
 - CloudWatch observability module with a prod dashboard, ALB 5xx alarm, per-service unhealthy-target alarms, per-service ECS CPU/memory alarms, RDS CPU/free-storage alarms, and ECS log-group naming convention output
 - empty alarm action lists by default; real paging or incident-routing ARNs must be supplied only outside this repo
 
-Future tickets add CI, diagrams, service-example polish, and fuller operating documentation.
+Future tickets add CI, diagrams, and fuller operating documentation.
 
 ## Prod posture
 
@@ -49,6 +50,7 @@ Prod demonstrates production intent rather than production completeness:
 - ALB deletion protection defaults to enabled to show production-intent review posture, while still requiring user-owned cleanup planning
 - PostgreSQL deletion protection, Multi-AZ, final snapshot, non-zero backup retention, encrypted gp3 storage, and Performance Insights are enabled to show production intent
 - default ECS desired count is two tasks for each service example
+- service profile metadata is kept public-safe and uses placeholder environment and secret reference names only
 - autoscaling ranges are wider than dev to show production-intent capacity planning
 - observability thresholds are visible variables, with empty alarm action lists to avoid committing real routing ARNs
 - Secrets Manager reference containers use prod paths and metadata only; secret values remain outside this repository

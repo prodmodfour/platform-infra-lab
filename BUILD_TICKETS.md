@@ -450,7 +450,7 @@ Commit when complete.
 
 ## 013 — Add service examples for the three portfolio apps
 
-Status: TODO
+Status: DONE
 
 Add public-safe Terraform examples or variables that show how the infrastructure would deploy:
 

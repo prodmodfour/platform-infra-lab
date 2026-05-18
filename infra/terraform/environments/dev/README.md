@@ -23,6 +23,7 @@ The dev environment now wires `../../modules/network` with cost-aware defaults:
 - a shared ECS cluster for private Fargate services
 - ECS service examples for `carbon-platform-api`, `job-runner-platform`, and `multi-tenant-saas-api`
 - fake public image URIs under `public.ecr.aws/example/...:demo`
+- `service_example_profiles` metadata and `service_example_catalog` output documenting health paths, placeholder environment variables, database/cache needs, secret references, metrics/logging expectations, and deployment notes
 - per-service CloudWatch log groups, task definitions, services, target groups, health checks, and desired-count autoscaling
 - ALB listener rules that forward path patterns from the HTTP listener to each service target group
 - ECS service secret inputs populated from Secrets Manager ARNs emitted by the secret-reference module; per-service extra references stay empty in committed examples
@@ -35,7 +36,7 @@ The dev environment now wires `../../modules/network` with cost-aware defaults:
 - CloudWatch observability module with a dev dashboard, ALB 5xx alarm, per-service unhealthy-target alarms, per-service ECS CPU/memory alarms, RDS CPU/free-storage alarms, and ECS log-group naming convention output
 - empty alarm action lists by default; real paging or incident-routing ARNs must be supplied only outside this repo
 
-Future tickets add CI, diagrams, service-example polish, and fuller operating documentation.
+Future tickets add CI, diagrams, and fuller operating documentation.
 
 ## Dev posture
 
@@ -48,6 +49,7 @@ Dev is intentionally small and cost-aware:
 - Redis/cache usage defaults to disabled, so the Redis security group and ElastiCache resources are omitted by default
 - PostgreSQL uses a small single-AZ instance class, short backup retention, encrypted gp3 storage, and no public accessibility
 - default ECS desired count is one task for each service example
+- service profile metadata is kept public-safe and uses placeholder environment and secret reference names only
 - autoscaling ranges are intentionally small for review
 - observability thresholds are visible variables, with empty alarm action lists to avoid committing real routing ARNs
 - Secrets Manager reference containers use dev paths and metadata only; secret values remain outside this repository

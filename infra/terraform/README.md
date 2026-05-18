@@ -85,7 +85,7 @@ infra/terraform/
         └── README.md
 ```
 
-The `dev` and `prod` environment roots now both wire the shared `network`, `security-groups`, `secrets-manager-references`, `iam`, `load-balancer`, `ecs-service`, `rds-postgres`, `redis-cache`, and `observability` modules. Future tickets continue adding docs, CI, and review polish while preserving the same environment structure.
+The `dev` and `prod` environment roots now both wire the shared `network`, `security-groups`, `secrets-manager-references`, `iam`, `load-balancer`, `ecs-service`, `rds-postgres`, `redis-cache`, and `observability` modules, plus public-safe `service_example_profiles` metadata for the three portfolio services. Future tickets continue adding docs, CI, and review polish while preserving the same environment structure.
 
 ## Naming guidance
 
@@ -108,6 +108,7 @@ Conventions:
 - Use lowercase kebab-case for AWS resource names where the service supports it.
 - Keep names generic and portfolio-safe; do not include employer names, private system names, or real account identifiers.
 - Keep service identifiers aligned with the demo services: `carbon-platform-api`, `job-runner-platform`, and `multi-tenant-saas-api`.
+- Keep service profile metadata public-safe: health paths, placeholder environment variable names, secret reference names, database/cache needs, metrics/logging expectations, and deployment notes are allowed; real URLs, credentials, account IDs, or private service names are not.
 - Prefer explicit resource names over opaque generated strings when that improves plan review.
 
 ## Tagging guidance

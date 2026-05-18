@@ -134,6 +134,32 @@ locals {
     listener_arn_source    = var.ecs_listener_arn == null ? "module.load_balancer.http_listener_arn" : "ecs_listener_arn_override"
   }
 
+  service_example_catalog = {
+    for service_name, service in var.ecs_services : service_name => {
+      description                          = var.service_example_profiles[service_name].description
+      image                                = service.image
+      container_port                       = service.container_port
+      cpu                                  = service.cpu
+      memory                               = service.memory
+      desired_count                        = service.desired_count
+      health_check_path                    = service.health_check_path
+      expected_health_path                 = var.service_example_profiles[service_name].expected_health_path
+      listener_rule_path_patterns          = service.listener_rule_path_patterns
+      placeholder_environment_variables    = merge({ APP_ENV = local.environment, SERVICE_NAME = service_name }, service.environment_variables)
+      documented_environment_variable_keys = sort(var.service_example_profiles[service_name].placeholder_environment_keys)
+      secret_reference_keys                = sort(keys(lookup(var.ecs_secret_definitions, service_name, {})))
+      documented_secret_reference_keys     = sort(var.service_example_profiles[service_name].secret_reference_keys)
+      database_requirement                 = var.service_example_profiles[service_name].database_requirement
+      cache_requirement                    = var.service_example_profiles[service_name].cache_requirement
+      metrics_expectations                 = var.service_example_profiles[service_name].metrics_expectations
+      logging_expectations                 = var.service_example_profiles[service_name].logging_expectations
+      deployment_notes                     = var.service_example_profiles[service_name].deployment_notes
+      log_group_name                       = "/aws/ecs/${local.name_prefix}/${service_name}"
+      secret_values_created_in_repo        = false
+      application_code_included_in_repo    = false
+    }
+  }
+
   observability_defaults = {
     dashboard_period_seconds              = var.observability_dashboard_period_seconds
     alarm_period_seconds                  = var.observability_alarm_period_seconds

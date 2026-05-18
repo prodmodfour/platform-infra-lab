@@ -446,6 +446,107 @@ variable "ecs_services" {
   }
 }
 
+variable "service_example_profiles" {
+  description = "Public-safe documentation metadata for the three portfolio service examples. These values describe deployment expectations only; they are not application code or secret values."
+  type = map(object({
+    description                  = string
+    expected_health_path         = string
+    placeholder_environment_keys = list(string)
+    secret_reference_keys        = list(string)
+    database_requirement         = string
+    cache_requirement            = string
+    metrics_expectations         = list(string)
+    logging_expectations         = list(string)
+    deployment_notes             = list(string)
+  }))
+  default = {
+    carbon-platform-api = {
+      description                  = "Public placeholder API for carbon workflow requests; demonstrates private database-backed HTTP service deployment."
+      expected_health_path         = "/health"
+      placeholder_environment_keys = ["APP_ENV", "SERVICE_NAME", "LOG_LEVEL", "DATABASE_MODE"]
+      secret_reference_keys        = ["DATABASE_URL"]
+      database_requirement         = "Requires private PostgreSQL through a DATABASE_URL secret reference managed outside this repository."
+      cache_requirement            = "No Redis/Valkey dependency in the committed example."
+      metrics_expectations = [
+        "ALB target health and 5xx metrics identify routing or application failures.",
+        "ECS CPU and memory metrics drive service alarms and desired-count scaling review."
+      ]
+      logging_expectations = [
+        "Application logs flow to the per-service CloudWatch log group under /aws/ecs/<name-prefix>/carbon-platform-api."
+      ]
+      deployment_notes = [
+        "Update the image tag in ecs_services only after validation passes and the fake placeholder image is replaced in a user-owned fork.",
+        "Run database migrations as a separate reviewed operation before increasing traffic for a real workload."
+      ]
+    }
+    job-runner-platform = {
+      description                  = "Public placeholder asynchronous job runner; demonstrates worker-style service deployment behind the same private ECS pattern."
+      expected_health_path         = "/healthz"
+      placeholder_environment_keys = ["APP_ENV", "SERVICE_NAME", "LOG_LEVEL", "WORKER_MODE", "QUEUE_NAME"]
+      secret_reference_keys        = ["JOB_RUNNER_API_KEY"]
+      database_requirement         = "No PostgreSQL dependency in the committed example; real job history storage would require a reviewed database reference."
+      cache_requirement            = "Can use private Redis/Valkey for queue coordination or worker leases; prod enables cache resources by default to show the private cache tier."
+      metrics_expectations = [
+        "ECS CPU and memory metrics indicate worker pressure and scale-out needs.",
+        "ALB target health confirms the worker control or health endpoint remains reachable."
+      ]
+      logging_expectations = [
+        "Worker lifecycle, retry, and queue placeholder logs flow to the per-service CloudWatch log group."
+      ]
+      deployment_notes = [
+        "Prefer draining or pausing job intake before replacing a real worker image.",
+        "Keep queue names public-safe placeholders in committed examples and manage real queue credentials outside this repository."
+      ]
+    }
+    multi-tenant-saas-api = {
+      description                  = "Public placeholder multi-tenant SaaS API; demonstrates database-backed API service with tenant-aware configuration."
+      expected_health_path         = "/ready"
+      placeholder_environment_keys = ["APP_ENV", "SERVICE_NAME", "LOG_LEVEL", "TENANCY_MODE", "DATABASE_MODE"]
+      secret_reference_keys        = ["DATABASE_URL", "JWT_SIGNING_KEY"]
+      database_requirement         = "Requires private PostgreSQL through a DATABASE_URL secret reference managed outside this repository."
+      cache_requirement            = "Can use private Redis/Valkey when enabled for sessions, rate limits, or tenant cache entries."
+      metrics_expectations = [
+        "ALB 5xx, target health, and latency dashboard widgets are primary request-path signals.",
+        "ECS CPU and memory metrics support autoscaling and noisy-tenant investigation."
+      ]
+      logging_expectations = [
+        "Request, tenant, and auth placeholder logs should use structured application logs in the service CloudWatch log group without sensitive tenant data."
+      ]
+      deployment_notes = [
+        "Coordinate schema migrations and backward-compatible tenant configuration before a real image rollout.",
+        "Rotate JWT or signing references outside this repository and verify ECS secret injection before shifting traffic."
+      ]
+    }
+  }
+
+  validation {
+    condition = length(var.service_example_profiles) == 3 && alltrue([
+      for required_service in ["carbon-platform-api", "job-runner-platform", "multi-tenant-saas-api"] :
+      contains(keys(var.service_example_profiles), required_service)
+    ])
+    error_message = "service_example_profiles must define exactly carbon-platform-api, job-runner-platform, and multi-tenant-saas-api."
+  }
+
+  validation {
+    condition = alltrue([
+      for service_name, profile in var.service_example_profiles :
+      can(regex("^[a-z][a-z0-9-]+$", service_name)) &&
+      length(trimspace(profile.description)) >= 20 &&
+      startswith(profile.expected_health_path, "/") &&
+      length(profile.placeholder_environment_keys) > 0 &&
+      length(profile.secret_reference_keys) > 0 &&
+      length(trimspace(profile.database_requirement)) >= 20 &&
+      length(trimspace(profile.cache_requirement)) >= 20 &&
+      length(profile.metrics_expectations) >= 2 &&
+      length(profile.logging_expectations) >= 1 &&
+      length(profile.deployment_notes) >= 1 &&
+      alltrue([for key in concat(profile.placeholder_environment_keys, profile.secret_reference_keys) : can(regex("^[A-Z_][A-Z0-9_]*$", key))]) &&
+      alltrue([for note in concat(profile.metrics_expectations, profile.logging_expectations, profile.deployment_notes) : length(trimspace(note)) >= 10])
+    ])
+    error_message = "Service example profiles must use public-safe service names, health paths, uppercase environment/secret keys, database/cache requirements, and reviewable notes."
+  }
+}
+
 variable "alb_ingress_cidrs" {
   description = "IPv4 CIDR blocks allowed to reach the public ALB. Prod keeps the edge public in this placeholder but production should review WAF/trusted CIDR restrictions."
   type        = list(string)
