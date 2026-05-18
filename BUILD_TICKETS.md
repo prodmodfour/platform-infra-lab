@@ -126,7 +126,7 @@ Commit when complete.
 
 ## 003 — Add AWS provider/environment skeletons
 
-Status: TODO
+Status: DONE
 
 Create Terraform environments:
 

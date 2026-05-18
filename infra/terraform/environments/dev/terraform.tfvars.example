@@ -1,0 +1,23 @@
+# Public-safe example values for the dev environment.
+# Copy to a local, untracked .tfvars file only if you choose to experiment manually.
+# Do not commit real account IDs, backend settings, credentials, or secret values.
+
+aws_region       = "us-east-1"
+project_name     = "platform-infra-lab"
+environment_name = "dev"
+
+vpc_cidr             = "10.20.0.0/16"
+availability_zones   = ["us-east-1a", "us-east-1b"]
+public_subnet_cidrs  = ["10.20.0.0/24", "10.20.1.0/24"]
+private_subnet_cidrs = ["10.20.10.0/24", "10.20.11.0/24"]
+
+enable_nat_gateway            = false
+log_retention_days            = 7
+deletion_protection_enabled   = false
+enable_redis                  = false
+service_desired_count_default = 1
+
+additional_tags = {
+  Owner   = "portfolio-demo"
+  CostUse = "lab-validation"
+}

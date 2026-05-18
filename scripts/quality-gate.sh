@@ -27,6 +27,20 @@ required_paths=(
   infra/terraform/modules/README.md
   infra/terraform/environments
   infra/terraform/environments/README.md
+  infra/terraform/environments/dev/providers.tf
+  infra/terraform/environments/dev/main.tf
+  infra/terraform/environments/dev/variables.tf
+  infra/terraform/environments/dev/outputs.tf
+  infra/terraform/environments/dev/backend.example.tf
+  infra/terraform/environments/dev/terraform.tfvars.example
+  infra/terraform/environments/dev/README.md
+  infra/terraform/environments/prod/providers.tf
+  infra/terraform/environments/prod/main.tf
+  infra/terraform/environments/prod/variables.tf
+  infra/terraform/environments/prod/outputs.tf
+  infra/terraform/environments/prod/backend.example.tf
+  infra/terraform/environments/prod/terraform.tfvars.example
+  infra/terraform/environments/prod/README.md
 )
 
 for path in "${required_paths[@]}"; do
@@ -53,6 +67,14 @@ grep -qi "common_tags" infra/terraform/modules/README.md
 grep -qi "Backend examples" infra/terraform/environments/README.md
 grep -qi "terraform.tfvars.example" infra/terraform/environments/README.md
 grep -qi "Validation-only workflow" infra/terraform/environments/README.md
+
+echo "== Terraform environment skeleton checks =="
+for env in dev prod; do
+  grep -q 'backend "s3"' "infra/terraform/environments/$env/backend.example.tf"
+  grep -qi "public-safe" "infra/terraform/environments/$env/README.md"
+  grep -qi "terraform.tfvars.example" "infra/terraform/environments/$env/README.md"
+  grep -q "environment_name.*$env" "infra/terraform/environments/$env/terraform.tfvars.example"
+done
 
 echo "== shell syntax checks =="
 for script in scripts/*.sh; do

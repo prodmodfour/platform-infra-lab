@@ -21,10 +21,26 @@ infra/terraform/
 ├── modules/
 │   └── README.md
 └── environments/
-    └── README.md
+    ├── README.md
+    ├── dev/
+    │   ├── providers.tf
+    │   ├── main.tf
+    │   ├── variables.tf
+    │   ├── outputs.tf
+    │   ├── backend.example.tf
+    │   ├── terraform.tfvars.example
+    │   └── README.md
+    └── prod/
+        ├── providers.tf
+        ├── main.tf
+        ├── variables.tf
+        ├── outputs.tf
+        ├── backend.example.tf
+        ├── terraform.tfvars.example
+        └── README.md
 ```
 
-Future tickets add concrete module and environment directories. Each module and environment should include its own `README.md` once implemented.
+The `dev` and `prod` environment roots are in place as validation-ready skeletons. Future tickets add concrete module directories and then wire the same module set into both environments.
 
 ## Naming guidance
 

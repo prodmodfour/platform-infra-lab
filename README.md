@@ -30,7 +30,7 @@ This repository must remain safe to publish and safe to review.
 
 ## Current status
 
-Bootstrap skeleton is in place. Terraform modules, environments, diagrams, and detailed operating documentation will be added ticket-by-ticket.
+Bootstrap skeleton, validation guardrails, Terraform conventions, and dev/prod Terraform environment skeletons are in place. Concrete Terraform modules, diagrams, and detailed operating documentation will be added ticket-by-ticket.
 
 ## Quick start validation
 
@@ -73,6 +73,8 @@ The quality gate checks shell syntax, repository structure, public-safety rules,
     └── terraform/
         ├── modules/
         └── environments/
+            ├── dev/
+            └── prod/
 ```
 
 ## Planned architecture themes

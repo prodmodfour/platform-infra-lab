@@ -1,0 +1,23 @@
+# Public-safe example values for the prod environment.
+# Copy to a local, untracked .tfvars file only if you choose to experiment manually.
+# Do not commit real account IDs, backend settings, credentials, or secret values.
+
+aws_region       = "us-east-1"
+project_name     = "platform-infra-lab"
+environment_name = "prod"
+
+vpc_cidr             = "10.30.0.0/16"
+availability_zones   = ["us-east-1a", "us-east-1b", "us-east-1c"]
+public_subnet_cidrs  = ["10.30.0.0/24", "10.30.1.0/24", "10.30.2.0/24"]
+private_subnet_cidrs = ["10.30.10.0/24", "10.30.11.0/24", "10.30.12.0/24"]
+
+enable_nat_gateway            = true
+log_retention_days            = 30
+deletion_protection_enabled   = true
+enable_redis                  = true
+service_desired_count_default = 2
+
+additional_tags = {
+  Owner   = "portfolio-demo"
+  CostUse = "production-intent-review"
+}
