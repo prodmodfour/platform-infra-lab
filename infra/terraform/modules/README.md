@@ -9,12 +9,12 @@ This directory contains reusable Terraform modules for the AWS platform lab. Mod
 - `iam` — ECS task execution role, application task role, and optional read policies for Secrets Manager or SSM Parameter Store references.
 - `load-balancer` — public Application Load Balancer, HTTP listener, optional HTTPS listener variables, optional access-log references, and listener outputs for ECS service rules.
 - `ecs-service` — ECS/Fargate task definition, service, CloudWatch log group, ALB target group, listener rule, health checks, and desired-count autoscaling.
+- `rds-postgres` — private RDS PostgreSQL instance, subnet group, backup/deletion-protection settings, storage variables, log exports, and RDS-managed Secrets Manager master credentials.
 
 ## Planned module areas
 
 The target architecture is expected to use additional modules for areas such as:
 
-- RDS PostgreSQL: private subnet group, instance configuration, backups, and deletion protection
 - Redis cache: optional private ElastiCache/Valkey-style cache pattern that can consume the cache security group
 - observability: CloudWatch dashboards, alarms, and log naming conventions
 

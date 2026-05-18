@@ -2,7 +2,7 @@
 
 ## Current state
 
-Tickets 000 through 008 are complete. The repository now has the public-safe skeleton, validation guardrails, Terraform conventions, dev/prod Terraform environment roots, shared AWS network module, shared security-groups module, shared IAM module, shared load-balancer module, and ECS/Fargate service module wired into both environments for the three portfolio demo services.
+Tickets 000 through 009 are complete. The repository now has the public-safe skeleton, validation guardrails, Terraform conventions, dev/prod Terraform environment roots, shared AWS network module, shared security-groups module, shared IAM module, shared load-balancer module, ECS/Fargate service module wired for the three portfolio demo services, and a private RDS PostgreSQL module wired into both environments.
 
 The next run should start with the lowest-numbered TODO ticket in `BUILD_TICKETS.md`.
 
@@ -11,7 +11,7 @@ The next run should start with the lowest-numbered TODO ticket in `BUILD_TICKETS
 - `bash scripts/check-terraform.sh` — passed.
   - Ran `terraform fmt -recursive -check`, `terraform init -backend=false`, and `terraform validate` for both `dev` and `prod` using a temporary copy of the Terraform tree.
 - `bash scripts/quality-gate.sh` — passed.
-  - Guardrails for shell syntax, public safety, no Terraform state/plan/real tfvars files, no secret-like files, no cloud mutation automation, and Terraform validation passed.
+  - Guardrails for shell syntax, public safety, no Terraform state/plan/real tfvars files, no secret-like files, no cloud mutation automation, required Terraform module structure, and Terraform validation passed.
 
 ## Public-safety notes
 
@@ -25,42 +25,42 @@ Do not add automated cloud mutation commands such as `terraform apply`, `terrafo
 
 ## Latest cycle notes
 
-Changed in ticket 008:
+Changed in ticket 009:
 
-- Added `infra/terraform/modules/load-balancer/` with `main.tf`, `variables.tf`, `outputs.tf`, and `README.md`.
-- Modeled the public ALB edge with:
-  - internet-facing Application Load Balancer by default
-  - required HTTP listener with a fixed-response default action for unmatched routes
-  - optional HTTPS listener variables that require a user-owned ACM certificate ARN when enabled
-  - optional ALB access-log configuration that references an existing user-owned S3 bucket when enabled
-  - outputs for ALB DNS, zone ID, listener ARNs, listener summaries, and target-group wiring pattern
-- Wired the load-balancer module into both `infra/terraform/environments/dev/` and `infra/terraform/environments/prod/`.
-- Passed `module.load_balancer.http_listener_arn` into the ECS service module by default so each demo service now creates path-based listener rules for its target group.
+- Added `infra/terraform/modules/rds-postgres/` with `main.tf`, `variables.tf`, `outputs.tf`, and `README.md`.
+- Modeled a private RDS PostgreSQL instance pattern with:
+  - private DB subnet group over environment private subnets
+  - `publicly_accessible = false`
+  - security group input supplied from the existing private RDS security group boundary
+  - PostgreSQL engine/version, database name, instance class, port, storage, backup, deletion-protection, and final-snapshot variables
+  - storage encryption enabled by default and optional user-owned KMS key references kept null in committed examples
+  - RDS-managed master user password support through Secrets Manager, without accepting or committing a database password value
+  - CloudWatch PostgreSQL log export variables, optional Enhanced Monitoring variables, and optional Performance Insights variables
+  - review-friendly outputs for endpoint, resource ID, subnet group, backup summary, storage summary, monitoring summary, and credential-reference summary
+- Wired the RDS PostgreSQL module into both `infra/terraform/environments/dev/` and `infra/terraform/environments/prod/`.
+- Added environment variables and public-safe `terraform.tfvars.example` values for RDS sizing and safeguards:
+  - dev uses a small single-AZ PostgreSQL shape, short backup retention, deletion protection disabled, and skipped final snapshot for disposable lab use
+  - prod shows production intent with Multi-AZ, deletion protection, final snapshot, longer backup retention, retained automated backups, larger storage ceiling, and Performance Insights enabled
 - Kept all committed examples public-safe:
-  - no real certificate ARN
-  - no real access-log bucket
-  - no real DNS name or hosted zone
-  - fake service images only
-  - placeholder secret-reference ARNs only
-- Updated environment defaults and examples for ALB HTTP, optional HTTPS, access logs, deletion protection, and listener-rule creation.
-- Added load-balancer outputs to both environments.
-- Updated Terraform module/environment documentation, README, architecture notes, security notes, deployment placeholder, operations placeholder, rollback placeholder, and cost notes for the ALB public-edge pattern.
-- Updated `scripts/quality-gate.sh` to require the load-balancer module files and sanity-check load-balancer wiring in both environments.
-- Marked ticket 008 as DONE in `BUILD_TICKETS.md`.
+  - no database password values
+  - no real KMS key ARNs
+  - no real secret ARNs for RDS credentials
+  - no real account IDs beyond the allowed fake placeholder `123456789012` already used for demo secret-reference ARNs
+- Updated Terraform module/environment documentation, README, architecture notes, security notes, deployment placeholder, operations placeholder, rollback placeholder, runbook placeholder, review guide placeholder, and cost notes for the private RDS PostgreSQL pattern.
+- Updated `scripts/quality-gate.sh` to require the RDS module files and sanity-check RDS wiring in both environments.
+- Marked ticket 009 as DONE in `BUILD_TICKETS.md`.
 
 Limitations:
 
-- HTTPS is modeled but disabled in committed examples because real ACM certificate ARNs and domain details must stay outside this public repo.
-- ALB access logs are modeled but disabled in committed examples because a real user-owned S3 log bucket and bucket policy are outside this repo.
-- The ALB listener default action is a fixed response; service reachability depends on the ECS service listener rules and path patterns.
-- Prod enables ALB deletion protection to show production intent, but real cleanup requires explicitly reviewing and disabling it before user-owned destruction.
-- IAM roles are still environment-level shared roles. Future hardening may use per-service task roles and tighter per-service secret ARN scopes.
-- Placeholder secret-reference ARNs use fake account ID `123456789012` and demo paths. Real use must create and rotate secrets outside this repo or in secure user-owned pipelines.
-- The current security-group egress model is intentionally narrow and does not yet model VPC endpoints or NAT egress required for real Fargate image pulls, CloudWatch logs, ECS APIs, or secret retrieval.
-- The default container health check assumes the demo image has a compatible HTTP health endpoint and `curl`; real images should override the command if needed.
-- No RDS, Redis resource module, or observability dashboard/alarm module is implemented yet; these remain deferred to later tickets.
+- The RDS module models a single `aws_db_instance` PostgreSQL pattern, not Aurora, RDS Proxy, read replicas, cross-region recovery, or custom parameter groups.
+- RDS master credentials are managed by AWS Secrets Manager if a user manually provisions the lab; application connection-string secrets are still placeholder references and remain deferred to the dedicated secrets/reference ticket.
+- Enhanced Monitoring is modeled but disabled in committed examples because a reviewed IAM monitoring role is not implemented yet.
+- Performance Insights is enabled only in the prod example to show production intent; real use should review retention, cost, and regional support.
+- The module exposes optional KMS key variables but committed examples keep them null because real KMS key ARNs must stay outside this public repo.
+- Database migrations are documented at a high level in the module README only; detailed migration and rollback runbooks remain deferred to later documentation tickets.
+- No Redis resource module or observability dashboard/alarm module is implemented yet; these remain deferred to later tickets.
 - GitHub Actions CI is still deferred to ticket 014.
 
 ## Next recommended ticket
 
-Ticket 009.
+Ticket 010.

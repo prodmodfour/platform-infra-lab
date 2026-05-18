@@ -41,6 +41,10 @@ required_paths=(
   infra/terraform/modules/network/variables.tf
   infra/terraform/modules/network/outputs.tf
   infra/terraform/modules/network/README.md
+  infra/terraform/modules/rds-postgres/main.tf
+  infra/terraform/modules/rds-postgres/variables.tf
+  infra/terraform/modules/rds-postgres/outputs.tf
+  infra/terraform/modules/rds-postgres/README.md
   infra/terraform/modules/security-groups/main.tf
   infra/terraform/modules/security-groups/variables.tf
   infra/terraform/modules/security-groups/outputs.tf
@@ -139,6 +143,27 @@ for env in dev prod; do
   grep -q 'output "load_balancer_http_listener_arn"' "infra/terraform/environments/$env/outputs.tf"
   grep -q 'create_ecs_listener_rules = true' "infra/terraform/environments/$env/terraform.tfvars.example"
   grep -q 'enable_load_balancer_https_listener       = false' "infra/terraform/environments/$env/terraform.tfvars.example"
+done
+
+echo "== Terraform RDS PostgreSQL module checks =="
+grep -q 'resource "aws_db_subnet_group" "this"' infra/terraform/modules/rds-postgres/main.tf
+grep -q 'resource "aws_db_instance" "this"' infra/terraform/modules/rds-postgres/main.tf
+grep -q 'manage_master_user_password' infra/terraform/modules/rds-postgres/main.tf
+grep -q 'publicly_accessible    = false' infra/terraform/modules/rds-postgres/main.tf
+grep -q 'backup_retention_period' infra/terraform/modules/rds-postgres/main.tf
+grep -q 'deletion_protection' infra/terraform/modules/rds-postgres/main.tf
+grep -q 'master_user_secret_arn' infra/terraform/modules/rds-postgres/outputs.tf
+grep -qi "Private database design" infra/terraform/modules/rds-postgres/README.md
+grep -qi "Credentials and secret references" infra/terraform/modules/rds-postgres/README.md
+grep -qi "Migration considerations" infra/terraform/modules/rds-postgres/README.md
+grep -qi "Production hardening gaps" infra/terraform/modules/rds-postgres/README.md
+for env in dev prod; do
+  grep -q 'module "rds_postgres"' "infra/terraform/environments/$env/main.tf"
+  grep -q 'module.security_groups.rds_postgres_security_group_id' "infra/terraform/environments/$env/main.tf"
+  grep -q 'output "rds_postgres_endpoint"' "infra/terraform/environments/$env/outputs.tf"
+  grep -q 'output "rds_postgres_master_user_secret_arn"' "infra/terraform/environments/$env/outputs.tf"
+  grep -q 'rds_database_name' "infra/terraform/environments/$env/terraform.tfvars.example"
+  grep -q 'rds_master_user_secret_kms_key_id         = null' "infra/terraform/environments/$env/terraform.tfvars.example"
 done
 
 echo "== Terraform ECS service module checks =="

@@ -108,7 +108,37 @@ alb_ingress_cidrs = ["0.0.0.0/0"]
 alb_ingress_ports = [80]
 service_port      = 8080
 database_port     = 5432
-redis_port        = 6379
+
+rds_database_name                         = "appdb"
+rds_master_username                       = "appadmin"
+rds_engine_version                        = "16.3"
+rds_instance_class                        = "db.t4g.small"
+rds_allocated_storage_gib                 = 50
+rds_max_allocated_storage_gib             = 200
+rds_storage_type                          = "gp3"
+rds_storage_encrypted                     = true
+rds_storage_kms_key_id                    = null
+rds_master_user_secret_kms_key_id         = null
+rds_multi_az                              = true
+rds_backup_retention_days                 = 14
+rds_preferred_backup_window               = "03:00-04:00"
+rds_preferred_maintenance_window          = "sun:04:00-sun:05:00"
+rds_deletion_protection_enabled           = true
+rds_skip_final_snapshot                   = false
+rds_final_snapshot_identifier             = null
+rds_delete_automated_backups              = false
+rds_copy_tags_to_snapshot                 = true
+rds_auto_minor_version_upgrade            = true
+rds_apply_immediately                     = false
+rds_enabled_cloudwatch_logs_exports       = ["postgresql", "upgrade"]
+rds_monitoring_interval                   = 0
+rds_monitoring_role_arn                   = null
+rds_performance_insights_enabled          = true
+rds_performance_insights_retention_period = 7
+rds_performance_insights_kms_key_id       = null
+rds_ca_cert_identifier                    = null
+
+redis_port = 6379
 
 # Placeholder secret references only. Do not put secret values in tfvars files.
 execution_secret_reference_arns = [

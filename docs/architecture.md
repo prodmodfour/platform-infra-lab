@@ -9,8 +9,9 @@ This document is a living placeholder for the target AWS/Terraform architecture.
 - `infra/terraform/modules/iam` models the ECS task execution role, application task role, and optional read policies for secret references.
 - `infra/terraform/modules/load-balancer` models an internet-facing Application Load Balancer, required HTTP listener, optional HTTPS listener variables, optional access-log references, and listener outputs for service rules.
 - `infra/terraform/modules/ecs-service` models a private Fargate service with task definition, ECS service, CloudWatch log group, ALB target group, listener rule, health checks, and desired-count autoscaling.
-- `infra/terraform/environments/dev` wires the network, security-groups, IAM, load-balancer, and ECS service modules with two public/private subnet pairs, NAT disabled by default, Redis security groups disabled by default, one task per demo service, dev-scoped placeholder secret-reference ARNs, and fake service images.
-- `infra/terraform/environments/prod` wires the network, security-groups, IAM, load-balancer, and ECS service modules with three public/private subnet pairs, NAT enabled by default to demonstrate private egress intent, Redis security groups enabled to show the optional cache tier, two tasks per demo service, prod-scoped placeholder secret-reference ARNs, and fake service images.
+- `infra/terraform/modules/rds-postgres` models a private RDS PostgreSQL instance with a private DB subnet group, no public accessibility, backup/deletion-protection settings, storage variables, log exports, optional monitoring settings, and RDS-managed Secrets Manager master credentials.
+- `infra/terraform/environments/dev` wires the network, security-groups, IAM, load-balancer, ECS service, and RDS PostgreSQL modules with two public/private subnet pairs, NAT disabled by default, Redis security groups disabled by default, one task per demo service, a small single-AZ private PostgreSQL instance, dev-scoped placeholder secret-reference ARNs, and fake service images.
+- `infra/terraform/environments/prod` wires the network, security-groups, IAM, load-balancer, ECS service, and RDS PostgreSQL modules with three public/private subnet pairs, NAT enabled by default to demonstrate private egress intent, Redis security groups enabled to show the optional cache tier, two tasks per demo service, a Multi-AZ private PostgreSQL instance with deletion protection, prod-scoped placeholder secret-reference ARNs, and fake service images.
 
 ## Target architecture themes
 
@@ -39,6 +40,15 @@ Current IAM intent:
 - the application task role is separate and starts with only explicitly supplied secret-reference read permissions
 - secret policies use variable-provided Secrets Manager and SSM Parameter Store ARNs, plus optional KMS key ARNs, rather than committed secret values
 - example ARNs use a fake account ID and placeholder paths only
+
+Current RDS PostgreSQL intent:
+
+- the database subnet group uses private subnets only
+- the RDS instance fixes `publicly_accessible = false`
+- the RDS security group accepts PostgreSQL only from the ECS service security group
+- RDS manages the master user password in Secrets Manager, and Terraform only exposes the secret ARN as a reference
+- dev uses small single-AZ sizing and shorter backup retention for cost-aware review
+- prod shows production intent with Multi-AZ, deletion protection, final snapshot, longer backup retention, and Performance Insights enabled
 
 Current security group intent:
 

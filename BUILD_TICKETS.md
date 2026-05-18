@@ -323,7 +323,7 @@ Commit when complete.
 
 ## 009 — Add RDS PostgreSQL module
 
-Status: TODO
+Status: DONE
 
 Create `infra/terraform/modules/rds-postgres/`.
 

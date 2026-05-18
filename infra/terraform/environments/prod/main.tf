@@ -22,15 +22,20 @@ locals {
   }
 
   platform_defaults = {
-    log_retention_days                = var.log_retention_days
-    deletion_protection_enabled       = var.deletion_protection_enabled
-    enable_redis                      = var.enable_redis
-    service_desired_count_default     = var.service_desired_count_default
-    ecs_service_count                 = length(var.ecs_services)
-    ecs_listener_rules_enabled        = var.create_ecs_listener_rules
-    load_balancer_https_enabled       = var.enable_load_balancer_https_listener
-    load_balancer_access_logs_enabled = var.load_balancer_access_logs_enabled
-    load_balancer_deletion_protection = var.load_balancer_deletion_protection_enabled
+    log_retention_days                 = var.log_retention_days
+    deletion_protection_enabled        = var.deletion_protection_enabled
+    enable_redis                       = var.enable_redis
+    service_desired_count_default      = var.service_desired_count_default
+    ecs_service_count                  = length(var.ecs_services)
+    ecs_listener_rules_enabled         = var.create_ecs_listener_rules
+    load_balancer_https_enabled        = var.enable_load_balancer_https_listener
+    load_balancer_access_logs_enabled  = var.load_balancer_access_logs_enabled
+    load_balancer_deletion_protection  = var.load_balancer_deletion_protection_enabled
+    rds_multi_az                       = var.rds_multi_az
+    rds_backup_retention_days          = var.rds_backup_retention_days
+    rds_deletion_protection_enabled    = var.rds_deletion_protection_enabled
+    rds_managed_master_user_secret     = true
+    rds_publicly_accessible_by_default = false
   }
 
   load_balancer_defaults = {
@@ -42,6 +47,31 @@ locals {
     access_logs_enabled         = var.load_balancer_access_logs_enabled
     access_logs_bucket_supplied = var.load_balancer_access_logs_bucket != null
     deletion_protection_enabled = var.load_balancer_deletion_protection_enabled
+  }
+
+  rds_postgres_defaults = {
+    database_name                         = var.rds_database_name
+    engine_version                        = var.rds_engine_version
+    instance_class                        = var.rds_instance_class
+    port                                  = var.database_port
+    allocated_storage_gib                 = var.rds_allocated_storage_gib
+    max_allocated_storage_gib             = var.rds_max_allocated_storage_gib
+    storage_type                          = var.rds_storage_type
+    storage_encrypted                     = var.rds_storage_encrypted
+    storage_kms_key_supplied              = var.rds_storage_kms_key_id != null
+    multi_az                              = var.rds_multi_az
+    backup_retention_days                 = var.rds_backup_retention_days
+    deletion_protection_enabled           = var.rds_deletion_protection_enabled
+    skip_final_snapshot                   = var.rds_skip_final_snapshot
+    delete_automated_backups              = var.rds_delete_automated_backups
+    enabled_cloudwatch_logs_exports       = var.rds_enabled_cloudwatch_logs_exports
+    enhanced_monitoring_interval_seconds  = var.rds_monitoring_interval
+    enhanced_monitoring_role_supplied     = var.rds_monitoring_role_arn != null
+    performance_insights_enabled          = var.rds_performance_insights_enabled
+    performance_insights_retention_period = var.rds_performance_insights_enabled ? var.rds_performance_insights_retention_period : null
+    managed_master_user_password          = true
+    master_user_secret_kms_key_supplied   = var.rds_master_user_secret_kms_key_id != null
+    publicly_accessible                   = false
   }
 
   security_group_defaults = {
@@ -75,7 +105,7 @@ locals {
     iam             = "implemented-ticket-006"
     ecs_service     = "implemented-ticket-007"
     load_balancer   = "implemented-ticket-008"
-    rds_postgres    = "ticket-009"
+    rds_postgres    = "implemented-ticket-009"
     redis_cache     = "ticket-010"
     observability   = "ticket-011"
   }
@@ -141,6 +171,46 @@ module "load_balancer" {
   access_logs_bucket         = var.load_balancer_access_logs_bucket
   access_logs_prefix         = var.load_balancer_access_logs_prefix
   common_tags                = local.common_tags
+}
+
+module "rds_postgres" {
+  source = "../../modules/rds-postgres"
+
+  name_prefix        = local.name_prefix
+  environment        = local.environment
+  private_subnet_ids = module.network.private_subnet_ids
+  security_group_ids = [module.security_groups.rds_postgres_security_group_id]
+
+  database_name                         = var.rds_database_name
+  master_username                       = var.rds_master_username
+  engine_version                        = var.rds_engine_version
+  instance_class                        = var.rds_instance_class
+  port                                  = var.database_port
+  allocated_storage_gib                 = var.rds_allocated_storage_gib
+  max_allocated_storage_gib             = var.rds_max_allocated_storage_gib
+  storage_type                          = var.rds_storage_type
+  storage_encrypted                     = var.rds_storage_encrypted
+  storage_kms_key_id                    = var.rds_storage_kms_key_id
+  master_user_secret_kms_key_id         = var.rds_master_user_secret_kms_key_id
+  multi_az                              = var.rds_multi_az
+  backup_retention_days                 = var.rds_backup_retention_days
+  preferred_backup_window               = var.rds_preferred_backup_window
+  preferred_maintenance_window          = var.rds_preferred_maintenance_window
+  deletion_protection                   = var.rds_deletion_protection_enabled
+  skip_final_snapshot                   = var.rds_skip_final_snapshot
+  final_snapshot_identifier             = var.rds_final_snapshot_identifier
+  delete_automated_backups              = var.rds_delete_automated_backups
+  copy_tags_to_snapshot                 = var.rds_copy_tags_to_snapshot
+  auto_minor_version_upgrade            = var.rds_auto_minor_version_upgrade
+  apply_immediately                     = var.rds_apply_immediately
+  enabled_cloudwatch_logs_exports       = var.rds_enabled_cloudwatch_logs_exports
+  monitoring_interval                   = var.rds_monitoring_interval
+  monitoring_role_arn                   = var.rds_monitoring_role_arn
+  performance_insights_enabled          = var.rds_performance_insights_enabled
+  performance_insights_kms_key_id       = var.rds_performance_insights_kms_key_id
+  performance_insights_retention_period = var.rds_performance_insights_retention_period
+  ca_cert_identifier                    = var.rds_ca_cert_identifier
+  common_tags                           = local.common_tags
 }
 
 resource "aws_ecs_cluster" "platform" {

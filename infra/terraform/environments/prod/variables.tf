@@ -422,6 +422,269 @@ variable "database_port" {
   }
 }
 
+variable "rds_database_name" {
+  description = "Initial PostgreSQL database name for the prod RDS instance. This is not a secret."
+  type        = string
+  default     = "appdb"
+
+  validation {
+    condition     = can(regex("^[A-Za-z][A-Za-z0-9_]{0,62}$", var.rds_database_name))
+    error_message = "rds_database_name must start with a letter and contain only letters, numbers, or underscores."
+  }
+}
+
+variable "rds_master_username" {
+  description = "Master username for the RDS-managed PostgreSQL credential. This is not the password."
+  type        = string
+  default     = "appadmin"
+
+  validation {
+    condition     = can(regex("^[A-Za-z][A-Za-z0-9_]{0,62}$", var.rds_master_username)) && lower(var.rds_master_username) != "postgres"
+    error_message = "rds_master_username must start with a letter, contain only letters/numbers/underscores, and avoid the reserved postgres username."
+  }
+}
+
+variable "rds_engine_version" {
+  description = "PostgreSQL engine version for the prod RDS example. Review regional support before manual provisioning."
+  type        = string
+  default     = "16.3"
+
+  validation {
+    condition     = length(trimspace(var.rds_engine_version)) > 0
+    error_message = "rds_engine_version must not be empty."
+  }
+}
+
+variable "rds_instance_class" {
+  description = "RDS instance class for the prod PostgreSQL example."
+  type        = string
+  default     = "db.t4g.small"
+
+  validation {
+    condition     = startswith(var.rds_instance_class, "db.")
+    error_message = "rds_instance_class must look like an RDS instance class such as db.t4g.micro."
+  }
+}
+
+variable "rds_allocated_storage_gib" {
+  description = "Initial allocated storage in GiB for the prod PostgreSQL instance."
+  type        = number
+  default     = 50
+
+  validation {
+    condition     = var.rds_allocated_storage_gib >= 20
+    error_message = "rds_allocated_storage_gib must be at least 20."
+  }
+}
+
+variable "rds_max_allocated_storage_gib" {
+  description = "Optional storage autoscaling ceiling in GiB for PostgreSQL. Set null to disable storage autoscaling."
+  type        = number
+  default     = 200
+  nullable    = true
+}
+
+variable "rds_storage_type" {
+  description = "RDS storage type for PostgreSQL."
+  type        = string
+  default     = "gp3"
+
+  validation {
+    condition     = contains(["gp2", "gp3", "io1", "io2"], var.rds_storage_type)
+    error_message = "rds_storage_type must be one of gp2, gp3, io1, or io2."
+  }
+}
+
+variable "rds_storage_encrypted" {
+  description = "Whether PostgreSQL storage encryption is enabled."
+  type        = bool
+  default     = true
+}
+
+variable "rds_storage_kms_key_id" {
+  description = "Optional user-owned KMS key ID/ARN for RDS storage encryption. Keep null in committed examples."
+  type        = string
+  default     = null
+  nullable    = true
+
+  validation {
+    condition     = var.rds_storage_kms_key_id == null ? true : length(trimspace(var.rds_storage_kms_key_id)) > 0
+    error_message = "rds_storage_kms_key_id must be null or a non-empty KMS key identifier."
+  }
+}
+
+variable "rds_master_user_secret_kms_key_id" {
+  description = "Optional user-owned KMS key ID/ARN for the RDS-managed master user secret. Keep null in committed examples."
+  type        = string
+  default     = null
+  nullable    = true
+
+  validation {
+    condition     = var.rds_master_user_secret_kms_key_id == null ? true : length(trimspace(var.rds_master_user_secret_kms_key_id)) > 0
+    error_message = "rds_master_user_secret_kms_key_id must be null or a non-empty KMS key identifier."
+  }
+}
+
+variable "rds_multi_az" {
+  description = "Whether the PostgreSQL instance uses Multi-AZ. Prod enables this to demonstrate production-intent availability."
+  type        = bool
+  default     = true
+}
+
+variable "rds_backup_retention_days" {
+  description = "Automated backup retention in days for PostgreSQL."
+  type        = number
+  default     = 14
+
+  validation {
+    condition     = var.rds_backup_retention_days >= 0 && var.rds_backup_retention_days <= 35
+    error_message = "rds_backup_retention_days must be between 0 and 35."
+  }
+}
+
+variable "rds_preferred_backup_window" {
+  description = "Preferred UTC backup window for PostgreSQL in hh:mm-hh:mm format."
+  type        = string
+  default     = "03:00-04:00"
+
+  validation {
+    condition     = can(regex("^[0-2][0-9]:[0-5][0-9]-[0-2][0-9]:[0-5][0-9]$", var.rds_preferred_backup_window))
+    error_message = "rds_preferred_backup_window must use hh:mm-hh:mm format."
+  }
+}
+
+variable "rds_preferred_maintenance_window" {
+  description = "Preferred UTC maintenance window for PostgreSQL, such as sun:04:00-sun:05:00."
+  type        = string
+  default     = "sun:04:00-sun:05:00"
+
+  validation {
+    condition     = can(regex("^(mon|tue|wed|thu|fri|sat|sun):[0-2][0-9]:[0-5][0-9]-(mon|tue|wed|thu|fri|sat|sun):[0-2][0-9]:[0-5][0-9]$", var.rds_preferred_maintenance_window))
+    error_message = "rds_preferred_maintenance_window must use ddd:hh:mm-ddd:hh:mm format with lowercase day names."
+  }
+}
+
+variable "rds_deletion_protection_enabled" {
+  description = "Whether PostgreSQL deletion protection is enabled. Prod enables this to show production-intent safeguards."
+  type        = bool
+  default     = true
+}
+
+variable "rds_skip_final_snapshot" {
+  description = "Whether to skip a final PostgreSQL snapshot during a user-owned destroy."
+  type        = bool
+  default     = false
+}
+
+variable "rds_final_snapshot_identifier" {
+  description = "Optional final snapshot identifier when rds_skip_final_snapshot is false. Defaults inside the module when null."
+  type        = string
+  default     = null
+  nullable    = true
+
+  validation {
+    condition     = var.rds_final_snapshot_identifier == null ? true : can(regex("^[a-z][a-z0-9-]+$", var.rds_final_snapshot_identifier))
+    error_message = "rds_final_snapshot_identifier must be lowercase kebab-case when provided."
+  }
+}
+
+variable "rds_delete_automated_backups" {
+  description = "Whether automated PostgreSQL backups are deleted with the instance during a user-owned destroy."
+  type        = bool
+  default     = false
+}
+
+variable "rds_copy_tags_to_snapshot" {
+  description = "Whether PostgreSQL tags are copied to snapshots for reviewability and cleanup."
+  type        = bool
+  default     = true
+}
+
+variable "rds_auto_minor_version_upgrade" {
+  description = "Whether RDS may apply PostgreSQL minor version upgrades during maintenance windows."
+  type        = bool
+  default     = true
+}
+
+variable "rds_apply_immediately" {
+  description = "Whether PostgreSQL changes apply immediately instead of during the maintenance window. Keep false for reviewable operations."
+  type        = bool
+  default     = false
+}
+
+variable "rds_enabled_cloudwatch_logs_exports" {
+  description = "PostgreSQL log exports to CloudWatch Logs. Values are log type references, not log contents."
+  type        = list(string)
+  default     = ["postgresql", "upgrade"]
+
+  validation {
+    condition     = alltrue([for log_type in var.rds_enabled_cloudwatch_logs_exports : contains(["postgresql", "upgrade"], log_type)])
+    error_message = "rds_enabled_cloudwatch_logs_exports may only contain postgresql and upgrade."
+  }
+}
+
+variable "rds_monitoring_interval" {
+  description = "Enhanced monitoring interval in seconds. Keep 0 unless a reviewed monitoring role ARN is supplied."
+  type        = number
+  default     = 0
+
+  validation {
+    condition     = contains([0, 1, 5, 10, 15, 30, 60], var.rds_monitoring_interval)
+    error_message = "rds_monitoring_interval must be one of 0, 1, 5, 10, 15, 30, or 60."
+  }
+}
+
+variable "rds_monitoring_role_arn" {
+  description = "IAM role ARN for RDS enhanced monitoring. Keep null in committed examples."
+  type        = string
+  default     = null
+  nullable    = true
+
+  validation {
+    condition = var.rds_monitoring_role_arn == null ? true : can(regex(
+      "^arn:aws[a-zA-Z-]*:iam::[0-9]{12}:role/.+",
+      var.rds_monitoring_role_arn
+    ))
+    error_message = "rds_monitoring_role_arn must be an IAM role ARN when provided."
+  }
+}
+
+variable "rds_performance_insights_enabled" {
+  description = "Whether RDS Performance Insights/Database Insights is enabled for PostgreSQL."
+  type        = bool
+  default     = true
+}
+
+variable "rds_performance_insights_retention_period" {
+  description = "Performance Insights retention period. AWS supports 7, 731, or month-sized multiples of 31 days."
+  type        = number
+  default     = 7
+
+  validation {
+    condition     = contains(concat([7, 731], [for month in range(1, 24) : month * 31]), var.rds_performance_insights_retention_period)
+    error_message = "rds_performance_insights_retention_period must be 7, 731, or a multiple of 31 from 31 through 713."
+  }
+}
+
+variable "rds_performance_insights_kms_key_id" {
+  description = "Optional KMS key ID/ARN for RDS Performance Insights. Keep null in committed examples."
+  type        = string
+  default     = null
+  nullable    = true
+
+  validation {
+    condition     = var.rds_performance_insights_kms_key_id == null ? true : length(trimspace(var.rds_performance_insights_kms_key_id)) > 0
+    error_message = "rds_performance_insights_kms_key_id must be null or a non-empty KMS key identifier."
+  }
+}
+
+variable "rds_ca_cert_identifier" {
+  description = "Optional RDS CA certificate identifier. Keep null unless a user-owned environment has reviewed certificate rotation."
+  type        = string
+  default     = null
+  nullable    = true
+}
+
 variable "redis_port" {
   description = "Redis/Valkey port allowed from private ECS services to the private cache security group when Redis is enabled."
   type        = number

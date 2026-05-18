@@ -1,6 +1,6 @@
 # Prod Terraform environment
 
-This root module is the public-safe `prod` environment for `platform-infra-lab`. It mirrors the dev structure while using production-intent defaults and examples for review, including the shared network, security-groups, IAM, load-balancer, and ECS service modules.
+This root module is the public-safe `prod` environment for `platform-infra-lab`. It mirrors the dev structure while using production-intent defaults and examples for review, including the shared network, security-groups, IAM, load-balancer, ECS service, and RDS PostgreSQL modules.
 
 ## Current scope
 
@@ -25,8 +25,12 @@ The prod environment now wires `../../modules/network` with production-intent de
 - per-service CloudWatch log groups, task definitions, services, target groups, health checks, and desired-count autoscaling
 - ALB listener rules that forward path patterns from the HTTP listener to each service target group
 - fake Secrets Manager and SSM Parameter Store ARNs as references only; no secret values are stored
+- a private RDS PostgreSQL instance in the private subnet group
+- PostgreSQL public accessibility fixed to false
+- RDS-managed Secrets Manager master user credential; no database password value is committed or read by this Terraform
+- production-intent PostgreSQL settings including Multi-AZ, longer backup retention, deletion protection, final snapshot, larger storage ceiling, log exports, and Performance Insights enabled
 
-Future tickets add RDS PostgreSQL, Redis resources, and observability.
+Future tickets add Redis resources and observability.
 
 ## Prod posture
 
@@ -38,6 +42,7 @@ Prod demonstrates production intent rather than production completeness:
 - deletion protection defaults to enabled for future stateful services
 - Redis/cache usage defaults to enabled to show the optional private cache tier and security group boundary
 - ALB deletion protection defaults to enabled to show production-intent review posture, while still requiring user-owned cleanup planning
+- PostgreSQL deletion protection, Multi-AZ, final snapshot, non-zero backup retention, encrypted gp3 storage, and Performance Insights are enabled to show production intent
 - default ECS desired count is two tasks for each service example
 - autoscaling ranges are wider than dev to show production-intent capacity planning
 - placeholder IAM and container secret-reference scopes use prod paths and a fake account ID for review only
@@ -48,7 +53,7 @@ These settings can create ongoing cost if a user later provisions real infrastru
 
 Public subnets are intended for internet-facing components only. Private subnets are intended for workloads and stateful services that should not receive public IP addresses.
 
-The security group boundary is intentionally narrow: internet CIDRs reach only the ALB security group, the ALB reaches ECS services only on the service port through listener rules and target groups, ECS services reach PostgreSQL only on port 5432, and ECS services reach Redis only when Redis is enabled. No public database or cache ingress is modeled.
+The security group boundary is intentionally narrow: internet CIDRs reach only the ALB security group, the ALB reaches ECS services only on the service port through listener rules and target groups, ECS services reach PostgreSQL only on port 5432, and ECS services reach Redis only when Redis is enabled. No public database or cache ingress is modeled. The RDS PostgreSQL module consumes the private RDS security group and private subnets, and fixes `publicly_accessible = false`.
 
 The IAM boundary separates the ECS task execution role from the application task role. The execution role is for ECS runtime integration such as image pulls, log delivery, and ECS-managed secret injection. The application task role starts with only explicitly supplied secret-reference read permissions. ECS service examples pass secret references as ARNs only, never values. All example ARNs are placeholders and must be replaced or removed before any real manual provisioning.
 

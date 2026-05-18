@@ -51,6 +51,16 @@ The ECS service module now models private workload placement and secret injectio
 - `secret_references` must be Secrets Manager or SSM Parameter Store ARNs, not secret values
 - listener rules are wired to the load-balancer module HTTP listener by default, keeping route ownership explicit
 
-The current egress model is intentionally strict and incomplete for real workloads. ECS services may need reviewed egress through VPC endpoints, NAT, or narrow rules for image pulls, logs, secret references, telemetry, and third-party APIs.
+The RDS PostgreSQL module now models the private database boundary:
+
+- the DB subnet group uses private subnet IDs from the network module
+- `publicly_accessible` is fixed to `false`
+- the environment passes only the private RDS security group, whose ingress is scoped to ECS services on the PostgreSQL port
+- the module does not accept or output a database password value
+- RDS-managed master user password support stores the master credential in Secrets Manager if a user manually provisions the lab
+- outputs expose the RDS-managed secret ARN as a reference only, not the secret value
+- dev and prod examples keep KMS key inputs null so no real key ARN is committed
+
+The current egress model is intentionally strict and incomplete for real workloads. ECS services may need reviewed egress through VPC endpoints, NAT, or narrow rules for image pulls, logs, secret references, telemetry, and third-party APIs. Real database use also needs reviewed migration roles, least-privilege database users, connection pooling, audit logging, and secret rotation ownership.
 
 Future content will expand validation-only CI notes, secret lifecycle details, and production hardening gaps.

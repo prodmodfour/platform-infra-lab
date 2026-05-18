@@ -25,6 +25,18 @@ The ECS service module adds cost drivers if manually provisioned:
 
 Dev examples keep one small task per service and short log retention. Prod examples show two tasks per service and wider autoscaling ranges to demonstrate production intent, not a recommendation to provision without review.
 
+The RDS PostgreSQL module adds cost drivers if manually provisioned:
+
+- RDS instance class and continuous runtime
+- single-AZ versus Multi-AZ placement
+- allocated storage and storage autoscaling ceiling
+- backup retention, final snapshots, and retained automated backups
+- CloudWatch PostgreSQL log exports
+- optional Performance Insights/Database Insights retention
+- KMS usage when user-owned keys are supplied
+
+Dev uses a small single-AZ PostgreSQL shape, short backup retention, and skipped final snapshot to stay disposable. Prod shows Multi-AZ, deletion protection, final snapshot, longer backup retention, larger storage, and Performance Insights to demonstrate production intent. These settings can create ongoing cost if provisioned.
+
 Any optional manual provisioning can incur cloud cost and should be reviewed, user-owned, and cleaned up by the operator.
 
-Future content will describe qualitative AWS cost drivers such as RDS, CloudWatch alarms/dashboards, and optional Redis/ElastiCache.
+Future content will describe qualitative AWS cost drivers such as CloudWatch alarms/dashboards and optional Redis/ElastiCache.

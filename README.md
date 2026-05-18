@@ -30,7 +30,7 @@ This repository must remain safe to publish and safe to review.
 
 ## Current status
 
-Bootstrap skeleton, validation guardrails, Terraform conventions, dev/prod Terraform environments, the shared network module, shared security-groups module, shared IAM module, shared load-balancer module, and ECS/Fargate service module are in place. Remaining data, observability, diagrams, and detailed operating documentation will be added ticket-by-ticket.
+Bootstrap skeleton, validation guardrails, Terraform conventions, dev/prod Terraform environments, the shared network module, shared security-groups module, shared IAM module, shared load-balancer module, ECS/Fargate service module, and private RDS PostgreSQL module are in place. Remaining cache, observability, diagrams, and detailed operating documentation will be added ticket-by-ticket.
 
 ## Quick start validation
 
@@ -76,6 +76,7 @@ The quality gate checks shell syntax, repository structure, public-safety rules,
         │   ├── iam/
         │   ├── load-balancer/
         │   ├── network/
+        │   ├── rds-postgres/
         │   └── security-groups/
         └── environments/
             ├── dev/
@@ -89,7 +90,8 @@ The quality gate checks shell syntax, repository structure, public-safety rules,
 - IAM separation between the ECS task execution role and the application task role, with placeholder secret-reference read policies.
 - Public Application Load Balancer with an HTTP listener, optional HTTPS variables, and listener-rule wiring to service target groups.
 - ECS/Fargate service definitions for `carbon-platform-api`, `job-runner-platform`, and `multi-tenant-saas-api` using fake images, private subnet placement, log groups, target groups, health checks, listener rules, and autoscaling settings.
-- Private PostgreSQL/RDS and optional Redis/ElastiCache patterns.
+- Private PostgreSQL/RDS instance pattern with private subnet group, no public accessibility, backups, deletion protection variables, storage sizing, log exports, and RDS-managed Secrets Manager master credentials.
+- Optional Redis/ElastiCache patterns.
 - Secret references via AWS-native services rather than committed secret values.
 - CloudWatch logs, metrics, dashboards, and alarms.
 - Separate dev/prod Terraform environments.

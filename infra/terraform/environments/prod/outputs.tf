@@ -108,6 +108,81 @@ output "security_group_rule_summary" {
   value       = module.security_groups.rule_summary
 }
 
+output "rds_postgres_defaults" {
+  description = "Review-friendly PostgreSQL/RDS defaults for this environment."
+  value       = local.rds_postgres_defaults
+}
+
+output "rds_postgres_subnet_group_name" {
+  description = "Private DB subnet group name used by PostgreSQL/RDS."
+  value       = module.rds_postgres.db_subnet_group_name
+}
+
+output "rds_postgres_instance_identifier" {
+  description = "RDS PostgreSQL instance identifier."
+  value       = module.rds_postgres.db_instance_identifier
+}
+
+output "rds_postgres_instance_arn" {
+  description = "RDS PostgreSQL instance ARN."
+  value       = module.rds_postgres.db_instance_arn
+}
+
+output "rds_postgres_resource_id" {
+  description = "Stable RDS resource ID used by monitoring integrations."
+  value       = module.rds_postgres.db_instance_resource_id
+}
+
+output "rds_postgres_endpoint" {
+  description = "Private RDS PostgreSQL endpoint including port. This is not a credential."
+  value       = module.rds_postgres.endpoint
+}
+
+output "rds_postgres_address" {
+  description = "Private RDS PostgreSQL hostname/address. This is not a credential."
+  value       = module.rds_postgres.address
+}
+
+output "rds_postgres_port" {
+  description = "PostgreSQL port exposed inside private subnets."
+  value       = module.rds_postgres.port
+}
+
+output "rds_postgres_database_name" {
+  description = "Initial PostgreSQL database name."
+  value       = module.rds_postgres.database_name
+}
+
+output "rds_postgres_master_user_secret_arn" {
+  description = "Secrets Manager ARN for the RDS-managed master user secret. This is a reference, not a secret value."
+  value       = module.rds_postgres.master_user_secret_arn
+}
+
+output "rds_postgres_credential_reference_summary" {
+  description = "Review-friendly RDS credential-reference pattern; no secret values are exposed."
+  value       = module.rds_postgres.credential_reference_summary
+}
+
+output "rds_postgres_publicly_accessible" {
+  description = "Whether the RDS instance is publicly accessible; expected to be false."
+  value       = module.rds_postgres.publicly_accessible
+}
+
+output "rds_postgres_backup_summary" {
+  description = "Review-friendly summary of RDS backup and deletion-protection settings."
+  value       = module.rds_postgres.backup_summary
+}
+
+output "rds_postgres_storage_summary" {
+  description = "Review-friendly summary of RDS storage and availability settings."
+  value       = module.rds_postgres.storage_summary
+}
+
+output "rds_postgres_monitoring_summary" {
+  description = "Review-friendly summary of RDS log export and monitoring settings."
+  value       = module.rds_postgres.monitoring_summary
+}
+
 output "load_balancer_defaults" {
   description = "Review-friendly load balancer defaults for this environment."
   value       = local.load_balancer_defaults
