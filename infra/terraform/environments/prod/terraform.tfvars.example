@@ -23,6 +23,22 @@ service_port      = 8080
 database_port     = 5432
 redis_port        = 6379
 
+# Placeholder secret references only. Do not put secret values in tfvars files.
+execution_secret_reference_arns = [
+  "arn:aws:secretsmanager:us-east-1:123456789012:secret:platform-infra-lab/prod/ecs-execution/*",
+]
+execution_ssm_parameter_arns = [
+  "arn:aws:ssm:us-east-1:123456789012:parameter/platform-infra-lab/prod/ecs-execution/*",
+]
+execution_kms_key_arns = []
+task_secret_reference_arns = [
+  "arn:aws:secretsmanager:us-east-1:123456789012:secret:platform-infra-lab/prod/application/*",
+]
+task_ssm_parameter_arns = [
+  "arn:aws:ssm:us-east-1:123456789012:parameter/platform-infra-lab/prod/application/*",
+]
+task_kms_key_arns = []
+
 additional_tags = {
   Owner   = "portfolio-demo"
   CostUse = "production-intent-review"

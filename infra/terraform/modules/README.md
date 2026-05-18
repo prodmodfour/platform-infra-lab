@@ -6,6 +6,7 @@ This directory contains reusable Terraform modules for the AWS platform lab. Mod
 
 - `network` — VPC, public/private subnets, route tables, an internet gateway, and an optional NAT gateway for private subnet egress.
 - `security-groups` — ALB, ECS service, PostgreSQL/RDS, and optional Redis/ElastiCache security group boundaries.
+- `iam` — ECS task execution role, application task role, and optional read policies for Secrets Manager or SSM Parameter Store references.
 
 ## Planned module areas
 
@@ -13,7 +14,6 @@ The target architecture is expected to use additional modules for areas such as:
 
 - load balancing: Application Load Balancer, listeners, and target group wiring
 - ECS services: task definitions, services, log groups, health checks, and autoscaling inputs
-- IAM: ECS task execution role, application task role, and optional secret-reference read policies
 - RDS PostgreSQL: private subnet group, instance configuration, backups, and deletion protection
 - Redis cache: optional private ElastiCache/Valkey-style cache pattern that can consume the cache security group
 - observability: CloudWatch dashboards, alarms, and log naming conventions

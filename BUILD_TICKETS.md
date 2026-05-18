@@ -221,7 +221,7 @@ Commit when complete.
 
 ## 006 — Add IAM module
 
-Status: TODO
+Status: DONE
 
 Create `infra/terraform/modules/iam/`.
 

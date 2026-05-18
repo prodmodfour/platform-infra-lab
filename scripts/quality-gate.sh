@@ -25,6 +25,10 @@ required_paths=(
   infra/terraform/README.md
   infra/terraform/modules
   infra/terraform/modules/README.md
+  infra/terraform/modules/iam/main.tf
+  infra/terraform/modules/iam/variables.tf
+  infra/terraform/modules/iam/outputs.tf
+  infra/terraform/modules/iam/README.md
   infra/terraform/modules/network/main.tf
   infra/terraform/modules/network/variables.tf
   infra/terraform/modules/network/outputs.tf
@@ -94,6 +98,21 @@ grep -qi "NAT gateway" infra/terraform/modules/network/README.md
 for env in dev prod; do
   grep -q 'module "network"' "infra/terraform/environments/$env/main.tf"
   grep -q 'output "vpc_id"' "infra/terraform/environments/$env/outputs.tf"
+done
+
+echo "== Terraform IAM module checks =="
+grep -q 'resource "aws_iam_role" "task_execution"' infra/terraform/modules/iam/main.tf
+grep -q 'resource "aws_iam_role" "task"' infra/terraform/modules/iam/main.tf
+grep -q 'AmazonECSTaskExecutionRolePolicy' infra/terraform/modules/iam/main.tf
+grep -q 'resource "aws_iam_role_policy" "execution_secret_references"' infra/terraform/modules/iam/main.tf
+grep -q 'resource "aws_iam_role_policy" "task_secret_references"' infra/terraform/modules/iam/main.tf
+grep -qi "Task role versus execution role" infra/terraform/modules/iam/README.md
+grep -qi "Secret references, not values" infra/terraform/modules/iam/README.md
+grep -qi "Production review requirements" infra/terraform/modules/iam/README.md
+for env in dev prod; do
+  grep -q 'module "iam"' "infra/terraform/environments/$env/main.tf"
+  grep -q 'output "ecs_task_execution_role_arn"' "infra/terraform/environments/$env/outputs.tf"
+  grep -q 'execution_secret_reference_arns' "infra/terraform/environments/$env/terraform.tfvars.example"
 done
 
 echo "== Terraform security group boundary checks =="

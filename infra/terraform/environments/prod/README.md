@@ -1,6 +1,6 @@
 # Prod Terraform environment
 
-This root module is the public-safe `prod` environment for `platform-infra-lab`. It mirrors the dev structure while using production-intent defaults and examples for review, including the shared network and security-groups modules.
+This root module is the public-safe `prod` environment for `platform-infra-lab`. It mirrors the dev structure while using production-intent defaults and examples for review, including the shared network, security-groups, and IAM modules.
 
 ## Current scope
 
@@ -15,8 +15,10 @@ The prod environment now wires `../../modules/network` with production-intent de
 - security groups for the future public ALB, private ECS services, private PostgreSQL, and optional Redis cache
 - public ingress limited to the future ALB edge on HTTP by default
 - private service-to-database and service-to-cache rules scoped by security group reference rather than public CIDRs
+- ECS task execution and application task IAM roles with placeholder secret-reference read policies
+- fake Secrets Manager and SSM Parameter Store ARNs as references only; no secret values are stored
 
-Future tickets add IAM, ECS service patterns, load balancing, RDS PostgreSQL, Redis resources, and observability.
+Future tickets add ECS service patterns, load balancing, RDS PostgreSQL, Redis resources, and observability.
 
 ## Prod posture
 
@@ -28,6 +30,7 @@ Prod demonstrates production intent rather than production completeness:
 - deletion protection defaults to enabled for future stateful services
 - Redis/cache usage defaults to enabled to show the optional private cache tier and security group boundary
 - default ECS desired count is two tasks for future service examples
+- placeholder IAM secret-reference scopes use prod paths and a fake account ID for review only
 
 These settings can create ongoing cost if a user later provisions real infrastructure. Any real use must be reviewed, user-owned, and cleaned up by the operator.
 
@@ -37,7 +40,9 @@ Public subnets are intended for internet-facing components only. Private subnets
 
 The security group boundary is intentionally narrow: internet CIDRs reach only the ALB security group, the ALB reaches ECS services only on the service port, ECS services reach PostgreSQL only on port 5432, and ECS services reach Redis only when Redis is enabled. No public database or cache ingress is modeled.
 
-The prod example uses a single shared NAT gateway to keep the pattern readable. A real production design should review per-availability-zone NAT gateways, VPC endpoints, flow logs, CIDR sizing, regional availability-zone support, HTTPS-only ingress, WAF/trusted CIDR controls, and outbound access requirements before provisioning.
+The IAM boundary separates the ECS task execution role from the application task role. The execution role is for ECS runtime integration such as image pulls, log delivery, and ECS-managed secret injection. The application task role starts with only explicitly supplied secret-reference read permissions. All example ARNs are placeholders and must be replaced or removed before any real manual provisioning.
+
+The prod example uses a single shared NAT gateway to keep the pattern readable. A real production design should review per-availability-zone NAT gateways, VPC endpoints, flow logs, CIDR sizing, regional availability-zone support, HTTPS-only ingress, WAF/trusted CIDR controls, IAM permissions boundaries, per-service task roles, and outbound access requirements before provisioning.
 
 ## Public-safety notes
 

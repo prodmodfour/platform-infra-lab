@@ -1,6 +1,6 @@
 # Terraform environment conventions
 
-This directory contains Terraform root modules for deployable environments. The `dev` and `prod` roots include provider configuration, backend examples, variables, outputs, per-environment documentation, and the shared network and security-groups modules.
+This directory contains Terraform root modules for deployable environments. The `dev` and `prod` roots include provider configuration, backend examples, variables, outputs, per-environment documentation, and the shared network, security-groups, and IAM modules.
 
 Environment roots are responsible for composing reusable modules with environment-specific inputs. They are the main review surface for proposed infrastructure changes. Module calls are added ticket-by-ticket as modules are implemented.
 
@@ -21,8 +21,8 @@ Each environment must include:
 
 Current environments:
 
-- `dev` — cost-aware lab defaults such as disabled NAT, two public/private subnet pairs, shorter log retention, disabled cache/cache security group, and one default service task.
-- `prod` — production-intent examples such as three public/private subnet pairs, enabled NAT, longer log retention, deletion protection, cache security group enabled, and two default service tasks.
+- `dev` — cost-aware lab defaults such as disabled NAT, two public/private subnet pairs, shorter log retention, disabled cache/cache security group, one default service task, and dev-scoped placeholder IAM secret references.
+- `prod` — production-intent examples such as three public/private subnet pairs, enabled NAT, longer log retention, deletion protection, cache security group enabled, two default service tasks, and prod-scoped placeholder IAM secret references.
 
 Do not commit real `.tfvars` files, real backend configuration, generated plan files, Terraform state, local credentials, or local `.env` files.
 
@@ -35,7 +35,7 @@ Each environment root should:
 - call the same core modules as other environments unless a documented exception exists
 - pass dependency outputs explicitly between modules
 - keep environment-specific sizing, retention, and feature flags visible in variables or examples
-- expose only useful outputs, such as security group IDs, load balancer DNS names, service names, dashboard names, or database endpoint references
+- expose only useful outputs, such as security group IDs, IAM role ARNs, load balancer DNS names, service names, dashboard names, or database endpoint references
 - document review notes, expected cost posture, and production hardening gaps in its `README.md`
 
 ## Dev and prod conventions

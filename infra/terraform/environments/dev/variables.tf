@@ -175,3 +175,47 @@ variable "redis_port" {
     error_message = "redis_port must be a valid TCP port."
   }
 }
+
+variable "execution_secret_reference_arns" {
+  description = "Public-safe placeholder Secrets Manager ARNs that the ECS task execution role may read for task-definition secret injection. References only; no secret values."
+  type        = list(string)
+  default = [
+    "arn:aws:secretsmanager:us-east-1:123456789012:secret:platform-infra-lab/dev/ecs-execution/*",
+  ]
+}
+
+variable "execution_ssm_parameter_arns" {
+  description = "Public-safe placeholder SSM Parameter Store ARNs that the ECS task execution role may read for task-definition secret injection. References only; no parameter values."
+  type        = list(string)
+  default = [
+    "arn:aws:ssm:us-east-1:123456789012:parameter/platform-infra-lab/dev/ecs-execution/*",
+  ]
+}
+
+variable "execution_kms_key_arns" {
+  description = "Optional placeholder KMS key ARNs for execution-role decrypt access when secret references use customer-managed keys. Empty by default."
+  type        = list(string)
+  default     = []
+}
+
+variable "task_secret_reference_arns" {
+  description = "Public-safe placeholder Secrets Manager ARNs that application code may read through the ECS task role. References only; no secret values."
+  type        = list(string)
+  default = [
+    "arn:aws:secretsmanager:us-east-1:123456789012:secret:platform-infra-lab/dev/application/*",
+  ]
+}
+
+variable "task_ssm_parameter_arns" {
+  description = "Public-safe placeholder SSM Parameter Store ARNs that application code may read through the ECS task role. References only; no parameter values."
+  type        = list(string)
+  default = [
+    "arn:aws:ssm:us-east-1:123456789012:parameter/platform-infra-lab/dev/application/*",
+  ]
+}
+
+variable "task_kms_key_arns" {
+  description = "Optional placeholder KMS key ARNs for application task-role decrypt access when secret references use customer-managed keys. Empty by default."
+  type        = list(string)
+  default     = []
+}

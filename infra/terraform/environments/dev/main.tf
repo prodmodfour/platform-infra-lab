@@ -37,10 +37,19 @@ locals {
     redis_port        = var.redis_port
   }
 
+  iam_defaults = {
+    execution_secret_reference_arns = var.execution_secret_reference_arns
+    execution_ssm_parameter_arns    = var.execution_ssm_parameter_arns
+    execution_kms_key_arns          = var.execution_kms_key_arns
+    task_secret_reference_arns      = var.task_secret_reference_arns
+    task_ssm_parameter_arns         = var.task_ssm_parameter_arns
+    task_kms_key_arns               = var.task_kms_key_arns
+  }
+
   planned_module_contract = {
     network         = "implemented-ticket-004"
     security_groups = "implemented-ticket-005"
-    iam             = "ticket-006"
+    iam             = "implemented-ticket-006"
     ecs_service     = "ticket-007"
     load_balancer   = "ticket-008"
     rds_postgres    = "ticket-009"
@@ -75,4 +84,18 @@ module "security_groups" {
   enable_redis      = var.enable_redis
   redis_port        = var.redis_port
   common_tags       = local.common_tags
+}
+
+module "iam" {
+  source = "../../modules/iam"
+
+  name_prefix                     = local.name_prefix
+  environment                     = local.environment
+  execution_secret_reference_arns = var.execution_secret_reference_arns
+  execution_ssm_parameter_arns    = var.execution_ssm_parameter_arns
+  execution_kms_key_arns          = var.execution_kms_key_arns
+  task_secret_reference_arns      = var.task_secret_reference_arns
+  task_ssm_parameter_arns         = var.task_ssm_parameter_arns
+  task_kms_key_arns               = var.task_kms_key_arns
+  common_tags                     = local.common_tags
 }

@@ -108,6 +108,36 @@ output "security_group_rule_summary" {
   value       = module.security_groups.rule_summary
 }
 
+output "iam_defaults" {
+  description = "IAM secret-reference inputs passed to the IAM module. These are references only, not secret values."
+  value       = local.iam_defaults
+}
+
+output "ecs_task_execution_role_name" {
+  description = "Name of the ECS task execution role."
+  value       = module.iam.ecs_task_execution_role_name
+}
+
+output "ecs_task_execution_role_arn" {
+  description = "ARN of the ECS task execution role for future ECS task definitions."
+  value       = module.iam.ecs_task_execution_role_arn
+}
+
+output "ecs_task_role_name" {
+  description = "Name of the ECS application task role."
+  value       = module.iam.ecs_task_role_name
+}
+
+output "ecs_task_role_arn" {
+  description = "ARN of the ECS application task role for future ECS task definitions."
+  value       = module.iam.ecs_task_role_arn
+}
+
+output "secret_reference_policy_summary" {
+  description = "Review-friendly summary of IAM secret-reference policies."
+  value       = module.iam.secret_reference_policy_summary
+}
+
 output "platform_defaults" {
   description = "Cost and availability defaults that future modules will consume."
   value       = local.platform_defaults

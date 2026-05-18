@@ -26,6 +26,14 @@ The security-groups module now models explicit traffic boundaries:
 - PostgreSQL and Redis security groups do not receive public CIDR ingress rules
 - private data-store rules use security group references rather than broad VPC CIDR access
 
+The IAM module now models role separation and secret-reference access:
+
+- the ECS task execution role is trusted by `ecs-tasks.amazonaws.com` and receives the AWS-managed `AmazonECSTaskExecutionRolePolicy` for platform runtime needs
+- the application ECS task role is separately trusted by `ecs-tasks.amazonaws.com` and receives no broad AWS permissions by default
+- optional inline policies grant `secretsmanager:GetSecretValue`, `secretsmanager:DescribeSecret`, `ssm:GetParameter`, `ssm:GetParameters`, and optional `kms:Decrypt` only for supplied reference ARNs
+- environment examples use fake account ID `123456789012` and placeholder Secrets Manager or SSM Parameter Store paths; no secret values are committed
+- production use should review per-service task roles, exact ARN scoping, permissions boundaries, IAM Access Analyzer findings, KMS key policy alignment, and secret rotation ownership
+
 The current egress model is intentionally strict and incomplete for real workloads. Future ECS services may need reviewed egress through VPC endpoints, NAT, or narrow rules for image pulls, logs, secret references, telemetry, and third-party APIs.
 
-Future content will document IAM role separation, least-privilege intent, secret references, validation-only CI, and production hardening gaps.
+Future content will expand validation-only CI notes, secret lifecycle details, and production hardening gaps.
