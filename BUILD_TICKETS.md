@@ -711,7 +711,7 @@ Commit when complete.
 
 ## 022 — Add ADRs
 
-Status: TODO
+Status: DONE
 
 Create ADRs:
 

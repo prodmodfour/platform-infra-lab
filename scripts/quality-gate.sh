@@ -30,6 +30,11 @@ required_paths=(
   docs/secrets.md
   docs/service-examples.md
   docs/decisions
+  docs/decisions/0001-aws-ecs-fargate-as-container-platform.md
+  docs/decisions/0002-terraform-modules-and-environments.md
+  docs/decisions/0003-private-database-and-cache.md
+  docs/decisions/0004-secrets-are-references-not-values.md
+  docs/decisions/0005-validation-only-ci.md
   docs/diagrams
   docs/diagrams/aws-container-platform.md
   infra
@@ -467,6 +472,29 @@ grep -q "job-runner-platform" docs/review-guide.md
 grep -q "multi-tenant-saas-api" docs/review-guide.md
 grep -q "infra/terraform/modules/ecs-service" docs/review-guide.md
 grep -q "scripts/quality-gate.sh" docs/review-guide.md
+
+echo "== ADR documentation checks =="
+declare -A required_adr_terms=(
+  [docs/decisions/0001-aws-ecs-fargate-as-container-platform.md]="ECS/Fargate"
+  [docs/decisions/0002-terraform-modules-and-environments.md]="Terraform modules"
+  [docs/decisions/0003-private-database-and-cache.md]="Private database"
+  [docs/decisions/0004-secrets-are-references-not-values.md]="Secrets are references"
+  [docs/decisions/0005-validation-only-ci.md]="Validation-only CI"
+)
+for adr in "${!required_adr_terms[@]}"; do
+  grep -qi "^## Status" "$adr"
+  grep -qi "^## Context" "$adr"
+  grep -qi "^## Decision" "$adr"
+  grep -qi "^## Consequences" "$adr"
+  grep -qi "Accepted" "$adr"
+  grep -qi "${required_adr_terms[$adr]}" "$adr"
+done
+
+grep -qi "optional, manual, user-owned" docs/decisions/0001-aws-ecs-fargate-as-container-platform.md
+grep -qi "backend.example.tf" docs/decisions/0002-terraform-modules-and-environments.md
+grep -qi "publicly_accessible.*false" docs/decisions/0003-private-database-and-cache.md
+grep -qi "does not create.*aws_secretsmanager_secret_version" docs/decisions/0004-secrets-are-references-not-values.md
+grep -qi "must not run Terraform apply" docs/decisions/0005-validation-only-ci.md
 
 echo "== shell syntax checks =="
 for script in scripts/*.sh; do
