@@ -2,13 +2,14 @@
 
 ## Current state
 
-Ticket 000 is complete. The repository now has the initial public-safe skeleton for `platform-infra-lab`, including README framing, placeholder documentation, Terraform directory placeholders, `.gitignore`, and a bootstrap quality gate.
+Tickets 000 and 001 are complete. The repository now has the initial public-safe skeleton plus reusable validation guardrails for public-safety, forbidden Terraform/local secret files, no automated cloud mutations, and Terraform formatting/validation when Terraform is installed.
 
 The next run should start with the lowest-numbered TODO ticket in `BUILD_TICKETS.md`.
 
 ## Quality gates
 
 - `bash scripts/quality-gate.sh` — passed.
+  - Terraform was not installed locally, so `scripts/check-terraform.sh` warned and skipped local Terraform fmt/init/validate as designed. CI will install Terraform in a later ticket.
 
 ## Public-safety notes
 
@@ -22,20 +23,22 @@ Do not add automated cloud mutation commands such as `terraform apply`, `terrafo
 
 ## Latest cycle notes
 
-Changed in ticket 000:
+Changed in ticket 001:
 
-- Added `README.md` with public portfolio framing, AWS/Terraform direction, validation instructions, and cloud/public-safety constraints.
-- Expanded `.gitignore` for Terraform state/plans, real tfvars, local secrets, credentials, and editor noise.
-- Added placeholder docs under `docs/`, plus tracked `docs/decisions/` and `docs/diagrams/` directories.
-- Added tracked Terraform skeleton directories under `infra/terraform/modules/` and `infra/terraform/environments/`.
-- Updated `scripts/quality-gate.sh` to validate bootstrap structure, README framing, and shell syntax.
+- Added `scripts/check-public-safety.sh` to scan the working tree for unsafe local env files, private key files/material, AWS credential-looking files/content, and non-placeholder 12-digit account IDs.
+- Added `scripts/check-no-terraform-state.sh` to reject Terraform state, generated plan files, real `.tfvars` files, and local `.env` files.
+- Added `scripts/check-no-cloud-mutations.sh` to scan scripts and CI-style automation files for Terraform/cloud mutation commands while allowing documentation-only warnings.
+- Added `scripts/check-terraform.sh` to run `terraform fmt -recursive -check`, `terraform init -backend=false`, and `terraform validate` for Terraform environments when Terraform is available.
+- Added `scripts/self-test-guardrails.sh` with temporary-fixture self-checks for the guardrails.
+- Updated `scripts/quality-gate.sh` to run the new guardrails and self-tests.
+- Updated `README.md` and `docs/security.md` with the current validation/security guardrail behavior.
 
 Limitations:
 
-- Terraform modules and environments are not implemented yet.
-- Detailed guardrail scripts, Terraform validation, and CI are deferred to later tickets.
-- Documentation files are placeholders and will be completed as related tickets are implemented.
+- Terraform modules and environments are not implemented yet, so Terraform init/validate has no environments to validate.
+- Terraform is not installed in the local environment used for this cycle; the Terraform guardrail warns and skips locally by design.
+- GitHub Actions CI is still deferred to ticket 014.
 
 ## Next recommended ticket
 
-Ticket 001.
+Ticket 002.

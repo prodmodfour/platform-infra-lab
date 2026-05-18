@@ -53,7 +53,7 @@ Commit when complete.
 
 ## 001 — Add validation scripts and guardrails
 
-Status: TODO
+Status: DONE
 
 Implement reusable validation scripts:
 

@@ -40,7 +40,7 @@ Run the local quality gate:
 bash scripts/quality-gate.sh
 ```
 
-The initial gate checks shell syntax and verifies the bootstrap structure. Later tickets will add public-safety, Terraform, and CI validation guardrails.
+The quality gate checks shell syntax, repository structure, public-safety rules, forbidden Terraform state/plan/variable files, automated cloud mutation commands, and Terraform formatting/validation when Terraform is installed. If Terraform is not installed locally, the Terraform check warns and skips; CI will install Terraform in a later ticket.
 
 ## Repository structure
 
@@ -52,6 +52,11 @@ The initial gate checks shell syntax and verifies the bootstrap structure. Later
 ├── BUILD_NOTES.md
 ├── scripts/
 │   ├── build-loop.sh
+│   ├── check-no-cloud-mutations.sh
+│   ├── check-no-terraform-state.sh
+│   ├── check-public-safety.sh
+│   ├── check-terraform.sh
+│   ├── self-test-guardrails.sh
 │   └── quality-gate.sh
 ├── docs/
 │   ├── architecture.md
