@@ -61,6 +61,16 @@ The RDS PostgreSQL module now models the private database boundary:
 - outputs expose the RDS-managed secret ARN as a reference only, not the secret value
 - dev and prod examples keep KMS key inputs null so no real key ARN is committed
 
-The current egress model is intentionally strict and incomplete for real workloads. ECS services may need reviewed egress through VPC endpoints, NAT, or narrow rules for image pulls, logs, secret references, telemetry, and third-party APIs. Real database use also needs reviewed migration roles, least-privilege database users, connection pooling, audit logging, and secret rotation ownership.
+The Redis cache module now models the private cache boundary:
+
+- the ElastiCache subnet group uses private subnet IDs from the network module
+- cache resources are created only when `enable_redis` is true
+- the environment passes only the private Redis security group, whose ingress is scoped to ECS services on the Redis port
+- at-rest and in-transit encryption default to enabled
+- KMS key inputs stay null in committed examples so no real key ARN is committed
+- cache endpoint outputs are references only and are not credentials
+- no Redis AUTH token, ACL user group, or cache connection-string secret value is stored in Terraform
+
+The current egress model is intentionally strict and incomplete for real workloads. ECS services may need reviewed egress through VPC endpoints, NAT, or narrow rules for image pulls, logs, secret references, telemetry, and third-party APIs. Real database use also needs reviewed migration roles, least-privilege database users, connection pooling, audit logging, and secret rotation ownership. Real cache use should review Redis AUTH/ACLs, TLS client compatibility, cache parameter groups, eviction policy, and whether cached data includes tenant-sensitive or regulated content.
 
 Future content will expand validation-only CI notes, secret lifecycle details, and production hardening gaps.

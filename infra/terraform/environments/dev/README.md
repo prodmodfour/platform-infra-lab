@@ -1,6 +1,6 @@
 # Dev Terraform environment
 
-This root module is the public-safe `dev` environment for `platform-infra-lab`. It establishes provider configuration, backend examples, variable defaults, outputs, naming, tagging, the shared network module, shared security-groups module, shared IAM module, shared load-balancer module, ECS/Fargate service examples, and private RDS PostgreSQL example.
+This root module is the public-safe `dev` environment for `platform-infra-lab`. It establishes provider configuration, backend examples, variable defaults, outputs, naming, tagging, the shared network module, shared security-groups module, shared IAM module, shared load-balancer module, ECS/Fargate service examples, private RDS PostgreSQL example, and optional Redis cache example.
 
 ## Current scope
 
@@ -29,8 +29,10 @@ The dev environment now wires `../../modules/network` with cost-aware defaults:
 - PostgreSQL public accessibility fixed to false
 - RDS-managed Secrets Manager master user credential; no database password value is committed or read by this Terraform
 - short dev backup retention, storage autoscaling ceiling, log exports, and disabled deletion protection/final snapshot for disposable lab experiments
+- Redis/Valkey cache module wired with `enable_redis = false` by default, so no cache subnet group or replication group is created unless a user-owned experiment enables it
+- small cache node shape, zero replicas, no snapshots, and encryption defaults documented for optional dev use
 
-Future tickets add optional Redis resources and observability.
+Future tickets add observability.
 
 ## Dev posture
 
@@ -40,7 +42,7 @@ Dev is intentionally small and cost-aware:
 - NAT gateway usage defaults to disabled until private egress is explicitly needed
 - log retention defaults to a short demo-friendly window for future log groups
 - deletion protection defaults to disabled for disposable lab experiments
-- Redis/cache usage defaults to disabled, so the Redis security group is omitted by default
+- Redis/cache usage defaults to disabled, so the Redis security group and ElastiCache resources are omitted by default
 - PostgreSQL uses a small single-AZ instance class, short backup retention, encrypted gp3 storage, and no public accessibility
 - default ECS desired count is one task for each service example
 - autoscaling ranges are intentionally small for review
@@ -52,7 +54,7 @@ These are placeholders for review and validation, not a production recommendatio
 
 Public subnets are intended for internet-facing components only. Private subnets are intended for workloads and stateful services that should not receive public IP addresses.
 
-The security group boundary is intentionally narrow: internet CIDRs reach only the ALB security group, the ALB reaches ECS services only on the service port through listener rules and target groups, ECS services reach PostgreSQL only on port 5432, and Redis rules are created only when Redis is enabled. No public database or cache ingress is modeled. The RDS PostgreSQL module consumes the private RDS security group and private subnets, and fixes `publicly_accessible = false`.
+The security group boundary is intentionally narrow: internet CIDRs reach only the ALB security group, the ALB reaches ECS services only on the service port through listener rules and target groups, ECS services reach PostgreSQL only on port 5432, and Redis rules/resources are created only when Redis is enabled. No public database or cache ingress is modeled. The RDS PostgreSQL module consumes the private RDS security group and private subnets, and fixes `publicly_accessible = false`. The Redis cache module consumes private subnets and the private Redis security group only when enabled.
 
 The IAM boundary separates the ECS task execution role from the application task role. The execution role is for ECS runtime integration such as image pulls, log delivery, and ECS-managed secret injection. The application task role starts with only explicitly supplied secret-reference read permissions. ECS service examples pass secret references as ARNs only, never values. All example ARNs are placeholders and must be replaced or removed before any real manual provisioning.
 

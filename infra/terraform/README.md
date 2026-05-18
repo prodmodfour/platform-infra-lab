@@ -45,6 +45,11 @@ infra/terraform/
 │   │   ├── variables.tf
 │   │   ├── outputs.tf
 │   │   └── README.md
+│   ├── redis-cache/
+│   │   ├── main.tf
+│   │   ├── variables.tf
+│   │   ├── outputs.tf
+│   │   └── README.md
 │   └── security-groups/
 │       ├── main.tf
 │       ├── variables.tf
@@ -70,7 +75,7 @@ infra/terraform/
         └── README.md
 ```
 
-The `dev` and `prod` environment roots now both wire the shared `network`, `security-groups`, `iam`, `load-balancer`, `ecs-service`, and `rds-postgres` modules. Future tickets add the remaining cache and observability modules and continue wiring the same module set into both environments.
+The `dev` and `prod` environment roots now both wire the shared `network`, `security-groups`, `iam`, `load-balancer`, `ecs-service`, `rds-postgres`, and `redis-cache` modules. Future tickets add the observability module and continue wiring the same module set into both environments.
 
 ## Naming guidance
 
@@ -147,6 +152,7 @@ Implemented modules:
 - `modules/load-balancer` — public ALB edge with an HTTP listener, optional HTTPS listener variables, optional access-log references, and listener outputs for ECS service rules.
 - `modules/ecs-service` — private ECS/Fargate service pattern with task definition, service, log group, target group, listener rule, health checks, and autoscaling.
 - `modules/rds-postgres` — private RDS PostgreSQL instance pattern with a private subnet group, backups, deletion protection variables, storage sizing, log exports, and RDS-managed Secrets Manager master credentials.
+- `modules/redis-cache` — optional private ElastiCache Redis/Valkey-style cache pattern with a private subnet group, replica/Multi-AZ variables, encryption settings, snapshots, and disabled outputs when not enabled.
 
 See `modules/README.md` for detailed module interface conventions.
 

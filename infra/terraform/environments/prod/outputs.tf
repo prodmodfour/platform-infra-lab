@@ -94,18 +94,78 @@ output "ecs_service_security_group_id" {
 }
 
 output "rds_postgres_security_group_id" {
-  description = "Security group ID for future private PostgreSQL/RDS resources."
+  description = "Security group ID for private PostgreSQL/RDS resources."
   value       = module.security_groups.rds_postgres_security_group_id
 }
 
 output "redis_cache_security_group_id" {
-  description = "Security group ID for future private Redis/ElastiCache resources when enabled; null otherwise."
+  description = "Security group ID for optional private Redis/ElastiCache resources when enabled; null otherwise."
   value       = module.security_groups.redis_cache_security_group_id
 }
 
 output "security_group_rule_summary" {
   description = "Review-friendly summary of security group traffic boundaries."
   value       = module.security_groups.rule_summary
+}
+
+output "redis_cache_defaults" {
+  description = "Review-friendly Redis/Valkey cache defaults for this environment."
+  value       = local.redis_cache_defaults
+}
+
+output "redis_cache_enabled" {
+  description = "Whether the optional Redis/Valkey cache resources are enabled."
+  value       = module.redis_cache.enabled
+}
+
+output "redis_cache_subnet_group_name" {
+  description = "Private ElastiCache subnet group name when Redis is enabled, otherwise null."
+  value       = module.redis_cache.subnet_group_name
+}
+
+output "redis_cache_replication_group_id" {
+  description = "ElastiCache replication group ID when Redis is enabled, otherwise null."
+  value       = module.redis_cache.replication_group_id
+}
+
+output "redis_cache_replication_group_arn" {
+  description = "ElastiCache replication group ARN when Redis is enabled, otherwise null."
+  value       = module.redis_cache.replication_group_arn
+}
+
+output "redis_cache_primary_endpoint_address" {
+  description = "Private cache primary endpoint when Redis is enabled. This is not a credential."
+  value       = module.redis_cache.primary_endpoint_address
+}
+
+output "redis_cache_reader_endpoint_address" {
+  description = "Private cache reader endpoint when replicas are present, otherwise null. This is not a credential."
+  value       = module.redis_cache.reader_endpoint_address
+}
+
+output "redis_cache_port" {
+  description = "Redis/Valkey port exposed inside private subnets when enabled, otherwise null."
+  value       = module.redis_cache.port
+}
+
+output "redis_cache_availability_summary" {
+  description = "Review-friendly summary of Redis/Valkey cache node count and availability settings."
+  value       = module.redis_cache.availability_summary
+}
+
+output "redis_cache_security_summary" {
+  description = "Review-friendly summary of Redis/Valkey private security settings."
+  value       = module.redis_cache.security_summary
+}
+
+output "redis_cache_snapshot_summary" {
+  description = "Review-friendly summary of Redis/Valkey snapshot and maintenance settings."
+  value       = module.redis_cache.snapshot_summary
+}
+
+output "redis_cache_connection_reference_summary" {
+  description = "Review-friendly Redis/Valkey connection-reference pattern; no cache auth token value is exposed."
+  value       = module.redis_cache.connection_reference_summary
 }
 
 output "rds_postgres_defaults" {

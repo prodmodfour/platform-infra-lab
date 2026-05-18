@@ -10,8 +10,9 @@ This document is a living placeholder for the target AWS/Terraform architecture.
 - `infra/terraform/modules/load-balancer` models an internet-facing Application Load Balancer, required HTTP listener, optional HTTPS listener variables, optional access-log references, and listener outputs for service rules.
 - `infra/terraform/modules/ecs-service` models a private Fargate service with task definition, ECS service, CloudWatch log group, ALB target group, listener rule, health checks, and desired-count autoscaling.
 - `infra/terraform/modules/rds-postgres` models a private RDS PostgreSQL instance with a private DB subnet group, no public accessibility, backup/deletion-protection settings, storage variables, log exports, optional monitoring settings, and RDS-managed Secrets Manager master credentials.
-- `infra/terraform/environments/dev` wires the network, security-groups, IAM, load-balancer, ECS service, and RDS PostgreSQL modules with two public/private subnet pairs, NAT disabled by default, Redis security groups disabled by default, one task per demo service, a small single-AZ private PostgreSQL instance, dev-scoped placeholder secret-reference ARNs, and fake service images.
-- `infra/terraform/environments/prod` wires the network, security-groups, IAM, load-balancer, ECS service, and RDS PostgreSQL modules with three public/private subnet pairs, NAT enabled by default to demonstrate private egress intent, Redis security groups enabled to show the optional cache tier, two tasks per demo service, a Multi-AZ private PostgreSQL instance with deletion protection, prod-scoped placeholder secret-reference ARNs, and fake service images.
+- `infra/terraform/modules/redis-cache` models an optional private ElastiCache Redis/Valkey-style replication group with a private subnet group, private security group input, enable/disable behavior, encryption settings, snapshots, and replica/Multi-AZ variables.
+- `infra/terraform/environments/dev` wires the network, security-groups, IAM, load-balancer, ECS service, RDS PostgreSQL, and Redis cache modules with two public/private subnet pairs, NAT disabled by default, Redis resources disabled by default, one task per demo service, a small single-AZ private PostgreSQL instance, dev-scoped placeholder secret-reference ARNs, and fake service images.
+- `infra/terraform/environments/prod` wires the network, security-groups, IAM, load-balancer, ECS service, RDS PostgreSQL, and Redis cache modules with three public/private subnet pairs, NAT enabled by default to demonstrate private egress intent, Redis resources enabled to show the optional cache tier with one replica/Multi-AZ intent, two tasks per demo service, a Multi-AZ private PostgreSQL instance with deletion protection, prod-scoped placeholder secret-reference ARNs, and fake service images.
 
 ## Target architecture themes
 
@@ -49,6 +50,15 @@ Current RDS PostgreSQL intent:
 - RDS manages the master user password in Secrets Manager, and Terraform only exposes the secret ARN as a reference
 - dev uses small single-AZ sizing and shorter backup retention for cost-aware review
 - prod shows production intent with Multi-AZ, deletion protection, final snapshot, longer backup retention, and Performance Insights enabled
+
+Current Redis/Valkey cache intent:
+
+- the cache subnet group uses private subnets only
+- the cache security group accepts Redis only from the ECS service security group
+- the module is disabled in dev by default to avoid unnecessary lab cost
+- prod enables a small private replication group with one replica, automatic failover, Multi-AZ, at-rest encryption, in-transit encryption, snapshot retention, and a final snapshot identifier
+- endpoint outputs are references for application configuration and review, not credentials
+- no Redis AUTH token or ACL secret value is stored in Terraform; secure secret-reference wiring is deferred to the dedicated secrets ticket
 
 Current security group intent:
 

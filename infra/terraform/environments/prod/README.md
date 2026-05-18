@@ -1,6 +1,6 @@
 # Prod Terraform environment
 
-This root module is the public-safe `prod` environment for `platform-infra-lab`. It mirrors the dev structure while using production-intent defaults and examples for review, including the shared network, security-groups, IAM, load-balancer, ECS service, and RDS PostgreSQL modules.
+This root module is the public-safe `prod` environment for `platform-infra-lab`. It mirrors the dev structure while using production-intent defaults and examples for review, including the shared network, security-groups, IAM, load-balancer, ECS service, RDS PostgreSQL, and Redis cache modules.
 
 ## Current scope
 
@@ -29,8 +29,10 @@ The prod environment now wires `../../modules/network` with production-intent de
 - PostgreSQL public accessibility fixed to false
 - RDS-managed Secrets Manager master user credential; no database password value is committed or read by this Terraform
 - production-intent PostgreSQL settings including Multi-AZ, longer backup retention, deletion protection, final snapshot, larger storage ceiling, log exports, and Performance Insights enabled
+- optional Redis/Valkey cache resources enabled by default to show the private cache tier
+- Redis cache settings including a small production-intent node shape, one replica, automatic failover, Multi-AZ, at-rest and in-transit encryption, snapshot retention, and a final snapshot identifier
 
-Future tickets add Redis resources and observability.
+Future tickets add observability.
 
 ## Prod posture
 
@@ -40,7 +42,7 @@ Prod demonstrates production intent rather than production completeness:
 - NAT gateway usage defaults to enabled to model private egress needs
 - log retention defaults to a longer window than dev for future log groups
 - deletion protection defaults to enabled for future stateful services
-- Redis/cache usage defaults to enabled to show the optional private cache tier and security group boundary
+- Redis/cache usage defaults to enabled to show the optional private cache tier, private subnet group, security group boundary, one replica, and Multi-AZ/failover intent
 - ALB deletion protection defaults to enabled to show production-intent review posture, while still requiring user-owned cleanup planning
 - PostgreSQL deletion protection, Multi-AZ, final snapshot, non-zero backup retention, encrypted gp3 storage, and Performance Insights are enabled to show production intent
 - default ECS desired count is two tasks for each service example
@@ -53,11 +55,11 @@ These settings can create ongoing cost if a user later provisions real infrastru
 
 Public subnets are intended for internet-facing components only. Private subnets are intended for workloads and stateful services that should not receive public IP addresses.
 
-The security group boundary is intentionally narrow: internet CIDRs reach only the ALB security group, the ALB reaches ECS services only on the service port through listener rules and target groups, ECS services reach PostgreSQL only on port 5432, and ECS services reach Redis only when Redis is enabled. No public database or cache ingress is modeled. The RDS PostgreSQL module consumes the private RDS security group and private subnets, and fixes `publicly_accessible = false`.
+The security group boundary is intentionally narrow: internet CIDRs reach only the ALB security group, the ALB reaches ECS services only on the service port through listener rules and target groups, ECS services reach PostgreSQL only on port 5432, and ECS services reach Redis only when Redis is enabled. No public database or cache ingress is modeled. The RDS PostgreSQL module consumes the private RDS security group and private subnets, and fixes `publicly_accessible = false`. The Redis cache module consumes private subnets and the private Redis security group only when enabled.
 
 The IAM boundary separates the ECS task execution role from the application task role. The execution role is for ECS runtime integration such as image pulls, log delivery, and ECS-managed secret injection. The application task role starts with only explicitly supplied secret-reference read permissions. ECS service examples pass secret references as ARNs only, never values. All example ARNs are placeholders and must be replaced or removed before any real manual provisioning.
 
-The prod example uses a single shared NAT gateway to keep the pattern readable. A real production design should review per-availability-zone NAT gateways, VPC endpoints, flow logs, CIDR sizing, regional availability-zone support, HTTPS-only ingress, WAF/trusted CIDR controls, IAM permissions boundaries, per-service task roles, and outbound access requirements before provisioning.
+The prod example uses a single shared NAT gateway to keep the pattern readable. A real production design should review per-availability-zone NAT gateways, VPC endpoints, flow logs, CIDR sizing, regional availability-zone support, HTTPS-only ingress, WAF/trusted CIDR controls, IAM permissions boundaries, per-service task roles, Redis AUTH/ACLs, cache parameter groups, and outbound access requirements before provisioning.
 
 ## Public-safety notes
 

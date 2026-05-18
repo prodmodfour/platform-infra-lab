@@ -140,6 +140,24 @@ rds_ca_cert_identifier                    = null
 
 redis_port = 6379
 
+# Optional Redis/Valkey cache. Dev keeps it disabled by default for cost-aware review.
+redis_engine                       = "redis"
+redis_engine_version               = "7.1"
+redis_node_type                    = "cache.t4g.micro"
+redis_parameter_group_name         = null
+redis_replica_count                = 0
+redis_automatic_failover_enabled   = false
+redis_multi_az_enabled             = false
+redis_at_rest_encryption_enabled   = true
+redis_transit_encryption_enabled   = true
+redis_kms_key_id                   = null
+redis_snapshot_retention_days      = 0
+redis_snapshot_window              = null
+redis_final_snapshot_identifier    = null
+redis_maintenance_window           = "sun:05:00-sun:06:00"
+redis_apply_immediately            = false
+redis_auto_minor_version_upgrade   = true
+
 # Placeholder secret references only. Do not put secret values in tfvars files.
 execution_secret_reference_arns = [
   "arn:aws:secretsmanager:us-east-1:123456789012:secret:platform-infra-lab/dev/ecs-execution/*",

@@ -360,7 +360,7 @@ Commit when complete.
 
 ## 010 — Add Redis cache module
 
-Status: TODO
+Status: DONE
 
 Create `infra/terraform/modules/redis-cache/`.
 

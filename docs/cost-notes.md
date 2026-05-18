@@ -37,6 +37,17 @@ The RDS PostgreSQL module adds cost drivers if manually provisioned:
 
 Dev uses a small single-AZ PostgreSQL shape, short backup retention, and skipped final snapshot to stay disposable. Prod shows Multi-AZ, deletion protection, final snapshot, longer backup retention, larger storage, and Performance Insights to demonstrate production intent. These settings can create ongoing cost if provisioned.
 
+The Redis cache module adds cost drivers if manually provisioned:
+
+- ElastiCache node type and continuous runtime
+- total cache node count, including replicas
+- automatic failover and Multi-AZ settings that require replicas
+- snapshot retention and final snapshots
+- cache traffic between private ECS services and cache nodes
+- KMS usage when user-owned keys are supplied
+
+Dev keeps Redis disabled by default and defines a small node shape for optional experiments. Prod enables a small private cache with one replica, Multi-AZ/failover intent, encryption, snapshot retention, and a final snapshot identifier to demonstrate production posture. These settings can create ongoing cost if provisioned.
+
 Any optional manual provisioning can incur cloud cost and should be reviewed, user-owned, and cleaned up by the operator.
 
-Future content will describe qualitative AWS cost drivers such as CloudWatch alarms/dashboards and optional Redis/ElastiCache.
+Future content will describe qualitative AWS cost drivers such as CloudWatch alarms/dashboards.

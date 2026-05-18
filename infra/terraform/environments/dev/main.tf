@@ -25,6 +25,10 @@ locals {
     log_retention_days                 = var.log_retention_days
     deletion_protection_enabled        = var.deletion_protection_enabled
     enable_redis                       = var.enable_redis
+    redis_node_type                    = var.redis_node_type
+    redis_replica_count                = var.redis_replica_count
+    redis_multi_az                     = var.redis_multi_az_enabled
+    redis_automatic_failover_enabled   = var.redis_automatic_failover_enabled
     service_desired_count_default      = var.service_desired_count_default
     ecs_service_count                  = length(var.ecs_services)
     ecs_listener_rules_enabled         = var.create_ecs_listener_rules
@@ -74,6 +78,24 @@ locals {
     publicly_accessible                   = false
   }
 
+  redis_cache_defaults = {
+    enabled                         = var.enable_redis
+    engine                          = var.redis_engine
+    engine_version                  = var.redis_engine_version
+    node_type                       = var.redis_node_type
+    port                            = var.redis_port
+    replica_count                   = var.redis_replica_count
+    total_cache_nodes               = var.enable_redis ? var.redis_replica_count + 1 : 0
+    automatic_failover_enabled      = var.redis_automatic_failover_enabled
+    multi_az_enabled                = var.redis_multi_az_enabled
+    at_rest_encryption_enabled      = var.redis_at_rest_encryption_enabled
+    transit_encryption_enabled      = var.redis_transit_encryption_enabled
+    kms_key_supplied                = var.redis_kms_key_id != null
+    snapshot_retention_days         = var.redis_snapshot_retention_days
+    final_snapshot_identifier       = var.redis_final_snapshot_identifier
+    endpoint_values_are_credentials = false
+  }
+
   security_group_defaults = {
     alb_ingress_cidrs = var.alb_ingress_cidrs
     alb_ingress_ports = var.alb_ingress_ports
@@ -106,7 +128,7 @@ locals {
     ecs_service     = "implemented-ticket-007"
     load_balancer   = "implemented-ticket-008"
     rds_postgres    = "implemented-ticket-009"
-    redis_cache     = "ticket-010"
+    redis_cache     = "implemented-ticket-010"
     observability   = "ticket-011"
   }
 }
@@ -211,6 +233,35 @@ module "rds_postgres" {
   performance_insights_retention_period = var.rds_performance_insights_retention_period
   ca_cert_identifier                    = var.rds_ca_cert_identifier
   common_tags                           = local.common_tags
+}
+
+module "redis_cache" {
+  source = "../../modules/redis-cache"
+
+  enabled            = var.enable_redis
+  name_prefix        = local.name_prefix
+  environment        = local.environment
+  private_subnet_ids = module.network.private_subnet_ids
+  security_group_ids = var.enable_redis ? [module.security_groups.redis_cache_security_group_id] : []
+
+  engine                     = var.redis_engine
+  engine_version             = var.redis_engine_version
+  node_type                  = var.redis_node_type
+  port                       = var.redis_port
+  parameter_group_name       = var.redis_parameter_group_name
+  replica_count              = var.redis_replica_count
+  automatic_failover_enabled = var.redis_automatic_failover_enabled
+  multi_az_enabled           = var.redis_multi_az_enabled
+  at_rest_encryption_enabled = var.redis_at_rest_encryption_enabled
+  transit_encryption_enabled = var.redis_transit_encryption_enabled
+  kms_key_id                 = var.redis_kms_key_id
+  snapshot_retention_days    = var.redis_snapshot_retention_days
+  snapshot_window            = var.redis_snapshot_window
+  final_snapshot_identifier  = var.redis_final_snapshot_identifier
+  maintenance_window         = var.redis_maintenance_window
+  apply_immediately          = var.redis_apply_immediately
+  auto_minor_version_upgrade = var.redis_auto_minor_version_upgrade
+  common_tags                = local.common_tags
 }
 
 resource "aws_ecs_cluster" "platform" {

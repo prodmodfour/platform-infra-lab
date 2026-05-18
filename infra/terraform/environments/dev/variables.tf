@@ -105,7 +105,7 @@ variable "deletion_protection_enabled" {
 }
 
 variable "enable_redis" {
-  description = "Future Redis/ElastiCache module flag. Dev keeps this disabled by default to avoid unnecessary lab cost."
+  description = "Redis/ElastiCache module flag. Dev keeps this disabled by default to avoid unnecessary lab cost."
   type        = bool
   default     = false
 }
@@ -694,6 +694,156 @@ variable "redis_port" {
     condition     = var.redis_port >= 1 && var.redis_port <= 65535
     error_message = "redis_port must be a valid TCP port."
   }
+}
+
+variable "redis_engine" {
+  description = "ElastiCache engine for the optional dev cache. Use redis or valkey where supported."
+  type        = string
+  default     = "redis"
+
+  validation {
+    condition     = contains(["redis", "valkey"], var.redis_engine)
+    error_message = "redis_engine must be redis or valkey."
+  }
+}
+
+variable "redis_engine_version" {
+  description = "Redis/Valkey engine version for the optional dev cache. Review regional support before manual provisioning."
+  type        = string
+  default     = "7.1"
+
+  validation {
+    condition     = length(trimspace(var.redis_engine_version)) > 0
+    error_message = "redis_engine_version must not be empty."
+  }
+}
+
+variable "redis_node_type" {
+  description = "ElastiCache node type for the optional dev cache. Kept small for cost-aware review."
+  type        = string
+  default     = "cache.t4g.micro"
+
+  validation {
+    condition     = startswith(var.redis_node_type, "cache.")
+    error_message = "redis_node_type must look like an ElastiCache node type such as cache.t4g.micro."
+  }
+}
+
+variable "redis_parameter_group_name" {
+  description = "Optional Redis/Valkey parameter group name. Keep null to use the AWS default for the selected engine/version."
+  type        = string
+  default     = null
+  nullable    = true
+
+  validation {
+    condition     = var.redis_parameter_group_name == null ? true : length(trimspace(var.redis_parameter_group_name)) > 0
+    error_message = "redis_parameter_group_name must be null or non-empty."
+  }
+}
+
+variable "redis_replica_count" {
+  description = "Number of optional Redis/Valkey read replicas. Dev defaults to zero to avoid extra cache nodes."
+  type        = number
+  default     = 0
+
+  validation {
+    condition     = var.redis_replica_count >= 0 && var.redis_replica_count <= 5
+    error_message = "redis_replica_count must be between 0 and 5."
+  }
+}
+
+variable "redis_automatic_failover_enabled" {
+  description = "Whether ElastiCache can promote a Redis/Valkey replica if the primary fails. Requires at least one replica."
+  type        = bool
+  default     = false
+}
+
+variable "redis_multi_az_enabled" {
+  description = "Whether Multi-AZ support is enabled for the optional cache. Requires at least one replica."
+  type        = bool
+  default     = false
+}
+
+variable "redis_at_rest_encryption_enabled" {
+  description = "Whether cache at-rest encryption is enabled. Keep true unless a reviewed exception exists."
+  type        = bool
+  default     = true
+}
+
+variable "redis_transit_encryption_enabled" {
+  description = "Whether in-transit encryption is enabled for cache client traffic."
+  type        = bool
+  default     = true
+}
+
+variable "redis_kms_key_id" {
+  description = "Optional user-owned KMS key ID/ARN for cache at-rest encryption. Keep null in committed examples."
+  type        = string
+  default     = null
+  nullable    = true
+
+  validation {
+    condition     = var.redis_kms_key_id == null ? true : length(trimspace(var.redis_kms_key_id)) > 0
+    error_message = "redis_kms_key_id must be null or a non-empty KMS key identifier."
+  }
+}
+
+variable "redis_snapshot_retention_days" {
+  description = "Number of days to retain automatic cache snapshots. Dev defaults to 0 for disposable lab use."
+  type        = number
+  default     = 0
+
+  validation {
+    condition     = var.redis_snapshot_retention_days >= 0 && var.redis_snapshot_retention_days <= 35
+    error_message = "redis_snapshot_retention_days must be between 0 and 35."
+  }
+}
+
+variable "redis_snapshot_window" {
+  description = "Optional UTC snapshot window in hh:mm-hh:mm format. Keep null when snapshots are disabled."
+  type        = string
+  default     = null
+  nullable    = true
+
+  validation {
+    condition     = var.redis_snapshot_window == null ? true : can(regex("^[0-2][0-9]:[0-5][0-9]-[0-2][0-9]:[0-5][0-9]$", var.redis_snapshot_window))
+    error_message = "redis_snapshot_window must be null or use hh:mm-hh:mm format."
+  }
+}
+
+variable "redis_final_snapshot_identifier" {
+  description = "Optional final cache snapshot identifier for user-owned deletion. Dev keeps this null."
+  type        = string
+  default     = null
+  nullable    = true
+
+  validation {
+    condition     = var.redis_final_snapshot_identifier == null ? true : can(regex("^[a-z][a-z0-9-]+$", var.redis_final_snapshot_identifier))
+    error_message = "redis_final_snapshot_identifier must be lowercase kebab-case when provided."
+  }
+}
+
+variable "redis_maintenance_window" {
+  description = "Preferred UTC maintenance window for the optional cache, such as sun:05:00-sun:06:00."
+  type        = string
+  default     = "sun:05:00-sun:06:00"
+
+  validation {
+    condition     = can(regex("^(mon|tue|wed|thu|fri|sat|sun):[0-2][0-9]:[0-5][0-9]-(mon|tue|wed|thu|fri|sat|sun):[0-2][0-9]:[0-5][0-9]$", var.redis_maintenance_window))
+    error_message = "redis_maintenance_window must use ddd:hh:mm-ddd:hh:mm format with lowercase day names."
+  }
+}
+
+variable "redis_apply_immediately" {
+  description = "Whether cache changes apply immediately instead of during the maintenance window. Keep false for reviewable operations."
+  type        = bool
+  default     = false
+}
+
+variable "redis_auto_minor_version_upgrade" {
+  description = "Whether ElastiCache may apply supported minor engine upgrades during maintenance windows."
+  type        = bool
+  default     = true
 }
 
 variable "execution_secret_reference_arns" {

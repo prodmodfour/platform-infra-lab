@@ -45,6 +45,10 @@ required_paths=(
   infra/terraform/modules/rds-postgres/variables.tf
   infra/terraform/modules/rds-postgres/outputs.tf
   infra/terraform/modules/rds-postgres/README.md
+  infra/terraform/modules/redis-cache/main.tf
+  infra/terraform/modules/redis-cache/variables.tf
+  infra/terraform/modules/redis-cache/outputs.tf
+  infra/terraform/modules/redis-cache/README.md
   infra/terraform/modules/security-groups/main.tf
   infra/terraform/modules/security-groups/variables.tf
   infra/terraform/modules/security-groups/outputs.tf
@@ -165,6 +169,30 @@ for env in dev prod; do
   grep -q 'rds_database_name' "infra/terraform/environments/$env/terraform.tfvars.example"
   grep -q 'rds_master_user_secret_kms_key_id         = null' "infra/terraform/environments/$env/terraform.tfvars.example"
 done
+
+echo "== Terraform Redis cache module checks =="
+grep -q 'resource "aws_elasticache_subnet_group" "this"' infra/terraform/modules/redis-cache/main.tf
+grep -q 'resource "aws_elasticache_replication_group" "this"' infra/terraform/modules/redis-cache/main.tf
+grep -q 'count = var.enabled ? 1 : 0' infra/terraform/modules/redis-cache/main.tf
+grep -q 'automatic_failover_enabled' infra/terraform/modules/redis-cache/main.tf
+grep -q 'multi_az_enabled' infra/terraform/modules/redis-cache/main.tf
+grep -q 'transit_encryption_enabled' infra/terraform/modules/redis-cache/main.tf
+grep -q 'connection_reference_summary' infra/terraform/modules/redis-cache/outputs.tf
+grep -qi "Optional cache use" infra/terraform/modules/redis-cache/README.md
+grep -qi "Private access" infra/terraform/modules/redis-cache/README.md
+grep -qi "Cost implications" infra/terraform/modules/redis-cache/README.md
+grep -qi "Production hardening gaps" infra/terraform/modules/redis-cache/README.md
+for env in dev prod; do
+  grep -q 'module "redis_cache"' "infra/terraform/environments/$env/main.tf"
+  grep -q 'module.security_groups.redis_cache_security_group_id' "infra/terraform/environments/$env/main.tf"
+  grep -q 'output "redis_cache_replication_group_id"' "infra/terraform/environments/$env/outputs.tf"
+  grep -q 'output "redis_cache_connection_reference_summary"' "infra/terraform/environments/$env/outputs.tf"
+  grep -q 'redis_node_type' "infra/terraform/environments/$env/terraform.tfvars.example"
+  grep -q 'redis_replica_count' "infra/terraform/environments/$env/terraform.tfvars.example"
+done
+grep -q 'enable_redis                  = false' infra/terraform/environments/dev/terraform.tfvars.example
+grep -q 'enable_redis                  = true' infra/terraform/environments/prod/terraform.tfvars.example
+grep -q 'redis_automatic_failover_enabled   = true' infra/terraform/environments/prod/terraform.tfvars.example
 
 echo "== Terraform ECS service module checks =="
 grep -q 'resource "aws_cloudwatch_log_group" "this"' infra/terraform/modules/ecs-service/main.tf
