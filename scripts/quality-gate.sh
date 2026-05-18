@@ -22,6 +22,8 @@ required_paths=(
   docs
   docs/deployment.md
   docs/rollback.md
+  docs/operations.md
+  docs/runbook.md
   docs/secrets.md
   docs/service-examples.md
   docs/decisions
@@ -381,6 +383,41 @@ grep -qi "Metrics/logs to check" docs/rollback.md
 grep -qi "Communication notes" docs/rollback.md
 grep -qi "Safety notes" docs/rollback.md
 grep -qi "does not provide rollback scripts" docs/rollback.md
+
+echo "== Operations documentation checks =="
+grep -qi "Operational scope and safety posture" docs/operations.md
+grep -qi "Health checks" docs/operations.md
+grep -qi "Logs" docs/operations.md
+grep -qi "Metrics" docs/operations.md
+grep -qi "Alarms" docs/operations.md
+grep -qi "Incident triage" docs/operations.md
+grep -qi "RDS connectivity issue" docs/operations.md
+grep -qi "Service crash loop" docs/operations.md
+grep -qi "High 5xx rate" docs/operations.md
+grep -qi "High latency" docs/operations.md
+grep -qi "Database saturation" docs/operations.md
+grep -qi "Redis unavailable" docs/operations.md
+grep -qi "Deployment stuck" docs/operations.md
+grep -qi "Cost cleanup" docs/operations.md
+grep -qi "Access review" docs/operations.md
+grep -qi "validation-only" docs/operations.md
+
+echo "== Runbook documentation checks =="
+grep -qi "Universal incident triage" docs/runbook.md
+grep -qi "Health checks" docs/runbook.md
+grep -qi "Logs" docs/runbook.md
+grep -qi "Metrics" docs/runbook.md
+grep -qi "Alarms" docs/runbook.md
+grep -qi "RDS connectivity issue" docs/runbook.md
+grep -qi "Service crash loop" docs/runbook.md
+grep -qi "High 5xx rate" docs/runbook.md
+grep -qi "High latency" docs/runbook.md
+grep -qi "Database saturation" docs/runbook.md
+grep -qi "Redis unavailable" docs/runbook.md
+grep -qi "Deployment stuck" docs/runbook.md
+grep -qi "Cost cleanup" docs/runbook.md
+grep -qi "Access review" docs/runbook.md
+grep -qi "Closeout checklist" docs/runbook.md
 
 echo "== shell syntax checks =="
 for script in scripts/*.sh; do

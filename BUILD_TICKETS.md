@@ -601,7 +601,7 @@ Commit when complete.
 
 ## 018 — Add operations guide and runbook
 
-Status: TODO
+Status: DONE
 
 Create or complete:
 
