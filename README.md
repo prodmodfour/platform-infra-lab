@@ -1,0 +1,87 @@
+# platform-infra-lab
+
+`platform-infra-lab` is an independent public portfolio project for demonstrating platform engineering and infrastructure-as-code patterns with AWS and Terraform.
+
+The repository is intentionally public-safe: it contains generic infrastructure examples, placeholder service names, and no employer/private system details.
+
+## What this project is for
+
+This lab is designed to show backend/platform/SRE skills through reviewable infrastructure code and operational documentation. The intended architecture will model containerised backend services on AWS using Terraform, including ECS/Fargate, load balancing, private data services, IAM boundaries, secret references, validation-only CI, observability, cost notes, and runbooks.
+
+Reference services are placeholders only:
+
+- `carbon-platform-api`
+- `job-runner-platform`
+- `multi-tenant-saas-api`
+
+No application code is included here.
+
+## Safety model
+
+This repository must remain safe to publish and safe to review.
+
+- Independent public portfolio project; no employer code or private architecture.
+- AWS/Terraform is the primary infrastructure direction.
+- No automatic cloud deployment is provided.
+- No committed secrets, credentials, SSH keys, kubeconfigs, or private data.
+- No Terraform state or generated plan files should be committed.
+- Any optional manual apply/provisioning step is user-owned and can incur cloud cost.
+- CI and scripts are intended for validation only.
+
+## Current status
+
+Bootstrap skeleton is in place. Terraform modules, environments, diagrams, and detailed operating documentation will be added ticket-by-ticket.
+
+## Quick start validation
+
+Run the local quality gate:
+
+```bash
+bash scripts/quality-gate.sh
+```
+
+The initial gate checks shell syntax and verifies the bootstrap structure. Later tickets will add public-safety, Terraform, and CI validation guardrails.
+
+## Repository structure
+
+```text
+.
+├── README.md
+├── AGENTS.md
+├── BUILD_TICKETS.md
+├── BUILD_NOTES.md
+├── scripts/
+│   ├── build-loop.sh
+│   └── quality-gate.sh
+├── docs/
+│   ├── architecture.md
+│   ├── deployment.md
+│   ├── rollback.md
+│   ├── operations.md
+│   ├── runbook.md
+│   ├── cost-notes.md
+│   ├── security.md
+│   ├── review-guide.md
+│   ├── decisions/
+│   └── diagrams/
+└── infra/
+    └── terraform/
+        ├── modules/
+        └── environments/
+```
+
+## Planned architecture themes
+
+- VPC with public and private subnet intent.
+- Public Application Load Balancer in front of private ECS/Fargate services.
+- Private PostgreSQL/RDS and optional Redis/ElastiCache patterns.
+- Secret references via AWS-native services rather than committed secret values.
+- CloudWatch logs, metrics, dashboards, and alarms.
+- Separate dev/prod Terraform environments.
+
+## Out of scope
+
+- Running a real production workload from this repository.
+- Storing application source code.
+- Automatic cloud mutation from scripts or CI.
+- Committing real account IDs, state, credentials, or private names.
