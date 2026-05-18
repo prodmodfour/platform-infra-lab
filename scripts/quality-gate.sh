@@ -21,6 +21,7 @@ required_paths=(
   scripts/check-doc-links.sh
   docs
   docs/deployment.md
+  docs/rollback.md
   docs/secrets.md
   docs/service-examples.md
   docs/decisions
@@ -364,6 +365,22 @@ grep -qi "Post-deploy checks" docs/deployment.md
 grep -qi "optional, manual, user-owned, and can incur cost" docs/deployment.md
 grep -q "terraform init -backend=false" docs/deployment.md
 grep -q "terraform plan" docs/deployment.md
+
+echo "== Rollback documentation checks =="
+grep -qi "Decision tree" docs/rollback.md
+grep -qi "Bad container image" docs/rollback.md
+grep -qi "Failing health checks" docs/rollback.md
+grep -qi "Failed ECS deployment" docs/rollback.md
+grep -qi "Bad environment variable/secret reference" docs/rollback.md
+grep -qi "Database migration issue" docs/rollback.md
+grep -qi "RDS incident" docs/rollback.md
+grep -qi "Redis/cache issue" docs/rollback.md
+grep -qi "ALB/routing issue" docs/rollback.md
+grep -qi "Verification steps" docs/rollback.md
+grep -qi "Metrics/logs to check" docs/rollback.md
+grep -qi "Communication notes" docs/rollback.md
+grep -qi "Safety notes" docs/rollback.md
+grep -qi "does not provide rollback scripts" docs/rollback.md
 
 echo "== shell syntax checks =="
 for script in scripts/*.sh; do

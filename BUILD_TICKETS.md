@@ -570,7 +570,7 @@ Commit when complete.
 
 ## 017 — Add rollback guide
 
-Status: TODO
+Status: DONE
 
 Create `docs/rollback.md`.
 

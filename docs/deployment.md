@@ -203,4 +203,4 @@ If a user-owned manual deployment is performed, verify the platform before decla
 - Secret references resolve for ECS task startup without exposing secret values in logs.
 - No unexpected NAT gateway, snapshot, log retention, or orphaned resource cost drivers remain after testing.
 
-If any check fails, stop promotion and use the rollback guide when it is added in a later ticket.
+If any check fails, stop promotion and use the [rollback guide](rollback.md) to choose the smallest safe rollback path.
