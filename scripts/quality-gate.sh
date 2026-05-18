@@ -101,6 +101,7 @@ for path in "${required_paths[@]}"; do
 done
 
 echo "== README framing checks =="
+grep -q "^# platform-infra-lab" README.md
 grep -qi "independent public portfolio" README.md
 grep -qi "AWS/Terraform" README.md
 grep -qi "no automatic cloud deployment" README.md
@@ -108,6 +109,43 @@ grep -qi "no committed secrets" README.md
 grep -qi "No Terraform state" README.md
 grep -qi "manual apply.*can incur" README.md
 grep -qi "backend/platform/SRE" README.md
+required_readme_headings=(
+  "Portfolio framing"
+  "Public-safety constraints"
+  "Cloud-safety constraints"
+  "Implemented scope"
+  "Out of scope"
+  "Requirements"
+  "Quick start validation"
+  "Repository structure"
+  "Architecture summary"
+  "Terraform module summary"
+  "Environment summary"
+  "CI and quality gate summary"
+  "Deployment and rollback docs"
+  "Cost and security docs"
+  "Suggested review path"
+  "Limitations"
+)
+for heading in "${required_readme_headings[@]}"; do
+  grep -q "^## $heading" README.md
+done
+for readme_term in "Application Load Balancer" "ECS/Fargate" "RDS" "Redis" "Secrets Manager" "CloudWatch"; do
+  grep -qi "$readme_term" README.md
+done
+for readme_link in \
+  "docs/architecture.md" \
+  "docs/deployment.md" \
+  "docs/rollback.md" \
+  "docs/cost-notes.md" \
+  "docs/security.md" \
+  "docs/review-guide.md" \
+  "infra/terraform/modules/network/README.md" \
+  "infra/terraform/modules/ecs-service/README.md" \
+  "infra/terraform/environments/dev/README.md" \
+  "infra/terraform/environments/prod/README.md"; do
+  grep -q "$readme_link" README.md
+done
 
 echo "== CI workflow checks =="
 grep -q 'hashicorp/setup-terraform@v' .github/workflows/ci.yml

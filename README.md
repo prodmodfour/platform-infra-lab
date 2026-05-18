@@ -1,46 +1,83 @@
-# platform-infra-lab
+# platform-infra-lab — public-safe AWS ECS/Fargate platform lab
 
-`platform-infra-lab` is an independent public portfolio project for demonstrating platform engineering and infrastructure-as-code patterns with AWS and Terraform.
+`platform-infra-lab` is an independent public portfolio project that demonstrates backend/platform/SRE infrastructure work with reviewable AWS/Terraform code, validation-only CI, and operations documentation.
 
-The repository is intentionally public-safe: it contains generic infrastructure examples, placeholder service names, and no employer/private system details.
+It models how containerised backend services can run behind an Application Load Balancer on ECS/Fargate with private PostgreSQL/RDS, optional private Redis/ElastiCache, IAM role boundaries, secret references, CloudWatch observability, deployment guidance, rollback notes, and cost/security guardrails.
 
-## What this project is for
+## Portfolio framing
 
-This lab is designed to show backend/platform/SRE skills through reviewable infrastructure code and operational documentation. The intended architecture will model containerised backend services on AWS using Terraform, including ECS/Fargate, load balancing, private data services, IAM boundaries, secret references, validation-only CI, observability, cost notes, and runbooks.
+This repository is designed for hiring reviewers who want evidence of platform engineering judgment without needing access to a real cloud account. The value is in the Terraform structure, module interfaces, environment separation, security boundaries, runbooks, and validation guardrails.
 
-Reference services are placeholders only:
+Reference service profiles are placeholders only:
 
 - `carbon-platform-api`
 - `job-runner-platform`
 - `multi-tenant-saas-api`
 
-No application code is included here.
+No application source code is included here.
 
-## Safety model
+## Public-safety constraints
 
-This repository must remain safe to publish and safe to review.
+This repo is intentionally safe to publish:
 
-- Independent public portfolio project; no employer code or private architecture.
-- AWS/Terraform is the primary infrastructure direction.
-- No automatic cloud deployment is provided.
-- No committed secrets, credentials, SSH keys, kubeconfigs, or private data.
-- No Terraform state or generated plan files should be committed.
-- Any optional manual apply/provisioning step is user-owned and can incur cloud cost.
-- CI and scripts are intended for validation only.
+- Independent public portfolio project; no employer code, private architecture, internal hostnames, private data, or endorsement implication.
+- Public-safe placeholder names and fake image references only.
+- No committed secrets, credentials, SSH keys, kubeconfigs, private keys, or `.env` secret files.
+- No Terraform state, generated plan files, or real `.tfvars` files.
+- No real cloud account IDs or private resource names.
 
-## Current status
+## Cloud-safety constraints
 
-Bootstrap skeleton, validation guardrails, validation-only GitHub Actions CI, Terraform conventions, dev/prod Terraform environments, the shared network module, shared security-groups module, shared IAM module, shared load-balancer module, ECS/Fargate service module, private RDS PostgreSQL module, optional Redis cache module, CloudWatch observability module, metadata-only Secrets Manager reference module, public-safe service example catalog, architecture diagrams, validation-first deployment guide, rollback guide, operations guide, operational runbook, qualitative cost notes, security guide, reviewer guide, and ADRs are in place.
+This project is validation-first and does not automatically mutate cloud infrastructure:
+
+- No automatic cloud deployment from scripts or CI.
+- CI and local scripts run validation only.
+- Any optional manual apply can incur cloud cost and is user-owned.
+- Backend configuration is example-only via `backend.example.tf`; no real backend bucket/table is committed.
+- Environment values are examples only via `terraform.tfvars.example`; real values must stay outside git.
+
+## Implemented scope
+
+The current implementation includes:
+
+- Terraform repository conventions and validation guardrails.
+- Dev and prod Terraform environment roots.
+- Shared modules for network, security groups, IAM, load balancing, ECS/Fargate services, RDS PostgreSQL, optional Redis cache, Secrets Manager references, and observability.
+- Public-safe service examples for the three placeholder backend services.
+- CloudWatch dashboard/alarm patterns and ECS log group conventions.
+- GitHub Actions validation CI.
+- Architecture, deployment, rollback, operations, runbook, cost, security, review, service example, secrets, and ADR documentation.
+
+## Out of scope
+
+This repository intentionally does not include:
+
+- Real application code or another web application implementation.
+- Production-ready guarantees or account-specific hardening.
+- Automatic provisioning, deployment, rollback, import, or destruction automation.
+- Real secrets, real account IDs, real Terraform backend configuration, state files, or generated plans.
+- Exact current cloud price estimates.
+
+## Requirements
+
+For local review:
+
+- `bash`
+- `git`
+- `python3` for Markdown link sanity checks
+- Terraform CLI, optional locally but required for full Terraform validation; GitHub Actions installs Terraform for CI
+
+AWS credentials are not required to run the quality gate because Terraform validation uses backend access disabled.
 
 ## Quick start validation
 
-Run the local quality gate:
+Run the local quality gate from the repository root:
 
 ```bash
 bash scripts/quality-gate.sh
 ```
 
-The quality gate checks shell syntax, repository structure, public-safety rules, forbidden Terraform state/plan/variable files, automated cloud mutation commands, Markdown link sanity, and Terraform formatting/validation when Terraform is installed. If Terraform is not installed locally, the Terraform check warns and skips; GitHub Actions installs Terraform and runs the same validation-only quality gate.
+The quality gate checks repository structure, shell syntax, public-safety rules, forbidden state/plan/secret-like files, cloud-mutation automation guardrails, Markdown links, Terraform formatting, and Terraform environment validation when Terraform is available.
 
 ## Repository structure
 
@@ -50,9 +87,7 @@ The quality gate checks shell syntax, repository structure, public-safety rules,
 ├── AGENTS.md
 ├── BUILD_TICKETS.md
 ├── BUILD_NOTES.md
-├── .github/
-│   └── workflows/
-│       └── ci.yml
+├── .github/workflows/ci.yml
 ├── scripts/
 │   ├── build-loop.sh
 │   ├── check-doc-links.sh
@@ -60,8 +95,8 @@ The quality gate checks shell syntax, repository structure, public-safety rules,
 │   ├── check-no-terraform-state.sh
 │   ├── check-public-safety.sh
 │   ├── check-terraform.sh
-│   ├── self-test-guardrails.sh
-│   └── quality-gate.sh
+│   ├── quality-gate.sh
+│   └── self-test-guardrails.sh
 ├── docs/
 │   ├── architecture.md
 │   ├── deployment.md
@@ -74,42 +109,99 @@ The quality gate checks shell syntax, repository structure, public-safety rules,
 │   ├── service-examples.md
 │   ├── review-guide.md
 │   ├── decisions/
-│   └── diagrams/
-│       └── aws-container-platform.md
-└── infra/
-    └── terraform/
-        ├── modules/
-        │   ├── ecs-service/
-        │   ├── iam/
-        │   ├── load-balancer/
-        │   ├── network/
-        │   ├── observability/
-        │   ├── rds-postgres/
-        │   ├── redis-cache/
-        │   ├── secrets-manager-references/
-        │   └── security-groups/
-        └── environments/
-            ├── dev/
-            └── prod/
+│   └── diagrams/aws-container-platform.md
+└── infra/terraform/
+    ├── modules/
+    │   ├── ecs-service/
+    │   ├── iam/
+    │   ├── load-balancer/
+    │   ├── network/
+    │   ├── observability/
+    │   ├── rds-postgres/
+    │   ├── redis-cache/
+    │   ├── secrets-manager-references/
+    │   └── security-groups/
+    └── environments/
+        ├── dev/
+        └── prod/
 ```
 
-## Planned architecture themes
+## Architecture summary
 
-- VPC with public and private subnet intent implemented by the network module.
-- Security group boundaries for public ALB ingress, private ECS services, private PostgreSQL/RDS, and optional private Redis/ElastiCache.
-- IAM separation between the ECS task execution role and the application task role, with placeholder secret-reference read policies.
-- Public Application Load Balancer with an HTTP listener, optional HTTPS variables, and listener-rule wiring to service target groups.
-- ECS/Fargate service definitions and service-profile metadata for `carbon-platform-api`, `job-runner-platform`, and `multi-tenant-saas-api` using fake images, private subnet placement, log groups, target groups, health checks, listener rules, placeholder environment variables, secret references, database/cache dependency notes, and autoscaling settings.
-- Private PostgreSQL/RDS instance pattern with private subnet group, no public accessibility, backups, deletion protection variables, storage sizing, log exports, and RDS-managed Secrets Manager master credentials.
-- Optional private Redis/ElastiCache cache pattern with private subnet group, private security group input, enable/disable flag, encryption settings, snapshots, and replica/Multi-AZ production variables.
-- CloudWatch observability module with an environment dashboard, ALB 5xx and unhealthy-target alarms, ECS CPU/memory alarms, RDS CPU/free-storage alarms, and ECS log-group naming conventions.
-- Metadata-only AWS Secrets Manager reference containers for ECS secret injection, with no secret versions or values in Terraform.
-- Secret references via AWS-native services rather than committed secret values.
-- Separate dev/prod Terraform environments.
+The modeled platform flow is:
 
-## Out of scope
+1. Public clients reach an internet-facing Application Load Balancer in public subnets.
+2. ALB listener rules route service paths to ECS/Fargate target groups.
+3. ECS services run in private subnets with no public task IPs.
+4. ECS tasks use separate execution and application task roles.
+5. PostgreSQL/RDS runs in private subnets and accepts traffic only from ECS service security groups.
+6. Redis/ElastiCache is optional and private, with dev disabled by default and prod enabled as a production-intent example.
+7. Secret values are not stored in Terraform; ECS receives AWS Secrets Manager references.
+8. CloudWatch logs, metrics, dashboards, and alarms provide the observability pattern.
 
-- Running a real production workload from this repository.
-- Storing application source code.
-- Automatic cloud mutation from scripts or CI.
-- Committing real account IDs, state, credentials, or private names.
+See [docs/architecture.md](docs/architecture.md) and [docs/diagrams/aws-container-platform.md](docs/diagrams/aws-container-platform.md).
+
+## Terraform module summary
+
+| Module | Purpose |
+| --- | --- |
+| [`network`](infra/terraform/modules/network/README.md) | VPC, public/private subnets, route table intent, internet gateway, optional NAT gateway. |
+| [`security-groups`](infra/terraform/modules/security-groups/README.md) | Public ALB boundary, private ECS ingress, private RDS/Redis rules. |
+| [`iam`](infra/terraform/modules/iam/README.md) | ECS task execution role, application task role, and scoped secret-reference read policies. |
+| [`load-balancer`](infra/terraform/modules/load-balancer/README.md) | Application Load Balancer, HTTP listener, optional HTTPS/listener patterns, access-log placeholders. |
+| [`ecs-service`](infra/terraform/modules/ecs-service/README.md) | Task definition, service, target group, listener rule, health checks, log group, autoscaling. |
+| [`rds-postgres`](infra/terraform/modules/rds-postgres/README.md) | Private PostgreSQL/RDS instance, subnet group, backups, deletion protection, managed password reference. |
+| [`redis-cache`](infra/terraform/modules/redis-cache/README.md) | Optional private Redis/Valkey-style cache, subnet group, replicas/failover/encryption variables. |
+| [`secrets-manager-references`](infra/terraform/modules/secrets-manager-references/README.md) | Metadata-only Secrets Manager containers for ECS secret references; no secret values. |
+| [`observability`](infra/terraform/modules/observability/README.md) | CloudWatch dashboard, ALB/ECS/RDS alarms, and log group naming outputs. |
+
+## Environment summary
+
+| Environment | Intent | Notable defaults |
+| --- | --- | --- |
+| [`dev`](infra/terraform/environments/dev/README.md) | Small, cost-aware review environment. | Two AZ layout, NAT disabled, Redis disabled, one ECS task per service, short retention, deletion protection disabled for disposable experiments. |
+| [`prod`](infra/terraform/environments/prod/README.md) | Production-intent example for review. | Three AZ layout, NAT enabled, Redis enabled, two ECS tasks per service, Multi-AZ/failover examples, deletion protection and longer retention where practical. |
+
+Both environments use public-safe `terraform.tfvars.example` files and example-only `backend.example.tf` files.
+
+## CI and quality gate summary
+
+GitHub Actions runs [`.github/workflows/ci.yml`](.github/workflows/ci.yml), which installs Terraform and executes:
+
+```bash
+bash scripts/quality-gate.sh
+```
+
+The workflow is validation-only. It checks shell syntax, public-safety guardrails, Terraform fmt/init/validate, Markdown links, no Terraform state/plan/real tfvars, and no automated cloud mutation commands.
+
+## Deployment and rollback docs
+
+- [Deployment guide](docs/deployment.md): validation, manual initialization, plan review, optional user-owned provisioning warnings, image update flow, migration notes, and post-deploy checks.
+- [Rollback guide](docs/rollback.md): bad image, failing health checks, failed ECS deployment, secret/config issues, database migration issues, RDS incidents, Redis issues, and ALB/routing issues.
+- [Operations guide](docs/operations.md) and [runbook](docs/runbook.md): health checks, logs, metrics, alarms, triage, database/cache issues, stuck deployments, cost cleanup, and access review.
+
+## Cost and security docs
+
+- [Cost notes](docs/cost-notes.md): qualitative cost drivers, NAT/RDS/ALB/ECS/CloudWatch/Redis implications, dev/prod trade-offs, cleanup checklist, and accidental-spend avoidance.
+- [Security guide](docs/security.md): no committed secrets/state, IAM role separation, least-privilege intent, private data tiers, public ALB boundary, secret reference pattern, CI posture, hardening gaps, and access review.
+- [Secrets guide](docs/secrets.md): values stay outside this public repo; Terraform models references only.
+- [ADRs](docs/decisions/): accepted architecture decisions and trade-offs.
+
+## Suggested review path
+
+For a 10-minute review:
+
+1. Start with this README.
+2. Scan [docs/architecture.md](docs/architecture.md) and the diagram.
+3. Inspect [`infra/terraform/environments/dev/main.tf`](infra/terraform/environments/dev/main.tf).
+4. Inspect [`infra/terraform/modules/ecs-service/README.md`](infra/terraform/modules/ecs-service/README.md) and [`infra/terraform/modules/security-groups/README.md`](infra/terraform/modules/security-groups/README.md).
+5. Run `bash scripts/quality-gate.sh` if reviewing locally.
+
+For a deeper review, follow [docs/review-guide.md](docs/review-guide.md).
+
+## Limitations
+
+- This is a portfolio lab, not a complete production platform.
+- HTTPS, WAF, VPC endpoints, centralized audit logging, paging integrations, image signing, policy-as-code, drift detection, and account-specific controls require additional user-owned design.
+- Terraform examples are reviewable and validatable, but real provisioning would require user-owned backend configuration, variables, AWS credentials, and cost controls outside this repo.
+- Database migrations and application release automation are documented as operational considerations but are not implemented here.
