@@ -48,6 +48,16 @@ The Redis cache module adds cost drivers if manually provisioned:
 
 Dev keeps Redis disabled by default and defines a small node shape for optional experiments. Prod enables a small private cache with one replica, Multi-AZ/failover intent, encryption, snapshot retention, and a final snapshot identifier to demonstrate production posture. These settings can create ongoing cost if provisioned.
 
+The observability module adds cost drivers if manually provisioned:
+
+- CloudWatch dashboard usage
+- CloudWatch alarms for ALB, ECS, and RDS metrics
+- CloudWatch Logs Insights queries shown in dashboard log widgets
+- log ingestion and retention from ECS service log groups created by the ECS module
+- RDS PostgreSQL log exports configured by the RDS module
+
+Committed alarm action lists are empty. If a user-owned environment connects alarms to SNS topics or incident-routing systems, those integrations can have their own cost and ownership considerations.
+
 Any optional manual provisioning can incur cloud cost and should be reviewed, user-owned, and cleaned up by the operator.
 
-Future content will describe qualitative AWS cost drivers such as CloudWatch alarms/dashboards.
+Future content will expand qualitative AWS cost drivers and cleanup guidance.

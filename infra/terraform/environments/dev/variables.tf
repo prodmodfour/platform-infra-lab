@@ -846,6 +846,156 @@ variable "redis_auto_minor_version_upgrade" {
   default     = true
 }
 
+variable "observability_alarm_actions" {
+  description = "Optional user-owned CloudWatch alarm action ARNs for dev. Keep empty in committed examples."
+  type        = list(string)
+  default     = []
+}
+
+variable "observability_ok_actions" {
+  description = "Optional user-owned CloudWatch OK action ARNs for dev. Keep empty in committed examples."
+  type        = list(string)
+  default     = []
+}
+
+variable "observability_insufficient_data_actions" {
+  description = "Optional user-owned CloudWatch insufficient-data action ARNs for dev. Keep empty in committed examples."
+  type        = list(string)
+  default     = []
+}
+
+variable "observability_dashboard_period_seconds" {
+  description = "Default CloudWatch dashboard widget period for dev."
+  type        = number
+  default     = 300
+
+  validation {
+    condition     = var.observability_dashboard_period_seconds >= 60 && var.observability_dashboard_period_seconds % 60 == 0
+    error_message = "observability_dashboard_period_seconds must be at least 60 and divisible by 60."
+  }
+}
+
+variable "observability_alarm_period_seconds" {
+  description = "CloudWatch alarm metric period for dev."
+  type        = number
+  default     = 300
+
+  validation {
+    condition     = var.observability_alarm_period_seconds >= 60 && var.observability_alarm_period_seconds % 60 == 0
+    error_message = "observability_alarm_period_seconds must be at least 60 and divisible by 60."
+  }
+}
+
+variable "alb_5xx_alarm_threshold" {
+  description = "Dev threshold for ALB-generated 5xx responses during the alarm evaluation window."
+  type        = number
+  default     = 5
+
+  validation {
+    condition     = var.alb_5xx_alarm_threshold >= 0
+    error_message = "alb_5xx_alarm_threshold must be zero or greater."
+  }
+}
+
+variable "alb_5xx_evaluation_periods" {
+  description = "Number of periods used by the dev ALB 5xx alarm."
+  type        = number
+  default     = 2
+
+  validation {
+    condition     = var.alb_5xx_evaluation_periods >= 1
+    error_message = "alb_5xx_evaluation_periods must be at least 1."
+  }
+}
+
+variable "alb_unhealthy_target_threshold" {
+  description = "Dev threshold for unhealthy targets per service target group."
+  type        = number
+  default     = 1
+
+  validation {
+    condition     = var.alb_unhealthy_target_threshold >= 0
+    error_message = "alb_unhealthy_target_threshold must be zero or greater."
+  }
+}
+
+variable "alb_unhealthy_target_evaluation_periods" {
+  description = "Number of periods used by dev unhealthy-target alarms."
+  type        = number
+  default     = 2
+
+  validation {
+    condition     = var.alb_unhealthy_target_evaluation_periods >= 1
+    error_message = "alb_unhealthy_target_evaluation_periods must be at least 1."
+  }
+}
+
+variable "ecs_cpu_alarm_threshold_percent" {
+  description = "Dev ECS service CPU utilization threshold percentage."
+  type        = number
+  default     = 80
+
+  validation {
+    condition     = var.ecs_cpu_alarm_threshold_percent > 0 && var.ecs_cpu_alarm_threshold_percent <= 100
+    error_message = "ecs_cpu_alarm_threshold_percent must be greater than 0 and less than or equal to 100."
+  }
+}
+
+variable "ecs_memory_alarm_threshold_percent" {
+  description = "Dev ECS service memory utilization threshold percentage."
+  type        = number
+  default     = 85
+
+  validation {
+    condition     = var.ecs_memory_alarm_threshold_percent > 0 && var.ecs_memory_alarm_threshold_percent <= 100
+    error_message = "ecs_memory_alarm_threshold_percent must be greater than 0 and less than or equal to 100."
+  }
+}
+
+variable "ecs_alarm_evaluation_periods" {
+  description = "Number of periods used by dev ECS CPU and memory alarms."
+  type        = number
+  default     = 3
+
+  validation {
+    condition     = var.ecs_alarm_evaluation_periods >= 1
+    error_message = "ecs_alarm_evaluation_periods must be at least 1."
+  }
+}
+
+variable "rds_cpu_alarm_threshold_percent" {
+  description = "Dev RDS PostgreSQL CPU utilization threshold percentage."
+  type        = number
+  default     = 80
+
+  validation {
+    condition     = var.rds_cpu_alarm_threshold_percent > 0 && var.rds_cpu_alarm_threshold_percent <= 100
+    error_message = "rds_cpu_alarm_threshold_percent must be greater than 0 and less than or equal to 100."
+  }
+}
+
+variable "rds_free_storage_space_threshold_bytes" {
+  description = "Dev RDS PostgreSQL free storage threshold in bytes."
+  type        = number
+  default     = 2147483648
+
+  validation {
+    condition     = var.rds_free_storage_space_threshold_bytes > 0
+    error_message = "rds_free_storage_space_threshold_bytes must be greater than zero."
+  }
+}
+
+variable "rds_alarm_evaluation_periods" {
+  description = "Number of periods used by dev RDS alarms."
+  type        = number
+  default     = 3
+
+  validation {
+    condition     = var.rds_alarm_evaluation_periods >= 1
+    error_message = "rds_alarm_evaluation_periods must be at least 1."
+  }
+}
+
 variable "execution_secret_reference_arns" {
   description = "Public-safe placeholder Secrets Manager ARNs that the ECS task execution role may read for task-definition secret injection. References only; no secret values."
   type        = list(string)

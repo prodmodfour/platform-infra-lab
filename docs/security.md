@@ -71,6 +71,14 @@ The Redis cache module now models the private cache boundary:
 - cache endpoint outputs are references only and are not credentials
 - no Redis AUTH token, ACL user group, or cache connection-string secret value is stored in Terraform
 
+The observability module now models CloudWatch visibility without committing private routing details:
+
+- dashboard widgets consume resource names, ARN suffixes, metric dimensions, and log group names only
+- ECS service logs follow a public-safe naming convention and are referenced by dashboard widgets; log contents are not stored in this repo
+- alarms cover ALB 5xx responses, unhealthy targets, ECS CPU/memory, and RDS CPU/free storage
+- alarm action lists default to empty so no real SNS topic ARN, account ID, webhook, or incident-routing target is committed
+- production use should review log access, retention, redaction, dashboard permissions, paging routes, and runbook ownership
+
 The current egress model is intentionally strict and incomplete for real workloads. ECS services may need reviewed egress through VPC endpoints, NAT, or narrow rules for image pulls, logs, secret references, telemetry, and third-party APIs. Real database use also needs reviewed migration roles, least-privilege database users, connection pooling, audit logging, and secret rotation ownership. Real cache use should review Redis AUTH/ACLs, TLS client compatibility, cache parameter groups, eviction policy, and whether cached data includes tenant-sensitive or regulated content.
 
 Future content will expand validation-only CI notes, secret lifecycle details, and production hardening gaps.

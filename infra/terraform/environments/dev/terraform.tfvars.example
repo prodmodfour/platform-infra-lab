@@ -158,6 +158,23 @@ redis_maintenance_window           = "sun:05:00-sun:06:00"
 redis_apply_immediately            = false
 redis_auto_minor_version_upgrade   = true
 
+# Observability examples. Alarm action lists stay empty because real routing ARNs belong outside this repo.
+observability_alarm_actions             = []
+observability_ok_actions                = []
+observability_insufficient_data_actions = []
+observability_dashboard_period_seconds  = 300
+observability_alarm_period_seconds      = 300
+alb_5xx_alarm_threshold                 = 5
+alb_5xx_evaluation_periods              = 2
+alb_unhealthy_target_threshold          = 1
+alb_unhealthy_target_evaluation_periods = 2
+ecs_cpu_alarm_threshold_percent         = 80
+ecs_memory_alarm_threshold_percent      = 85
+ecs_alarm_evaluation_periods            = 3
+rds_cpu_alarm_threshold_percent         = 80
+rds_free_storage_space_threshold_bytes  = 2147483648
+rds_alarm_evaluation_periods            = 3
+
 # Placeholder secret references only. Do not put secret values in tfvars files.
 execution_secret_reference_arns = [
   "arn:aws:secretsmanager:us-east-1:123456789012:secret:platform-infra-lab/dev/ecs-execution/*",

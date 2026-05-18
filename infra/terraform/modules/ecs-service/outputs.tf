@@ -38,6 +38,11 @@ output "target_group_arn" {
   value       = aws_lb_target_group.this.arn
 }
 
+output "target_group_arn_suffix" {
+  description = "ALB target group ARN suffix used by CloudWatch ApplicationELB target-group metric dimensions."
+  value       = aws_lb_target_group.this.arn_suffix
+}
+
 output "listener_rule_arn" {
   description = "ALB listener rule ARN when created, otherwise null."
   value       = try(aws_lb_listener_rule.this[0].arn, null)

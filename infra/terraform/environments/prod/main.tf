@@ -121,6 +121,23 @@ locals {
     listener_arn_source    = var.ecs_listener_arn == null ? "module.load_balancer.http_listener_arn" : "ecs_listener_arn_override"
   }
 
+  observability_defaults = {
+    dashboard_period_seconds              = var.observability_dashboard_period_seconds
+    alarm_period_seconds                  = var.observability_alarm_period_seconds
+    alarm_actions_configured              = length(var.observability_alarm_actions) > 0
+    ok_actions_configured                 = length(var.observability_ok_actions) > 0
+    insufficient_data_actions_configured  = length(var.observability_insufficient_data_actions) > 0
+    alb_5xx_alarm_threshold               = var.alb_5xx_alarm_threshold
+    alb_unhealthy_target_threshold        = var.alb_unhealthy_target_threshold
+    ecs_cpu_alarm_threshold_percent       = var.ecs_cpu_alarm_threshold_percent
+    ecs_memory_alarm_threshold_percent    = var.ecs_memory_alarm_threshold_percent
+    rds_cpu_alarm_threshold_percent       = var.rds_cpu_alarm_threshold_percent
+    rds_free_storage_threshold_bytes      = var.rds_free_storage_space_threshold_bytes
+    ecs_service_count                     = length(var.ecs_services)
+    log_group_naming_convention           = "/aws/ecs/${local.name_prefix}/<service-name>"
+    paging_or_incident_routing_configured = length(var.observability_alarm_actions) > 0
+  }
+
   planned_module_contract = {
     network         = "implemented-ticket-004"
     security_groups = "implemented-ticket-005"
@@ -129,7 +146,7 @@ locals {
     load_balancer   = "implemented-ticket-008"
     rds_postgres    = "implemented-ticket-009"
     redis_cache     = "implemented-ticket-010"
-    observability   = "ticket-011"
+    observability   = "implemented-ticket-011"
   }
 }
 
@@ -315,6 +332,44 @@ module "ecs_services" {
   autoscaling_max_capacity        = each.value.autoscaling_max_capacity
   autoscaling_cpu_target_value    = each.value.autoscaling_cpu_target_value
   autoscaling_memory_target_value = each.value.autoscaling_memory_target_value
+
+  common_tags = local.common_tags
+}
+
+module "observability" {
+  source = "../../modules/observability"
+
+  name_prefix              = local.name_prefix
+  environment              = local.environment
+  aws_region               = var.aws_region
+  load_balancer_name       = module.load_balancer.load_balancer_name
+  load_balancer_arn_suffix = module.load_balancer.load_balancer_arn_suffix
+  ecs_cluster_name         = aws_ecs_cluster.platform.name
+  ecs_services = {
+    for service_name, service in module.ecs_services : service_name => {
+      service_name            = service.service_name
+      target_group_arn_suffix = service.target_group_arn_suffix
+      log_group_name          = service.log_group_name
+    }
+  }
+  rds_instance_identifier = module.rds_postgres.db_instance_identifier
+
+  alarm_actions             = var.observability_alarm_actions
+  ok_actions                = var.observability_ok_actions
+  insufficient_data_actions = var.observability_insufficient_data_actions
+  dashboard_period_seconds  = var.observability_dashboard_period_seconds
+  alarm_period_seconds      = var.observability_alarm_period_seconds
+
+  alb_5xx_alarm_threshold                 = var.alb_5xx_alarm_threshold
+  alb_5xx_evaluation_periods              = var.alb_5xx_evaluation_periods
+  alb_unhealthy_target_threshold          = var.alb_unhealthy_target_threshold
+  alb_unhealthy_target_evaluation_periods = var.alb_unhealthy_target_evaluation_periods
+  ecs_cpu_alarm_threshold_percent         = var.ecs_cpu_alarm_threshold_percent
+  ecs_memory_alarm_threshold_percent      = var.ecs_memory_alarm_threshold_percent
+  ecs_alarm_evaluation_periods            = var.ecs_alarm_evaluation_periods
+  rds_cpu_alarm_threshold_percent         = var.rds_cpu_alarm_threshold_percent
+  rds_free_storage_space_threshold_bytes  = var.rds_free_storage_space_threshold_bytes
+  rds_alarm_evaluation_periods            = var.rds_alarm_evaluation_periods
 
   common_tags = local.common_tags
 }

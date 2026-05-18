@@ -390,7 +390,7 @@ Commit when complete.
 
 ## 011 — Add observability module
 
-Status: TODO
+Status: DONE
 
 Create `infra/terraform/modules/observability/`.
 

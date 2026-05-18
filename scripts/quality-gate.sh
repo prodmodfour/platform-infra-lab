@@ -49,6 +49,10 @@ required_paths=(
   infra/terraform/modules/redis-cache/variables.tf
   infra/terraform/modules/redis-cache/outputs.tf
   infra/terraform/modules/redis-cache/README.md
+  infra/terraform/modules/observability/main.tf
+  infra/terraform/modules/observability/variables.tf
+  infra/terraform/modules/observability/outputs.tf
+  infra/terraform/modules/observability/README.md
   infra/terraform/modules/security-groups/main.tf
   infra/terraform/modules/security-groups/variables.tf
   infra/terraform/modules/security-groups/outputs.tf
@@ -214,6 +218,32 @@ for env in dev prod; do
   grep -q 'job-runner-platform' "infra/terraform/environments/$env/terraform.tfvars.example"
   grep -q 'multi-tenant-saas-api' "infra/terraform/environments/$env/terraform.tfvars.example"
   grep -q 'create_ecs_listener_rules = true' "infra/terraform/environments/$env/terraform.tfvars.example"
+done
+
+echo "== Terraform observability module checks =="
+grep -q 'resource "aws_cloudwatch_dashboard" "this"' infra/terraform/modules/observability/main.tf
+grep -q 'resource "aws_cloudwatch_metric_alarm" "alb_5xx"' infra/terraform/modules/observability/main.tf
+grep -q 'resource "aws_cloudwatch_metric_alarm" "alb_unhealthy_targets"' infra/terraform/modules/observability/main.tf
+grep -q 'resource "aws_cloudwatch_metric_alarm" "ecs_cpu"' infra/terraform/modules/observability/main.tf
+grep -q 'resource "aws_cloudwatch_metric_alarm" "ecs_memory"' infra/terraform/modules/observability/main.tf
+grep -q 'resource "aws_cloudwatch_metric_alarm" "rds_cpu"' infra/terraform/modules/observability/main.tf
+grep -q 'resource "aws_cloudwatch_metric_alarm" "rds_free_storage"' infra/terraform/modules/observability/main.tf
+grep -q 'log_group_naming_convention' infra/terraform/modules/observability/outputs.tf
+grep -qi "Logs" infra/terraform/modules/observability/README.md
+grep -qi "Metrics" infra/terraform/modules/observability/README.md
+grep -qi "Alarms" infra/terraform/modules/observability/README.md
+grep -qi "Dashboard" infra/terraform/modules/observability/README.md
+grep -qi "Production gaps" infra/terraform/modules/observability/README.md
+grep -q 'output "load_balancer_arn_suffix"' infra/terraform/modules/load-balancer/outputs.tf
+grep -q 'output "target_group_arn_suffix"' infra/terraform/modules/ecs-service/outputs.tf
+for env in dev prod; do
+  grep -q 'module "observability"' "infra/terraform/environments/$env/main.tf"
+  grep -q 'module.load_balancer.load_balancer_arn_suffix' "infra/terraform/environments/$env/main.tf"
+  grep -q 'target_group_arn_suffix = service.target_group_arn_suffix' "infra/terraform/environments/$env/main.tf"
+  grep -q 'output "cloudwatch_dashboard_name"' "infra/terraform/environments/$env/outputs.tf"
+  grep -q 'output "cloudwatch_alarm_names"' "infra/terraform/environments/$env/outputs.tf"
+  grep -q 'observability_alarm_actions             = \[\]' "infra/terraform/environments/$env/terraform.tfvars.example"
+  grep -q 'alb_5xx_alarm_threshold' "infra/terraform/environments/$env/terraform.tfvars.example"
 done
 
 echo "== Terraform security group boundary checks =="

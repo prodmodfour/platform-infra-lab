@@ -31,8 +31,10 @@ The dev environment now wires `../../modules/network` with cost-aware defaults:
 - short dev backup retention, storage autoscaling ceiling, log exports, and disabled deletion protection/final snapshot for disposable lab experiments
 - Redis/Valkey cache module wired with `enable_redis = false` by default, so no cache subnet group or replication group is created unless a user-owned experiment enables it
 - small cache node shape, zero replicas, no snapshots, and encryption defaults documented for optional dev use
+- CloudWatch observability module with a dev dashboard, ALB 5xx alarm, per-service unhealthy-target alarms, per-service ECS CPU/memory alarms, RDS CPU/free-storage alarms, and ECS log-group naming convention output
+- empty alarm action lists by default; real paging or incident-routing ARNs must be supplied only outside this repo
 
-Future tickets add observability.
+Future tickets add secret-reference modeling details, CI, diagrams, and fuller operating documentation.
 
 ## Dev posture
 
@@ -46,6 +48,7 @@ Dev is intentionally small and cost-aware:
 - PostgreSQL uses a small single-AZ instance class, short backup retention, encrypted gp3 storage, and no public accessibility
 - default ECS desired count is one task for each service example
 - autoscaling ranges are intentionally small for review
+- observability thresholds are visible variables, with empty alarm action lists to avoid committing real routing ARNs
 - placeholder IAM and container secret-reference scopes use dev paths and a fake account ID for review only
 
 These are placeholders for review and validation, not a production recommendation.

@@ -99,4 +99,4 @@ See `variables.tf` for the full typed interface.
 
 ## Outputs
 
-The module outputs service, task definition, log group, target group, listener rule, autoscaling, and review-summary values. Outputs never include secret values.
+The module outputs service, task definition, log group, target group, target-group ARN suffix for CloudWatch metrics, listener rule, autoscaling, and review-summary values. Outputs never include secret values.

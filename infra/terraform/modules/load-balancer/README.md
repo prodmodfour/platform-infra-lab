@@ -108,6 +108,7 @@ Key outputs include:
 
 - `load_balancer_dns_name`
 - `load_balancer_zone_id`
+- `load_balancer_arn_suffix` for CloudWatch ApplicationELB metrics
 - `http_listener_arn`
 - `https_listener_arn`
 - `listener_summary`

@@ -45,6 +45,11 @@ infra/terraform/
 │   │   ├── variables.tf
 │   │   ├── outputs.tf
 │   │   └── README.md
+│   ├── observability/
+│   │   ├── main.tf
+│   │   ├── variables.tf
+│   │   ├── outputs.tf
+│   │   └── README.md
 │   ├── redis-cache/
 │   │   ├── main.tf
 │   │   ├── variables.tf
@@ -75,7 +80,7 @@ infra/terraform/
         └── README.md
 ```
 
-The `dev` and `prod` environment roots now both wire the shared `network`, `security-groups`, `iam`, `load-balancer`, `ecs-service`, `rds-postgres`, and `redis-cache` modules. Future tickets add the observability module and continue wiring the same module set into both environments.
+The `dev` and `prod` environment roots now both wire the shared `network`, `security-groups`, `iam`, `load-balancer`, `ecs-service`, `rds-postgres`, `redis-cache`, and `observability` modules. Future tickets continue adding docs, CI, and secret-reference details while preserving the same environment structure.
 
 ## Naming guidance
 
@@ -153,6 +158,7 @@ Implemented modules:
 - `modules/ecs-service` — private ECS/Fargate service pattern with task definition, service, log group, target group, listener rule, health checks, and autoscaling.
 - `modules/rds-postgres` — private RDS PostgreSQL instance pattern with a private subnet group, backups, deletion protection variables, storage sizing, log exports, and RDS-managed Secrets Manager master credentials.
 - `modules/redis-cache` — optional private ElastiCache Redis/Valkey-style cache pattern with a private subnet group, replica/Multi-AZ variables, encryption settings, snapshots, and disabled outputs when not enabled.
+- `modules/observability` — CloudWatch dashboard, ALB 5xx/unhealthy-target alarms, ECS CPU/memory alarms, RDS CPU/free-storage alarms, and ECS log-group naming conventions.
 
 See `modules/README.md` for detailed module interface conventions.
 

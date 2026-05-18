@@ -11,8 +11,9 @@ This document is a living placeholder for the target AWS/Terraform architecture.
 - `infra/terraform/modules/ecs-service` models a private Fargate service with task definition, ECS service, CloudWatch log group, ALB target group, listener rule, health checks, and desired-count autoscaling.
 - `infra/terraform/modules/rds-postgres` models a private RDS PostgreSQL instance with a private DB subnet group, no public accessibility, backup/deletion-protection settings, storage variables, log exports, optional monitoring settings, and RDS-managed Secrets Manager master credentials.
 - `infra/terraform/modules/redis-cache` models an optional private ElastiCache Redis/Valkey-style replication group with a private subnet group, private security group input, enable/disable behavior, encryption settings, snapshots, and replica/Multi-AZ variables.
-- `infra/terraform/environments/dev` wires the network, security-groups, IAM, load-balancer, ECS service, RDS PostgreSQL, and Redis cache modules with two public/private subnet pairs, NAT disabled by default, Redis resources disabled by default, one task per demo service, a small single-AZ private PostgreSQL instance, dev-scoped placeholder secret-reference ARNs, and fake service images.
-- `infra/terraform/environments/prod` wires the network, security-groups, IAM, load-balancer, ECS service, RDS PostgreSQL, and Redis cache modules with three public/private subnet pairs, NAT enabled by default to demonstrate private egress intent, Redis resources enabled to show the optional cache tier with one replica/Multi-AZ intent, two tasks per demo service, a Multi-AZ private PostgreSQL instance with deletion protection, prod-scoped placeholder secret-reference ARNs, and fake service images.
+- `infra/terraform/modules/observability` models a CloudWatch dashboard, ALB 5xx alarm, per-service unhealthy-target alarms, per-service ECS CPU/memory alarms, RDS CPU/free-storage alarms, and ECS log-group naming conventions.
+- `infra/terraform/environments/dev` wires the network, security-groups, IAM, load-balancer, ECS service, RDS PostgreSQL, Redis cache, and observability modules with two public/private subnet pairs, NAT disabled by default, Redis resources disabled by default, one task per demo service, a small single-AZ private PostgreSQL instance, dev-scoped placeholder secret-reference ARNs, empty alarm action lists, and fake service images.
+- `infra/terraform/environments/prod` wires the network, security-groups, IAM, load-balancer, ECS service, RDS PostgreSQL, Redis cache, and observability modules with three public/private subnet pairs, NAT enabled by default to demonstrate private egress intent, Redis resources enabled to show the optional cache tier with one replica/Multi-AZ intent, two tasks per demo service, a Multi-AZ private PostgreSQL instance with deletion protection, prod-scoped placeholder secret-reference ARNs, empty alarm action lists, and fake service images.
 
 ## Target architecture themes
 
@@ -59,6 +60,16 @@ Current Redis/Valkey cache intent:
 - prod enables a small private replication group with one replica, automatic failover, Multi-AZ, at-rest encryption, in-transit encryption, snapshot retention, and a final snapshot identifier
 - endpoint outputs are references for application configuration and review, not credentials
 - no Redis AUTH token or ACL secret value is stored in Terraform; secure secret-reference wiring is deferred to the dedicated secrets ticket
+
+Current observability intent:
+
+- the observability module creates one CloudWatch dashboard per environment
+- dashboard widgets cover ALB 5xx/latency, target health by ECS service, ECS CPU/memory, RDS CPU/free storage/connections, and recent ECS service logs
+- ALB metric dimensions use the load balancer ARN suffix; target-health metrics use per-service target group ARN suffixes
+- ECS service metrics use the shared cluster name and service names from the ECS service module
+- RDS metrics use the private PostgreSQL instance identifier
+- alarm action lists are empty in committed examples because real SNS topics or incident-routing ARNs belong outside this public repo
+- the ECS service log group convention is `/aws/ecs/<name_prefix>/<service-name>`
 
 Current security group intent:
 

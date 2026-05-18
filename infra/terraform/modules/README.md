@@ -11,12 +11,7 @@ This directory contains reusable Terraform modules for the AWS platform lab. Mod
 - `ecs-service` — ECS/Fargate task definition, service, CloudWatch log group, ALB target group, listener rule, health checks, and desired-count autoscaling.
 - `rds-postgres` — private RDS PostgreSQL instance, subnet group, backup/deletion-protection settings, storage variables, log exports, and RDS-managed Secrets Manager master credentials.
 - `redis-cache` — optional private ElastiCache Redis/Valkey-style replication group, subnet group, encryption settings, replica/Multi-AZ variables, snapshots, and disabled outputs when not enabled.
-
-## Planned module areas
-
-The target architecture is expected to use an additional module for:
-
-- observability: CloudWatch dashboards, alarms, and log naming conventions
+- `observability` — CloudWatch dashboard, ALB 5xx and unhealthy-target alarms, ECS CPU/memory alarms, RDS CPU/free-storage alarms, and ECS log-group naming conventions.
 
 These names are public-safe design labels, not references to private systems.
 

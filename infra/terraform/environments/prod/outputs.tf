@@ -258,6 +258,11 @@ output "load_balancer_arn" {
   value       = module.load_balancer.load_balancer_arn
 }
 
+output "load_balancer_arn_suffix" {
+  description = "ARN suffix of the public Application Load Balancer used by CloudWatch metrics."
+  value       = module.load_balancer.load_balancer_arn_suffix
+}
+
 output "load_balancer_dns_name" {
   description = "DNS name assigned to the public Application Load Balancer."
   value       = module.load_balancer.load_balancer_dns_name
@@ -343,9 +348,49 @@ output "ecs_service_target_group_arns" {
   value       = { for service_name, service in module.ecs_services : service_name => service.target_group_arn }
 }
 
+output "ecs_service_target_group_arn_suffixes" {
+  description = "ALB target group ARN suffixes used by CloudWatch ApplicationELB target health metrics."
+  value       = { for service_name, service in module.ecs_services : service_name => service.target_group_arn_suffix }
+}
+
 output "ecs_service_log_group_names" {
   description = "CloudWatch log group names created for each ECS service."
   value       = { for service_name, service in module.ecs_services : service_name => service.log_group_name }
+}
+
+output "observability_defaults" {
+  description = "Review-friendly CloudWatch dashboard and alarm defaults for this environment."
+  value       = local.observability_defaults
+}
+
+output "cloudwatch_dashboard_name" {
+  description = "CloudWatch dashboard name for this environment."
+  value       = module.observability.dashboard_name
+}
+
+output "cloudwatch_dashboard_arn" {
+  description = "CloudWatch dashboard ARN for this environment."
+  value       = module.observability.dashboard_arn
+}
+
+output "cloudwatch_log_group_naming_convention" {
+  description = "Expected ECS service log group naming convention used by observability dashboard widgets."
+  value       = module.observability.log_group_naming_convention
+}
+
+output "cloudwatch_alarm_names" {
+  description = "CloudWatch alarm names created for ALB, ECS, and RDS signals."
+  value       = module.observability.alarm_names
+}
+
+output "cloudwatch_alarm_summary" {
+  description = "Review-friendly summary of CloudWatch alarm thresholds and action wiring."
+  value       = module.observability.alarm_summary
+}
+
+output "cloudwatch_dashboard_summary" {
+  description = "Review-friendly summary of CloudWatch dashboard coverage."
+  value       = module.observability.dashboard_summary
 }
 
 output "platform_defaults" {

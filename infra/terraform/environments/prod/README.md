@@ -31,8 +31,10 @@ The prod environment now wires `../../modules/network` with production-intent de
 - production-intent PostgreSQL settings including Multi-AZ, longer backup retention, deletion protection, final snapshot, larger storage ceiling, log exports, and Performance Insights enabled
 - optional Redis/Valkey cache resources enabled by default to show the private cache tier
 - Redis cache settings including a small production-intent node shape, one replica, automatic failover, Multi-AZ, at-rest and in-transit encryption, snapshot retention, and a final snapshot identifier
+- CloudWatch observability module with a prod dashboard, ALB 5xx alarm, per-service unhealthy-target alarms, per-service ECS CPU/memory alarms, RDS CPU/free-storage alarms, and ECS log-group naming convention output
+- empty alarm action lists by default; real paging or incident-routing ARNs must be supplied only outside this repo
 
-Future tickets add observability.
+Future tickets add secret-reference modeling details, CI, diagrams, and fuller operating documentation.
 
 ## Prod posture
 
@@ -47,6 +49,7 @@ Prod demonstrates production intent rather than production completeness:
 - PostgreSQL deletion protection, Multi-AZ, final snapshot, non-zero backup retention, encrypted gp3 storage, and Performance Insights are enabled to show production intent
 - default ECS desired count is two tasks for each service example
 - autoscaling ranges are wider than dev to show production-intent capacity planning
+- observability thresholds are visible variables, with empty alarm action lists to avoid committing real routing ARNs
 - placeholder IAM and container secret-reference scopes use prod paths and a fake account ID for review only
 
 These settings can create ongoing cost if a user later provisions real infrastructure. Any real use must be reviewed, user-owned, and cleaned up by the operator.
