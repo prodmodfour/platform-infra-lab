@@ -192,6 +192,8 @@ resource "aws_ecs_service" "this" {
     container_port   = var.container_port
   }
 
+  depends_on = [aws_lb_listener_rule.this]
+
   tags = merge(local.component_tags, {
     Name = local.service_full_name
     Tier = "private-service"

@@ -34,12 +34,12 @@ output "vpc_cidr_block" {
 }
 
 output "public_subnet_ids" {
-  description = "Public subnet IDs for future load balancer resources."
+  description = "Public subnet IDs for load balancer resources."
   value       = module.network.public_subnet_ids
 }
 
 output "private_subnet_ids" {
-  description = "Private subnet IDs for future ECS, database, and cache resources."
+  description = "Private subnet IDs for ECS, database, and cache resources."
   value       = module.network.private_subnet_ids
 }
 
@@ -84,12 +84,12 @@ output "security_group_defaults" {
 }
 
 output "load_balancer_security_group_id" {
-  description = "Security group ID for the future public Application Load Balancer."
+  description = "Security group ID for the public Application Load Balancer."
   value       = module.security_groups.load_balancer_security_group_id
 }
 
 output "ecs_service_security_group_id" {
-  description = "Security group ID for future private ECS services."
+  description = "Security group ID for private ECS services."
   value       = module.security_groups.ecs_service_security_group_id
 }
 
@@ -106,6 +106,51 @@ output "redis_cache_security_group_id" {
 output "security_group_rule_summary" {
   description = "Review-friendly summary of security group traffic boundaries."
   value       = module.security_groups.rule_summary
+}
+
+output "load_balancer_defaults" {
+  description = "Review-friendly load balancer defaults for this environment."
+  value       = local.load_balancer_defaults
+}
+
+output "load_balancer_name" {
+  description = "Name of the public Application Load Balancer."
+  value       = module.load_balancer.load_balancer_name
+}
+
+output "load_balancer_arn" {
+  description = "ARN of the public Application Load Balancer."
+  value       = module.load_balancer.load_balancer_arn
+}
+
+output "load_balancer_dns_name" {
+  description = "DNS name assigned to the public Application Load Balancer."
+  value       = module.load_balancer.load_balancer_dns_name
+}
+
+output "load_balancer_zone_id" {
+  description = "Canonical hosted zone ID for ALB DNS aliases."
+  value       = module.load_balancer.load_balancer_zone_id
+}
+
+output "load_balancer_http_listener_arn" {
+  description = "HTTP listener ARN used by ECS service listener rules."
+  value       = module.load_balancer.http_listener_arn
+}
+
+output "load_balancer_https_listener_arn" {
+  description = "HTTPS listener ARN when enabled, otherwise null."
+  value       = module.load_balancer.https_listener_arn
+}
+
+output "load_balancer_listener_summary" {
+  description = "Review-friendly summary of ALB listeners."
+  value       = module.load_balancer.listener_summary
+}
+
+output "load_balancer_target_group_wiring_pattern" {
+  description = "Summary of how ECS service target groups connect to the ALB."
+  value       = module.load_balancer.target_group_wiring_pattern
 }
 
 output "iam_defaults" {

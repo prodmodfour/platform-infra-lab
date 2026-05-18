@@ -1,29 +1,32 @@
 # Dev Terraform environment
 
-This root module is the public-safe `dev` environment for `platform-infra-lab`. It establishes provider configuration, backend examples, variable defaults, outputs, naming, tagging, the shared network module, shared security-groups module, shared IAM module, and ECS/Fargate service examples.
+This root module is the public-safe `dev` environment for `platform-infra-lab`. It establishes provider configuration, backend examples, variable defaults, outputs, naming, tagging, the shared network module, shared security-groups module, shared IAM module, shared load-balancer module, and ECS/Fargate service examples.
 
 ## Current scope
 
 The dev environment now wires `../../modules/network` with cost-aware defaults:
 
 - VPC CIDR: `10.20.0.0/16`
-- two public subnets for future public edge resources such as an ALB
-- two private subnets for future ECS services, database, and cache resources
+- two public subnets for the public Application Load Balancer edge
+- two private subnets for ECS services, database, and cache resources
 - internet gateway and public route table
 - one private route table per private subnet
 - NAT gateway disabled by default
-- security groups for the future public ALB, private ECS services, private PostgreSQL, and optional Redis cache
-- public ingress limited to the future ALB edge on HTTP by default
+- security groups for the public ALB, private ECS services, private PostgreSQL, and optional Redis cache
+- public ingress limited to the ALB edge on HTTP by default
+- an internet-facing Application Load Balancer with an HTTP listener and fixed-response default action
+- optional HTTPS listener variables kept disabled until a user-owned ACM certificate ARN is supplied outside this repo
+- optional ALB access-log wiring kept disabled by default because no real log bucket is committed
 - private service-to-database rules scoped by security group reference rather than public CIDRs
 - ECS task execution and application task IAM roles with placeholder secret-reference read policies
 - a shared ECS cluster for private Fargate services
 - ECS service examples for `carbon-platform-api`, `job-runner-platform`, and `multi-tenant-saas-api`
 - fake public image URIs under `public.ecr.aws/example/...:demo`
 - per-service CloudWatch log groups, task definitions, services, target groups, health checks, and desired-count autoscaling
-- optional ALB listener-rule wiring kept disabled until the load-balancer module supplies a listener ARN
+- ALB listener rules that forward path patterns from the HTTP listener to each service target group
 - fake Secrets Manager and SSM Parameter Store ARNs as references only; no secret values are stored
 
-Future tickets add the load balancer, RDS PostgreSQL, optional Redis resources, and observability.
+Future tickets add RDS PostgreSQL, optional Redis resources, and observability.
 
 ## Dev posture
 
@@ -44,7 +47,7 @@ These are placeholders for review and validation, not a production recommendatio
 
 Public subnets are intended for internet-facing components only. Private subnets are intended for workloads and stateful services that should not receive public IP addresses.
 
-The security group boundary is intentionally narrow: internet CIDRs reach only the ALB security group, the ALB reaches ECS services only on the service port, ECS services reach PostgreSQL only on port 5432, and Redis rules are created only when Redis is enabled. No public database or cache ingress is modeled.
+The security group boundary is intentionally narrow: internet CIDRs reach only the ALB security group, the ALB reaches ECS services only on the service port through listener rules and target groups, ECS services reach PostgreSQL only on port 5432, and Redis rules are created only when Redis is enabled. No public database or cache ingress is modeled.
 
 The IAM boundary separates the ECS task execution role from the application task role. The execution role is for ECS runtime integration such as image pulls, log delivery, and ECS-managed secret injection. The application task role starts with only explicitly supplied secret-reference read permissions. ECS service examples pass secret references as ARNs only, never values. All example ARNs are placeholders and must be replaced or removed before any real manual provisioning.
 

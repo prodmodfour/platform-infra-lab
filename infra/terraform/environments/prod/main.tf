@@ -22,12 +22,26 @@ locals {
   }
 
   platform_defaults = {
-    log_retention_days            = var.log_retention_days
-    deletion_protection_enabled   = var.deletion_protection_enabled
-    enable_redis                  = var.enable_redis
-    service_desired_count_default = var.service_desired_count_default
-    ecs_service_count             = length(var.ecs_services)
-    ecs_listener_rules_enabled    = var.create_ecs_listener_rules
+    log_retention_days                = var.log_retention_days
+    deletion_protection_enabled       = var.deletion_protection_enabled
+    enable_redis                      = var.enable_redis
+    service_desired_count_default     = var.service_desired_count_default
+    ecs_service_count                 = length(var.ecs_services)
+    ecs_listener_rules_enabled        = var.create_ecs_listener_rules
+    load_balancer_https_enabled       = var.enable_load_balancer_https_listener
+    load_balancer_access_logs_enabled = var.load_balancer_access_logs_enabled
+    load_balancer_deletion_protection = var.load_balancer_deletion_protection_enabled
+  }
+
+  load_balancer_defaults = {
+    internal                    = var.load_balancer_internal
+    http_listener_port          = var.load_balancer_http_listener_port
+    https_listener_enabled      = var.enable_load_balancer_https_listener
+    https_listener_port         = var.load_balancer_https_listener_port
+    https_certificate_supplied  = var.load_balancer_https_certificate_arn != null
+    access_logs_enabled         = var.load_balancer_access_logs_enabled
+    access_logs_bucket_supplied = var.load_balancer_access_logs_bucket != null
+    deletion_protection_enabled = var.load_balancer_deletion_protection_enabled
   }
 
   security_group_defaults = {
@@ -52,7 +66,7 @@ locals {
     cluster_name           = "${local.name_prefix}-ecs-cluster"
     service_names          = sort(keys(var.ecs_services))
     listener_rules_enabled = var.create_ecs_listener_rules
-    listener_arn_supplied  = var.ecs_listener_arn != null
+    listener_arn_source    = var.ecs_listener_arn == null ? "module.load_balancer.http_listener_arn" : "ecs_listener_arn_override"
   }
 
   planned_module_contract = {
@@ -60,7 +74,7 @@ locals {
     security_groups = "implemented-ticket-005"
     iam             = "implemented-ticket-006"
     ecs_service     = "implemented-ticket-007"
-    load_balancer   = "ticket-008"
+    load_balancer   = "implemented-ticket-008"
     rds_postgres    = "ticket-009"
     redis_cache     = "ticket-010"
     observability   = "ticket-011"
@@ -109,6 +123,26 @@ module "iam" {
   common_tags                     = local.common_tags
 }
 
+module "load_balancer" {
+  source = "../../modules/load-balancer"
+
+  name_prefix                = local.name_prefix
+  environment                = local.environment
+  public_subnet_ids          = module.network.public_subnet_ids
+  security_group_ids         = [module.security_groups.load_balancer_security_group_id]
+  internal                   = var.load_balancer_internal
+  enable_deletion_protection = var.load_balancer_deletion_protection_enabled
+  http_listener_port         = var.load_balancer_http_listener_port
+  enable_https_listener      = var.enable_load_balancer_https_listener
+  https_listener_port        = var.load_balancer_https_listener_port
+  https_certificate_arn      = var.load_balancer_https_certificate_arn
+  https_ssl_policy           = var.load_balancer_https_ssl_policy
+  access_logs_enabled        = var.load_balancer_access_logs_enabled
+  access_logs_bucket         = var.load_balancer_access_logs_bucket
+  access_logs_prefix         = var.load_balancer_access_logs_prefix
+  common_tags                = local.common_tags
+}
+
 resource "aws_ecs_cluster" "platform" {
   name = local.ecs_service_defaults.cluster_name
 
@@ -151,7 +185,7 @@ module "ecs_services" {
   secret_references = each.value.secret_references
 
   create_listener_rule        = var.create_ecs_listener_rules
-  listener_arn                = var.ecs_listener_arn
+  listener_arn                = var.ecs_listener_arn == null ? module.load_balancer.http_listener_arn : var.ecs_listener_arn
   listener_rule_priority      = each.value.listener_rule_priority
   listener_rule_path_patterns = each.value.listener_rule_path_patterns
 

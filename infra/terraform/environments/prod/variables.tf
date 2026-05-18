@@ -60,7 +60,7 @@ variable "availability_zones" {
 }
 
 variable "public_subnet_cidrs" {
-  description = "CIDR blocks for public subnets such as the future ALB edge."
+  description = "CIDR blocks for public subnets such as the ALB edge."
   type        = list(string)
   default     = ["10.30.0.0/24", "10.30.1.0/24", "10.30.2.0/24"]
 
@@ -122,13 +122,13 @@ variable "service_desired_count_default" {
 }
 
 variable "create_ecs_listener_rules" {
-  description = "Whether ECS service modules should create ALB listener rules. Prod keeps this false until the load-balancer module provides a listener ARN."
+  description = "Whether ECS service modules should create ALB listener rules against the environment load-balancer module."
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "ecs_listener_arn" {
-  description = "Optional ALB listener ARN used when create_ecs_listener_rules is true. Keep placeholder-only in committed examples."
+  description = "Optional override ALB listener ARN used when create_ecs_listener_rules is true. Leave null to use module.load_balancer.http_listener_arn."
   type        = string
   default     = null
   nullable    = true
@@ -139,6 +139,105 @@ variable "ecs_listener_arn" {
       var.ecs_listener_arn
     ))
     error_message = "ecs_listener_arn must be an ALB listener ARN when provided."
+  }
+}
+
+variable "load_balancer_internal" {
+  description = "Whether the Application Load Balancer is internal. Prod defaults to false to model the public edge."
+  type        = bool
+  default     = false
+}
+
+variable "load_balancer_deletion_protection_enabled" {
+  description = "Whether ALB deletion protection is enabled. Prod enables this to show production-intent review posture."
+  type        = bool
+  default     = true
+}
+
+variable "load_balancer_http_listener_port" {
+  description = "HTTP listener port for the public Application Load Balancer."
+  type        = number
+  default     = 80
+
+  validation {
+    condition     = var.load_balancer_http_listener_port >= 1 && var.load_balancer_http_listener_port <= 65535
+    error_message = "load_balancer_http_listener_port must be a valid TCP port."
+  }
+}
+
+variable "enable_load_balancer_https_listener" {
+  description = "Whether to create an optional HTTPS listener. Keep false in committed examples because no real cert ARN is stored."
+  type        = bool
+  default     = false
+}
+
+variable "load_balancer_https_listener_port" {
+  description = "HTTPS listener port when the optional HTTPS listener is enabled."
+  type        = number
+  default     = 443
+
+  validation {
+    condition     = var.load_balancer_https_listener_port >= 1 && var.load_balancer_https_listener_port <= 65535
+    error_message = "load_balancer_https_listener_port must be a valid TCP port."
+  }
+}
+
+variable "load_balancer_https_certificate_arn" {
+  description = "Optional ACM certificate ARN for HTTPS. Keep null in committed examples; use only user-owned values outside this repo."
+  type        = string
+  default     = null
+  nullable    = true
+
+  validation {
+    condition = var.load_balancer_https_certificate_arn == null ? true : can(regex(
+      "^arn:aws[a-zA-Z-]*:acm:[a-z0-9-]+:[0-9]{12}:certificate/.+",
+      var.load_balancer_https_certificate_arn
+    ))
+    error_message = "load_balancer_https_certificate_arn must be an ACM certificate ARN when provided."
+  }
+}
+
+variable "load_balancer_https_ssl_policy" {
+  description = "SSL policy for the optional HTTPS listener. Review before real production use."
+  type        = string
+  default     = "ELBSecurityPolicy-2016-08"
+
+  validation {
+    condition     = length(trimspace(var.load_balancer_https_ssl_policy)) > 0
+    error_message = "load_balancer_https_ssl_policy must not be empty."
+  }
+}
+
+variable "load_balancer_access_logs_enabled" {
+  description = "Whether ALB access logs are enabled. Prod keeps this false because no real log bucket is committed."
+  type        = bool
+  default     = false
+}
+
+variable "load_balancer_access_logs_bucket" {
+  description = "Existing user-owned S3 bucket for ALB access logs when enabled. Keep null in committed examples."
+  type        = string
+  default     = null
+  nullable    = true
+
+  validation {
+    condition = var.load_balancer_access_logs_bucket == null ? true : can(regex(
+      "^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$",
+      var.load_balancer_access_logs_bucket
+    ))
+    error_message = "load_balancer_access_logs_bucket must look like an S3 bucket name when provided."
+  }
+}
+
+variable "load_balancer_access_logs_prefix" {
+  description = "Optional prefix for ALB access logs. Defaults inside the module when null."
+  type        = string
+  default     = null
+  nullable    = true
+
+  validation {
+    condition     = var.load_balancer_access_logs_prefix == null ? true : !startswith(var.load_balancer_access_logs_prefix, "/")
+    error_message = "load_balancer_access_logs_prefix must be relative and must not start with /."
   }
 }
 
@@ -280,7 +379,7 @@ variable "ecs_services" {
 }
 
 variable "alb_ingress_cidrs" {
-  description = "IPv4 CIDR blocks allowed to reach the future public ALB. Prod keeps the edge public in this placeholder but production should review WAF/trusted CIDR restrictions."
+  description = "IPv4 CIDR blocks allowed to reach the public ALB. Prod keeps the edge public in this placeholder but production should review WAF/trusted CIDR restrictions."
   type        = list(string)
   default     = ["0.0.0.0/0"]
 
@@ -291,7 +390,7 @@ variable "alb_ingress_cidrs" {
 }
 
 variable "alb_ingress_ports" {
-  description = "TCP ports exposed on the future public ALB security group. Prod includes HTTP now; HTTPS is documented for later load-balancer work."
+  description = "TCP ports exposed on the public ALB security group. Prod includes HTTP now; add HTTPS only with a reviewed certificate and ingress rule."
   type        = list(number)
   default     = [80]
 

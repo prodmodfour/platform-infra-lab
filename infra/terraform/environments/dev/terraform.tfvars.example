@@ -17,9 +17,20 @@ deletion_protection_enabled   = false
 enable_redis                  = false
 service_desired_count_default = 1
 
-# ALB listener rules stay disabled until the load-balancer module supplies a listener ARN.
-create_ecs_listener_rules = false
+# ALB listener rules use module.load_balancer.http_listener_arn by default.
+create_ecs_listener_rules = true
 ecs_listener_arn          = null
+
+load_balancer_internal                    = false
+load_balancer_deletion_protection_enabled = false
+load_balancer_http_listener_port          = 80
+enable_load_balancer_https_listener       = false
+load_balancer_https_listener_port         = 443
+load_balancer_https_certificate_arn       = null
+load_balancer_https_ssl_policy            = "ELBSecurityPolicy-2016-08"
+load_balancer_access_logs_enabled         = false
+load_balancer_access_logs_bucket          = null
+load_balancer_access_logs_prefix          = null
 
 ecs_services = {
   carbon-platform-api = {

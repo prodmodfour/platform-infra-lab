@@ -7,13 +7,22 @@ This document is a living placeholder for the target AWS/Terraform architecture.
 - `infra/terraform/modules/network` models the base VPC, public subnets, private subnets, an internet gateway, route tables, and an optional NAT gateway.
 - `infra/terraform/modules/security-groups` models public ALB, private ECS service, private PostgreSQL/RDS, and optional private Redis/ElastiCache security group boundaries.
 - `infra/terraform/modules/iam` models the ECS task execution role, application task role, and optional read policies for secret references.
-- `infra/terraform/modules/ecs-service` models a private Fargate service with task definition, ECS service, CloudWatch log group, ALB target group, optional listener rule, health checks, and desired-count autoscaling.
-- `infra/terraform/environments/dev` wires the network, security-groups, IAM, and ECS service modules with two public/private subnet pairs, NAT disabled by default, Redis security groups disabled by default, one task per demo service, dev-scoped placeholder secret-reference ARNs, and fake service images.
-- `infra/terraform/environments/prod` wires the network, security-groups, IAM, and ECS service modules with three public/private subnet pairs, NAT enabled by default to demonstrate private egress intent, Redis security groups enabled to show the optional cache tier, two tasks per demo service, prod-scoped placeholder secret-reference ARNs, and fake service images.
+- `infra/terraform/modules/load-balancer` models an internet-facing Application Load Balancer, required HTTP listener, optional HTTPS listener variables, optional access-log references, and listener outputs for service rules.
+- `infra/terraform/modules/ecs-service` models a private Fargate service with task definition, ECS service, CloudWatch log group, ALB target group, listener rule, health checks, and desired-count autoscaling.
+- `infra/terraform/environments/dev` wires the network, security-groups, IAM, load-balancer, and ECS service modules with two public/private subnet pairs, NAT disabled by default, Redis security groups disabled by default, one task per demo service, dev-scoped placeholder secret-reference ARNs, and fake service images.
+- `infra/terraform/environments/prod` wires the network, security-groups, IAM, load-balancer, and ECS service modules with three public/private subnet pairs, NAT enabled by default to demonstrate private egress intent, Redis security groups enabled to show the optional cache tier, two tasks per demo service, prod-scoped placeholder secret-reference ARNs, and fake service images.
 
 ## Target architecture themes
 
-The broader public-safe container platform design will include an Application Load Balancer, ECS/Fargate services in private subnets, private PostgreSQL/RDS, optional private Redis/ElastiCache, secret references, and CloudWatch observability.
+The broader public-safe container platform design includes an Application Load Balancer, ECS/Fargate services in private subnets, private PostgreSQL/RDS, optional private Redis/ElastiCache, secret references, and CloudWatch observability.
+
+Current load-balancer intent:
+
+- the ALB is the only public edge resource and is placed in public subnets
+- the HTTP listener returns a fixed response for unmatched routes
+- each ECS service owns a target group and listener rule with explicit path patterns
+- optional HTTPS variables exist, but committed examples keep HTTPS disabled because no real certificate ARN belongs in this repo
+- optional access-log wiring references a user-owned bucket only when enabled; no real bucket is committed
 
 Current ECS service intent:
 
@@ -21,8 +30,8 @@ Current ECS service intent:
 - `carbon-platform-api`, `job-runner-platform`, and `multi-tenant-saas-api` are modeled as private Fargate services
 - each service uses a fake `public.ecr.aws/example/...:demo` image and no application code is copied into this repo
 - task definitions use the execution role for image pulls, log delivery, and ECS-managed secret injection, plus a separate application task role
-- each service has a CloudWatch log group, target group, target-group health check, container health check, deployment circuit breaker, and autoscaling settings
-- listener-rule creation is optional and disabled until the load-balancer module supplies an ALB listener ARN
+- each service has a CloudWatch log group, target group, target-group health check, container health check, deployment circuit breaker, listener rule, and autoscaling settings
+- listener rules use the load-balancer module's HTTP listener ARN by default and forward service path patterns to private Fargate target groups
 
 Current IAM intent:
 
@@ -33,7 +42,7 @@ Current IAM intent:
 
 Current security group intent:
 
-- public internet CIDRs reach only the future ALB security group
+- public internet CIDRs reach only the ALB security group
 - the ALB security group reaches the ECS service security group only on the application service port
 - the ECS service security group reaches PostgreSQL only on the database port
 - the ECS service security group reaches Redis only when the Redis boundary is enabled

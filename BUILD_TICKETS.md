@@ -293,7 +293,7 @@ Commit when complete.
 
 ## 008 — Add load balancer module
 
-Status: TODO
+Status: DONE
 
 Create `infra/terraform/modules/load-balancer/`.
 

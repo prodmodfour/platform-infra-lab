@@ -13,13 +13,21 @@ Current local guardrails are validation-only and run through `bash scripts/quali
 
 The network module separates public and private subnet intent:
 
-- public subnets are for future internet-facing edge resources such as an ALB
-- private subnets are for future ECS services, databases, and caches
+- public subnets are for internet-facing edge resources such as the ALB
+- private subnets are for ECS services, databases, and caches
 - private subnets do not map public IP addresses on launch
+
+The load-balancer module now models the public edge:
+
+- the ALB is internet-facing by default and uses the dedicated ALB security group
+- the HTTP listener has a fixed-response default action for unmatched routes
+- ECS services attach path-based listener rules to the ALB listener and stay in private subnets
+- optional HTTPS support requires a user-owned ACM certificate ARN outside this repo; no real certificate ARN is committed
+- optional access logs require a user-owned S3 bucket outside this repo; no real bucket is committed
 
 The security-groups module now models explicit traffic boundaries:
 
-- public IPv4 ingress is allowed only to the future ALB security group
+- public IPv4 ingress is allowed only to the ALB security group
 - the ALB security group can reach the ECS service security group only on the configured service port
 - ECS services can reach the PostgreSQL/RDS security group only on the configured database port
 - ECS services can reach the Redis/ElastiCache security group only when Redis is enabled
@@ -41,7 +49,7 @@ The ECS service module now models private workload placement and secret injectio
 - container images are constrained in examples to fake `public.ecr.aws/example/...:demo` URIs
 - non-secret environment variables are separated from `secret_references`
 - `secret_references` must be Secrets Manager or SSM Parameter Store ARNs, not secret values
-- listener-rule creation is disabled until an ALB listener is explicitly wired by a later load-balancer module
+- listener rules are wired to the load-balancer module HTTP listener by default, keeping route ownership explicit
 
 The current egress model is intentionally strict and incomplete for real workloads. ECS services may need reviewed egress through VPC endpoints, NAT, or narrow rules for image pulls, logs, secret references, telemetry, and third-party APIs.
 

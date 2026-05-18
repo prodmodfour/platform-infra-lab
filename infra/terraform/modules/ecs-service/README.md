@@ -36,7 +36,7 @@ listener_rule_priority   = 110
 listener_rule_path_patterns = ["/carbon*", "/carbon/*"]
 ```
 
-Until the load-balancer module is wired, environments keep `create_listener_rule = false`. This still demonstrates the target group and ECS service attachment pattern for review, but a real manual apply should wait until an ALB/listener is present and the target group is reachable.
+With the load-balancer module wired, environments can set `create_listener_rule = true` and pass `module.load_balancer.http_listener_arn`. If an operator disables listener-rule creation for experimentation, a real manual apply should verify that each target group is associated with an ALB listener before creating an ECS service.
 
 ## Health checks
 

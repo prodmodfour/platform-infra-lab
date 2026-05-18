@@ -56,7 +56,7 @@ Key inputs:
 
 ## Cost notes
 
-Security groups do not have standalone hourly cost, but the resources that consume them can. ECS tasks and CloudWatch logs are now modeled by the ECS service module; public ALB traffic, RDS instances, Redis nodes, and NAT gateways are additional cost drivers as later modules are added or wired. Any optional manual provisioning remains user-owned and can incur cloud cost.
+Security groups do not have standalone hourly cost, but the resources that consume them can. ECS tasks, CloudWatch logs, and public ALB traffic are now modeled; RDS instances, Redis nodes, and NAT gateways are additional cost drivers as later modules are added or wired. Any optional manual provisioning remains user-owned and can incur cloud cost.
 
 ## Production hardening gaps
 

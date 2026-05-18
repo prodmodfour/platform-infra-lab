@@ -33,6 +33,10 @@ required_paths=(
   infra/terraform/modules/iam/variables.tf
   infra/terraform/modules/iam/outputs.tf
   infra/terraform/modules/iam/README.md
+  infra/terraform/modules/load-balancer/main.tf
+  infra/terraform/modules/load-balancer/variables.tf
+  infra/terraform/modules/load-balancer/outputs.tf
+  infra/terraform/modules/load-balancer/README.md
   infra/terraform/modules/network/main.tf
   infra/terraform/modules/network/variables.tf
   infra/terraform/modules/network/outputs.tf
@@ -119,6 +123,24 @@ for env in dev prod; do
   grep -q 'execution_secret_reference_arns' "infra/terraform/environments/$env/terraform.tfvars.example"
 done
 
+echo "== Terraform load balancer module checks =="
+grep -q 'resource "aws_lb" "this"' infra/terraform/modules/load-balancer/main.tf
+grep -q 'resource "aws_lb_listener" "http"' infra/terraform/modules/load-balancer/main.tf
+grep -q 'resource "aws_lb_listener" "https"' infra/terraform/modules/load-balancer/main.tf
+grep -q 'dynamic "access_logs"' infra/terraform/modules/load-balancer/main.tf
+grep -q 'output "http_listener_arn"' infra/terraform/modules/load-balancer/outputs.tf
+grep -qi "Target group wiring pattern" infra/terraform/modules/load-balancer/README.md
+grep -qi "HTTPS production requirement" infra/terraform/modules/load-balancer/README.md
+grep -qi "database/cache stay private\|PostgreSQL/RDS and Redis/ElastiCache remain private" infra/terraform/modules/load-balancer/README.md
+for env in dev prod; do
+  grep -q 'module "load_balancer"' "infra/terraform/environments/$env/main.tf"
+  grep -q 'module.load_balancer.http_listener_arn' "infra/terraform/environments/$env/main.tf"
+  grep -q 'output "load_balancer_dns_name"' "infra/terraform/environments/$env/outputs.tf"
+  grep -q 'output "load_balancer_http_listener_arn"' "infra/terraform/environments/$env/outputs.tf"
+  grep -q 'create_ecs_listener_rules = true' "infra/terraform/environments/$env/terraform.tfvars.example"
+  grep -q 'enable_load_balancer_https_listener       = false' "infra/terraform/environments/$env/terraform.tfvars.example"
+done
+
 echo "== Terraform ECS service module checks =="
 grep -q 'resource "aws_cloudwatch_log_group" "this"' infra/terraform/modules/ecs-service/main.tf
 grep -q 'resource "aws_ecs_task_definition" "this"' infra/terraform/modules/ecs-service/main.tf
@@ -138,7 +160,7 @@ for env in dev prod; do
   grep -q 'carbon-platform-api' "infra/terraform/environments/$env/terraform.tfvars.example"
   grep -q 'job-runner-platform' "infra/terraform/environments/$env/terraform.tfvars.example"
   grep -q 'multi-tenant-saas-api' "infra/terraform/environments/$env/terraform.tfvars.example"
-  grep -q 'create_ecs_listener_rules = false' "infra/terraform/environments/$env/terraform.tfvars.example"
+  grep -q 'create_ecs_listener_rules = true' "infra/terraform/environments/$env/terraform.tfvars.example"
 done
 
 echo "== Terraform security group boundary checks =="
