@@ -30,7 +30,7 @@ This repository must remain safe to publish and safe to review.
 
 ## Current status
 
-Bootstrap skeleton, validation guardrails, Terraform conventions, dev/prod Terraform environments, the shared network module, shared security-groups module, shared IAM module, shared load-balancer module, ECS/Fargate service module, private RDS PostgreSQL module, optional Redis cache module, CloudWatch observability module, metadata-only Secrets Manager reference module, and public-safe service example catalog are in place. Remaining diagrams, CI, and detailed operating documentation will be added ticket-by-ticket.
+Bootstrap skeleton, validation guardrails, validation-only GitHub Actions CI, Terraform conventions, dev/prod Terraform environments, the shared network module, shared security-groups module, shared IAM module, shared load-balancer module, ECS/Fargate service module, private RDS PostgreSQL module, optional Redis cache module, CloudWatch observability module, metadata-only Secrets Manager reference module, and public-safe service example catalog are in place. Remaining diagrams and detailed operating documentation will be added ticket-by-ticket.
 
 ## Quick start validation
 
@@ -40,7 +40,7 @@ Run the local quality gate:
 bash scripts/quality-gate.sh
 ```
 
-The quality gate checks shell syntax, repository structure, public-safety rules, forbidden Terraform state/plan/variable files, automated cloud mutation commands, and Terraform formatting/validation when Terraform is installed. If Terraform is not installed locally, the Terraform check warns and skips; CI will install Terraform in a later ticket.
+The quality gate checks shell syntax, repository structure, public-safety rules, forbidden Terraform state/plan/variable files, automated cloud mutation commands, Markdown link sanity, and Terraform formatting/validation when Terraform is installed. If Terraform is not installed locally, the Terraform check warns and skips; GitHub Actions installs Terraform and runs the same validation-only quality gate.
 
 ## Repository structure
 
@@ -50,8 +50,12 @@ The quality gate checks shell syntax, repository structure, public-safety rules,
 ├── AGENTS.md
 ├── BUILD_TICKETS.md
 ├── BUILD_NOTES.md
+├── .github/
+│   └── workflows/
+│       └── ci.yml
 ├── scripts/
 │   ├── build-loop.sh
+│   ├── check-doc-links.sh
 │   ├── check-no-cloud-mutations.sh
 │   ├── check-no-terraform-state.sh
 │   ├── check-public-safety.sh

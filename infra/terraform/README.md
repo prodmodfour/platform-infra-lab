@@ -214,4 +214,4 @@ Run the repository quality gate before opening or committing changes:
 bash scripts/quality-gate.sh
 ```
 
-The gate checks shell syntax, public-safety rules, forbidden state/plan/variable files, forbidden automation mutations, Terraform formatting, and Terraform validation when Terraform is installed. Later CI remains validation-only and must not provision or destroy infrastructure.
+The gate checks shell syntax, public-safety rules, forbidden state/plan/variable files, forbidden automation mutations, Markdown link sanity, Terraform formatting, and Terraform validation when Terraform is installed. GitHub Actions installs Terraform and runs the same validation-only gate; it does not require cloud credentials and must not provision or destroy infrastructure.

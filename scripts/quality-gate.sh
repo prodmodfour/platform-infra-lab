@@ -13,10 +13,12 @@ echo "== bootstrap structure checks =="
 required_paths=(
   README.md
   .gitignore
+  .github/workflows/ci.yml
   AGENTS.md
   BUILD_TICKETS.md
   BUILD_NOTES.md
   scripts
+  scripts/check-doc-links.sh
   docs
   docs/secrets.md
   docs/service-examples.md
@@ -93,6 +95,12 @@ grep -qi "no committed secrets" README.md
 grep -qi "No Terraform state" README.md
 grep -qi "manual apply.*can incur" README.md
 grep -qi "backend/platform/SRE" README.md
+
+echo "== CI workflow checks =="
+grep -q 'hashicorp/setup-terraform@v' .github/workflows/ci.yml
+grep -q 'bash scripts/quality-gate.sh' .github/workflows/ci.yml
+grep -qi 'pull_request' .github/workflows/ci.yml
+grep -qi 'workflow_dispatch' .github/workflows/ci.yml
 
 echo "== Terraform convention documentation checks =="
 grep -qi "backend.example.tf" infra/terraform/README.md
@@ -338,6 +346,9 @@ bash scripts/check-no-terraform-state.sh
 
 echo "== cloud mutation guardrail =="
 bash scripts/check-no-cloud-mutations.sh
+
+echo "== documentation link sanity checks =="
+bash scripts/check-doc-links.sh
 
 echo "== Terraform validation =="
 bash scripts/check-terraform.sh

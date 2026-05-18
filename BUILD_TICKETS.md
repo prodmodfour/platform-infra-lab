@@ -479,7 +479,7 @@ Commit when complete.
 
 ## 014 — Add GitHub Actions validation CI
 
-Status: TODO
+Status: DONE
 
 Implement `.github/workflows/ci.yml`.
 
