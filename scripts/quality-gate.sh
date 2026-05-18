@@ -534,6 +534,15 @@ grep -qi "publicly_accessible.*false" docs/decisions/0003-private-database-and-c
 grep -qi "does not create.*aws_secretsmanager_secret_version" docs/decisions/0004-secrets-are-references-not-values.md
 grep -qi "must not run Terraform apply" docs/decisions/0005-validation-only-ci.md
 
+echo "== final completion marker checks =="
+grep -q '^AUTOMATION_STATUS: DONE$' BUILD_TICKETS.md
+grep -q '^## 024 — Final autonomous review and completion marker$' BUILD_TICKETS.md
+awk '/^## 024 — Final autonomous review and completion marker$/,/^---$/' BUILD_TICKETS.md | grep -q '^Status: DONE$'
+if grep -Eq '^Status: (TODO|IN_PROGRESS|BLOCKED)$' BUILD_TICKETS.md; then
+  echo "ERROR: BUILD_TICKETS.md still contains unfinished ticket statuses." >&2
+  exit 1
+fi
+
 echo "== shell syntax checks =="
 for script in scripts/*.sh; do
   [[ -e "$script" ]] || continue
