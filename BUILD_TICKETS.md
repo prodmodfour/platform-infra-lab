@@ -633,7 +633,7 @@ Commit when complete.
 
 ## 019 — Add cost notes
 
-Status: TODO
+Status: DONE
 
 Create `docs/cost-notes.md`.
 

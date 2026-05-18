@@ -24,6 +24,7 @@ required_paths=(
   docs/rollback.md
   docs/operations.md
   docs/runbook.md
+  docs/cost-notes.md
   docs/secrets.md
   docs/service-examples.md
   docs/decisions
@@ -418,6 +419,21 @@ grep -qi "Deployment stuck" docs/runbook.md
 grep -qi "Cost cleanup" docs/runbook.md
 grep -qi "Access review" docs/runbook.md
 grep -qi "Closeout checklist" docs/runbook.md
+
+echo "== Cost documentation checks =="
+grep -qi "Cost documentation scope" docs/cost-notes.md
+grep -qi "Cost drivers" docs/cost-notes.md
+grep -qi "NAT gateway cost implications" docs/cost-notes.md
+grep -qi "RDS cost implications" docs/cost-notes.md
+grep -qi "ALB cost implications" docs/cost-notes.md
+grep -qi "ECS Fargate cost drivers" docs/cost-notes.md
+grep -qi "CloudWatch log/metric costs" docs/cost-notes.md
+grep -qi "Redis/ElastiCache costs" docs/cost-notes.md
+grep -qi "Dev versus prod trade-offs" docs/cost-notes.md
+grep -qi "Cleanup checklist" docs/cost-notes.md
+grep -qi "How to avoid accidental spend" docs/cost-notes.md
+grep -qi "optional, manual, user-owned, and can incur cost" docs/cost-notes.md
+grep -qi "No exact current AWS prices are claimed" docs/cost-notes.md
 
 echo "== shell syntax checks =="
 for script in scripts/*.sh; do
