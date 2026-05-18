@@ -30,7 +30,7 @@ This repository must remain safe to publish and safe to review.
 
 ## Current status
 
-Bootstrap skeleton, validation guardrails, validation-only GitHub Actions CI, Terraform conventions, dev/prod Terraform environments, the shared network module, shared security-groups module, shared IAM module, shared load-balancer module, ECS/Fargate service module, private RDS PostgreSQL module, optional Redis cache module, CloudWatch observability module, metadata-only Secrets Manager reference module, and public-safe service example catalog are in place. Remaining diagrams and detailed operating documentation will be added ticket-by-ticket.
+Bootstrap skeleton, validation guardrails, validation-only GitHub Actions CI, Terraform conventions, dev/prod Terraform environments, the shared network module, shared security-groups module, shared IAM module, shared load-balancer module, ECS/Fargate service module, private RDS PostgreSQL module, optional Redis cache module, CloudWatch observability module, metadata-only Secrets Manager reference module, public-safe service example catalog, and architecture diagrams are in place. Remaining detailed operating documentation will be added ticket-by-ticket.
 
 ## Quick start validation
 
@@ -75,6 +75,7 @@ The quality gate checks shell syntax, repository structure, public-safety rules,
 │   ├── review-guide.md
 │   ├── decisions/
 │   └── diagrams/
+│       └── aws-container-platform.md
 └── infra/
     └── terraform/
         ├── modules/

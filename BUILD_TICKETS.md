@@ -510,7 +510,7 @@ Commit when complete.
 
 ## 015 — Add architecture docs and diagrams
 
-Status: TODO
+Status: DONE
 
 Create or complete:
 

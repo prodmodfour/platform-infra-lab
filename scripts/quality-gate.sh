@@ -24,6 +24,7 @@ required_paths=(
   docs/service-examples.md
   docs/decisions
   docs/diagrams
+  docs/diagrams/aws-container-platform.md
   infra
   infra/terraform
   infra/terraform/README.md
@@ -327,6 +328,25 @@ for env in dev prod; do
   grep -q 'module "security_groups"' "infra/terraform/environments/$env/main.tf"
   grep -q 'output "load_balancer_security_group_id"' "infra/terraform/environments/$env/outputs.tf"
   grep -q 'output "rds_postgres_security_group_id"' "infra/terraform/environments/$env/outputs.tf"
+done
+
+echo "== Architecture documentation checks =="
+grep -qi "VPC/subnet layout" docs/architecture.md
+grep -qi "ALB/public edge" docs/architecture.md
+grep -qi "ECS private service placement" docs/architecture.md
+grep -qi "RDS private placement" docs/architecture.md
+grep -qi "Optional Redis private placement" docs/architecture.md
+grep -qi "CloudWatch logs/metrics" docs/architecture.md
+grep -qi "IAM roles" docs/architecture.md
+grep -qi "Secret references" docs/architecture.md
+grep -qi "Environment separation" docs/architecture.md
+grep -qi "Request flow" docs/architecture.md
+grep -qi "Deployment flow" docs/architecture.md
+grep -q "flowchart" docs/diagrams/aws-container-platform.md
+grep -q "sequenceDiagram" docs/diagrams/aws-container-platform.md
+for architecture_term in "Application Load Balancer" "ECS" "RDS PostgreSQL" "Redis" "Secrets Manager" "CloudWatch"; do
+  grep -q "$architecture_term" docs/diagrams/aws-container-platform.md
+  grep -q "$architecture_term" docs/architecture.md
 done
 
 echo "== shell syntax checks =="
