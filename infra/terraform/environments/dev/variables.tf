@@ -38,7 +38,7 @@ variable "additional_tags" {
 }
 
 variable "vpc_cidr" {
-  description = "CIDR block reserved for the future dev VPC."
+  description = "CIDR block for the dev VPC."
   type        = string
   default     = "10.20.0.0/16"
 
@@ -49,7 +49,7 @@ variable "vpc_cidr" {
 }
 
 variable "availability_zones" {
-  description = "Availability zone names used by future subnet modules."
+  description = "Availability zone names used by the network module for subnet placement."
   type        = list(string)
   default     = ["us-east-1a", "us-east-1b"]
 
@@ -60,7 +60,7 @@ variable "availability_zones" {
 }
 
 variable "public_subnet_cidrs" {
-  description = "CIDR blocks reserved for future public subnets such as the ALB edge."
+  description = "CIDR blocks for public subnets such as the future ALB edge."
   type        = list(string)
   default     = ["10.20.0.0/24", "10.20.1.0/24"]
 
@@ -71,7 +71,7 @@ variable "public_subnet_cidrs" {
 }
 
 variable "private_subnet_cidrs" {
-  description = "CIDR blocks reserved for future private ECS, database, and cache subnets."
+  description = "CIDR blocks for private ECS, database, and cache subnet placement."
   type        = list(string)
   default     = ["10.20.10.0/24", "10.20.11.0/24"]
 
@@ -82,7 +82,7 @@ variable "private_subnet_cidrs" {
 }
 
 variable "enable_nat_gateway" {
-  description = "Future network module flag. Dev defaults to false to keep the lab cost-aware unless egress is explicitly needed."
+  description = "Network module flag. Dev defaults to false to keep the lab cost-aware unless private egress is explicitly needed."
   type        = bool
   default     = false
 }

@@ -25,6 +25,10 @@ required_paths=(
   infra/terraform/README.md
   infra/terraform/modules
   infra/terraform/modules/README.md
+  infra/terraform/modules/network/main.tf
+  infra/terraform/modules/network/variables.tf
+  infra/terraform/modules/network/outputs.tf
+  infra/terraform/modules/network/README.md
   infra/terraform/environments
   infra/terraform/environments/README.md
   infra/terraform/environments/dev/providers.tf
@@ -74,6 +78,18 @@ for env in dev prod; do
   grep -qi "public-safe" "infra/terraform/environments/$env/README.md"
   grep -qi "terraform.tfvars.example" "infra/terraform/environments/$env/README.md"
   grep -q "environment_name.*$env" "infra/terraform/environments/$env/terraform.tfvars.example"
+done
+
+echo "== Terraform network module checks =="
+grep -q 'resource "aws_vpc"' infra/terraform/modules/network/main.tf
+grep -q 'resource "aws_subnet" "public"' infra/terraform/modules/network/main.tf
+grep -q 'resource "aws_subnet" "private"' infra/terraform/modules/network/main.tf
+grep -q 'resource "aws_nat_gateway"' infra/terraform/modules/network/main.tf
+grep -qi "Public and private subnet intent" infra/terraform/modules/network/README.md
+grep -qi "NAT gateway" infra/terraform/modules/network/README.md
+for env in dev prod; do
+  grep -q 'module "network"' "infra/terraform/environments/$env/main.tf"
+  grep -q 'output "vpc_id"' "infra/terraform/environments/$env/outputs.tf"
 done
 
 echo "== shell syntax checks =="

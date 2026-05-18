@@ -1,8 +1,8 @@
 # Terraform environment conventions
 
-This directory contains Terraform root modules for deployable environments. The initial `dev` and `prod` roots are validation-ready skeletons with provider configuration, backend examples, variables, outputs, and per-environment documentation.
+This directory contains Terraform root modules for deployable environments. The `dev` and `prod` roots include provider configuration, backend examples, variables, outputs, per-environment documentation, and the shared network module.
 
-Environment roots are responsible for composing reusable modules with environment-specific inputs. They are the main review surface for proposed infrastructure changes. Concrete module calls are added ticket-by-ticket as modules are implemented.
+Environment roots are responsible for composing reusable modules with environment-specific inputs. They are the main review surface for proposed infrastructure changes. Module calls are added ticket-by-ticket as modules are implemented.
 
 ## Required environment structure
 
@@ -21,8 +21,8 @@ Each environment must include:
 
 Current environments:
 
-- `dev` — cost-aware lab defaults such as disabled NAT, shorter log retention, disabled cache, and one default service task.
-- `prod` — production-intent examples such as three availability zones, enabled NAT, longer log retention, deletion protection, cache enabled, and two default service tasks.
+- `dev` — cost-aware lab defaults such as disabled NAT, two public/private subnet pairs, shorter log retention, disabled cache, and one default service task.
+- `prod` — production-intent examples such as three public/private subnet pairs, enabled NAT, longer log retention, deletion protection, cache enabled, and two default service tasks.
 
 Do not commit real `.tfvars` files, real backend configuration, generated plan files, Terraform state, local credentials, or local `.env` files.
 

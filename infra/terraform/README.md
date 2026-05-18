@@ -19,7 +19,12 @@ The repository is intentionally validation-first. Terraform code should be easy 
 infra/terraform/
 ├── README.md
 ├── modules/
-│   └── README.md
+│   ├── README.md
+│   └── network/
+│       ├── main.tf
+│       ├── variables.tf
+│       ├── outputs.tf
+│       └── README.md
 └── environments/
     ├── README.md
     ├── dev/
@@ -40,7 +45,7 @@ infra/terraform/
         └── README.md
 ```
 
-The `dev` and `prod` environment roots are in place as validation-ready skeletons. Future tickets add concrete module directories and then wire the same module set into both environments.
+The `dev` and `prod` environment roots now both wire the shared `network` module. Future tickets add the remaining modules and continue wiring the same module set into both environments.
 
 ## Naming guidance
 
@@ -108,6 +113,10 @@ Interface expectations:
 - Prefer secret references, such as Secrets Manager or SSM Parameter Store ARNs/names, instead of secret values.
 - Output only what downstream modules need; avoid broad outputs that expose unnecessary details.
 - Do not configure providers or backends inside reusable modules.
+
+Implemented modules:
+
+- `modules/network` — VPC, public/private subnets, internet gateway, route tables, and optional NAT gateway.
 
 See `modules/README.md` for detailed module interface conventions.
 

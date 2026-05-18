@@ -38,7 +38,7 @@ variable "additional_tags" {
 }
 
 variable "vpc_cidr" {
-  description = "CIDR block reserved for the future prod VPC."
+  description = "CIDR block for the prod VPC."
   type        = string
   default     = "10.30.0.0/16"
 
@@ -49,7 +49,7 @@ variable "vpc_cidr" {
 }
 
 variable "availability_zones" {
-  description = "Availability zone names used by future subnet modules."
+  description = "Availability zone names used by the network module for subnet placement."
   type        = list(string)
   default     = ["us-east-1a", "us-east-1b", "us-east-1c"]
 
@@ -60,7 +60,7 @@ variable "availability_zones" {
 }
 
 variable "public_subnet_cidrs" {
-  description = "CIDR blocks reserved for future public subnets such as the ALB edge."
+  description = "CIDR blocks for public subnets such as the future ALB edge."
   type        = list(string)
   default     = ["10.30.0.0/24", "10.30.1.0/24", "10.30.2.0/24"]
 
@@ -71,7 +71,7 @@ variable "public_subnet_cidrs" {
 }
 
 variable "private_subnet_cidrs" {
-  description = "CIDR blocks reserved for future private ECS, database, and cache subnets."
+  description = "CIDR blocks for private ECS, database, and cache subnet placement."
   type        = list(string)
   default     = ["10.30.10.0/24", "10.30.11.0/24", "10.30.12.0/24"]
 
@@ -82,7 +82,7 @@ variable "private_subnet_cidrs" {
 }
 
 variable "enable_nat_gateway" {
-  description = "Future network module flag. Prod shows production intent with NAT enabled for private egress review."
+  description = "Network module flag. Prod shows production intent with NAT enabled for private egress review."
   type        = bool
   default     = true
 }

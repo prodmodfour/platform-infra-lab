@@ -1,31 +1,38 @@
 # Dev Terraform environment
 
-This root module is the public-safe `dev` skeleton for `platform-infra-lab`. It establishes provider configuration, backend examples, variable defaults, outputs, naming, and tagging conventions before resource modules are added in later tickets.
+This root module is the public-safe `dev` environment for `platform-infra-lab`. It establishes provider configuration, backend examples, variable defaults, outputs, naming, tagging, and the first concrete module: the shared network module.
 
-## Scope in this ticket
+## Current scope
 
-This environment currently contains no AWS resources. It validates the root-module structure only:
+The dev environment now wires `../../modules/network` with cost-aware defaults:
 
-- AWS provider version constraints and default tags
-- public-safe naming via `name_prefix`
-- dev network CIDR placeholders
-- cost-aware defaults for future ECS, logs, database, and cache modules
-- a placeholder S3 backend example that is not real backend configuration
+- VPC CIDR: `10.20.0.0/16`
+- two public subnets for future public edge resources such as an ALB
+- two private subnets for future ECS services, database, and cache resources
+- internet gateway and public route table
+- one private route table per private subnet
+- NAT gateway disabled by default
 
-Future tickets wire the same planned module set into both `dev` and `prod`: network, security groups, IAM, ECS service, load balancer, RDS PostgreSQL, optional Redis, and observability.
+Future tickets add security groups, IAM, ECS service patterns, load balancing, RDS PostgreSQL, optional Redis, and observability.
 
 ## Dev posture
 
 Dev is intentionally small and cost-aware:
 
 - two availability zones are shown for the platform pattern
-- NAT gateway usage defaults to disabled until explicitly needed
-- log retention defaults to a short demo-friendly window
+- NAT gateway usage defaults to disabled until private egress is explicitly needed
+- log retention defaults to a short demo-friendly window for future log groups
 - deletion protection defaults to disabled for disposable lab experiments
 - Redis/cache usage defaults to disabled
 - default ECS desired count is one task for future service examples
 
-These are placeholders for review and validation, not a recommendation for production.
+These are placeholders for review and validation, not a production recommendation.
+
+## Network review notes
+
+Public subnets are intended for internet-facing components only. Private subnets are intended for workloads and stateful services that should not receive public IP addresses. Security group rules are intentionally deferred to a later ticket so subnet placement and traffic boundaries can be reviewed separately.
+
+If NAT is enabled for a real dev experiment, it can create ongoing cloud cost. Keep it disabled unless the workload needs private outbound internet access, and clean up user-owned resources after review.
 
 ## Public-safety notes
 

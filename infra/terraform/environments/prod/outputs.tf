@@ -19,8 +19,63 @@ output "common_tags" {
 }
 
 output "network_defaults" {
-  description = "Network defaults that will be passed to the network module in a later ticket."
+  description = "Network inputs passed to the network module."
   value       = local.network_defaults
+}
+
+output "vpc_id" {
+  description = "ID of the environment VPC."
+  value       = module.network.vpc_id
+}
+
+output "vpc_cidr_block" {
+  description = "CIDR block assigned to the environment VPC."
+  value       = module.network.vpc_cidr_block
+}
+
+output "public_subnet_ids" {
+  description = "Public subnet IDs for future load balancer resources."
+  value       = module.network.public_subnet_ids
+}
+
+output "private_subnet_ids" {
+  description = "Private subnet IDs for future ECS, database, and cache resources."
+  value       = module.network.private_subnet_ids
+}
+
+output "public_subnet_cidrs" {
+  description = "CIDR blocks for public subnets."
+  value       = module.network.public_subnet_cidrs
+}
+
+output "private_subnet_cidrs" {
+  description = "CIDR blocks for private subnets."
+  value       = module.network.private_subnet_cidrs
+}
+
+output "public_route_table_id" {
+  description = "Public route table ID for the environment VPC."
+  value       = module.network.public_route_table_id
+}
+
+output "private_route_table_ids" {
+  description = "Private route table IDs for the environment VPC."
+  value       = module.network.private_route_table_ids
+}
+
+output "internet_gateway_id" {
+  description = "Internet gateway ID for the environment VPC."
+  value       = module.network.internet_gateway_id
+}
+
+output "nat_gateway_enabled" {
+  description = "Whether the environment is configured to create a NAT gateway."
+  value       = module.network.nat_gateway_enabled
+}
+
+output "nat_gateway_id" {
+  description = "NAT gateway ID when enabled, otherwise null."
+  value       = module.network.nat_gateway_id
 }
 
 output "platform_defaults" {

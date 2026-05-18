@@ -29,7 +29,7 @@ locals {
   }
 
   planned_module_contract = {
-    network         = "ticket-004"
+    network         = "implemented-ticket-004"
     security_groups = "ticket-005"
     iam             = "ticket-006"
     ecs_service     = "ticket-007"
@@ -38,4 +38,17 @@ locals {
     redis_cache     = "ticket-010"
     observability   = "ticket-011"
   }
+}
+
+module "network" {
+  source = "../../modules/network"
+
+  name_prefix          = local.name_prefix
+  environment          = local.environment
+  vpc_cidr             = var.vpc_cidr
+  availability_zones   = var.availability_zones
+  public_subnet_cidrs  = var.public_subnet_cidrs
+  private_subnet_cidrs = var.private_subnet_cidrs
+  enable_nat_gateway   = var.enable_nat_gateway
+  common_tags          = local.common_tags
 }

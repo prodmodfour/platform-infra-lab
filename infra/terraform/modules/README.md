@@ -1,12 +1,15 @@
 # Terraform module conventions
 
-This directory contains reusable Terraform modules for the AWS platform lab. Concrete module directories are added ticket-by-ticket; this file defines the conventions every module should follow.
+This directory contains reusable Terraform modules for the AWS platform lab. Module directories are added ticket-by-ticket; this file defines the conventions every module should follow.
+
+## Implemented modules
+
+- `network` — VPC, public/private subnets, route tables, an internet gateway, and an optional NAT gateway for private subnet egress.
 
 ## Planned module areas
 
-The target architecture is expected to use modules for areas such as:
+The target architecture is expected to use additional modules for areas such as:
 
-- networking: VPC, public/private subnets, route tables, and NAT gateway options
 - load balancing: Application Load Balancer, listeners, and target group wiring
 - ECS services: task definitions, services, log groups, health checks, and autoscaling inputs
 - IAM: ECS task execution role, application task role, and optional secret-reference read policies

@@ -157,7 +157,7 @@ Commit when complete.
 
 ## 004 — Add network module
 
-Status: TODO
+Status: DONE
 
 Create `infra/terraform/modules/network/`.
 
