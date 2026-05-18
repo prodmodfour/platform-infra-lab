@@ -30,7 +30,7 @@ This repository must remain safe to publish and safe to review.
 
 ## Current status
 
-Bootstrap skeleton, validation guardrails, Terraform conventions, dev/prod Terraform environments, the shared network module, shared security-groups module, shared IAM module, shared load-balancer module, ECS/Fargate service module, private RDS PostgreSQL module, optional Redis cache module, and CloudWatch observability module are in place. Remaining diagrams, secret-reference details, and detailed operating documentation will be added ticket-by-ticket.
+Bootstrap skeleton, validation guardrails, Terraform conventions, dev/prod Terraform environments, the shared network module, shared security-groups module, shared IAM module, shared load-balancer module, ECS/Fargate service module, private RDS PostgreSQL module, optional Redis cache module, CloudWatch observability module, and metadata-only Secrets Manager reference module are in place. Remaining diagrams, service example polish, CI, and detailed operating documentation will be added ticket-by-ticket.
 
 ## Quick start validation
 
@@ -66,6 +66,7 @@ The quality gate checks shell syntax, repository structure, public-safety rules,
 │   ├── runbook.md
 │   ├── cost-notes.md
 │   ├── security.md
+│   ├── secrets.md
 │   ├── review-guide.md
 │   ├── decisions/
 │   └── diagrams/
@@ -79,6 +80,7 @@ The quality gate checks shell syntax, repository structure, public-safety rules,
         │   ├── observability/
         │   ├── rds-postgres/
         │   ├── redis-cache/
+        │   ├── secrets-manager-references/
         │   └── security-groups/
         └── environments/
             ├── dev/
@@ -95,6 +97,7 @@ The quality gate checks shell syntax, repository structure, public-safety rules,
 - Private PostgreSQL/RDS instance pattern with private subnet group, no public accessibility, backups, deletion protection variables, storage sizing, log exports, and RDS-managed Secrets Manager master credentials.
 - Optional private Redis/ElastiCache cache pattern with private subnet group, private security group input, enable/disable flag, encryption settings, snapshots, and replica/Multi-AZ production variables.
 - CloudWatch observability module with an environment dashboard, ALB 5xx and unhealthy-target alarms, ECS CPU/memory alarms, RDS CPU/free-storage alarms, and ECS log-group naming conventions.
+- Metadata-only AWS Secrets Manager reference containers for ECS secret injection, with no secret versions or values in Terraform.
 - Secret references via AWS-native services rather than committed secret values.
 - Separate dev/prod Terraform environments.
 

@@ -23,7 +23,7 @@ The module accepts an existing ECS cluster ARN/name rather than creating a clust
 - Public ingress is not created here. Traffic reaches the service through an ALB target group and, when enabled, an ALB listener rule.
 - The task execution role and application task role are passed in separately to preserve IAM role separation.
 - Container `environment_variables` are for non-secret values only.
-- Container `secret_references` are Secrets Manager or SSM Parameter Store ARNs only; secret values are never accepted or output.
+- Container `secret_references` are Secrets Manager or SSM Parameter Store ARNs only; environment roots populate them from the metadata-only Secrets Manager reference module by default, and secret values are never accepted or output.
 
 ## Load-balancer wiring
 
@@ -76,7 +76,7 @@ Before real use, review at least:
 - HTTPS-only ALB listeners and certificate management
 - WAF or trusted ingress controls at the public edge
 - per-service task roles rather than shared application task roles
-- exact secret ARN scoping and rotation ownership
+- exact secret ARN scoping, metadata ownership, and rotation ownership
 - VPC endpoints or NAT egress for image pulls, logs, ECS APIs, and secret references
 - container image provenance and vulnerability scanning
 - deployment alarms, paging, and rollback workflows

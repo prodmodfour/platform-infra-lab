@@ -34,12 +34,15 @@ The security-groups module now models explicit traffic boundaries:
 - PostgreSQL and Redis security groups do not receive public CIDR ingress rules
 - private data-store rules use security group references rather than broad VPC CIDR access
 
-The IAM module now models role separation and secret-reference access:
+The Secrets Manager reference and IAM modules now model secret-reference access:
 
+- the Secrets Manager reference module creates metadata-only `aws_secretsmanager_secret` containers for ECS task-definition secret injection
+- it deliberately creates no `aws_secretsmanager_secret_version` resources, accepts no `secret_string`, and stores no generated values in Terraform state
+- secret values must be created outside this public repository or by a secure user-owned pipeline
 - the ECS task execution role is trusted by `ecs-tasks.amazonaws.com` and receives the AWS-managed `AmazonECSTaskExecutionRolePolicy` for platform runtime needs
 - the application ECS task role is separately trusted by `ecs-tasks.amazonaws.com` and receives no broad AWS permissions by default
 - optional inline policies grant `secretsmanager:GetSecretValue`, `secretsmanager:DescribeSecret`, `ssm:GetParameter`, `ssm:GetParameters`, and optional `kms:Decrypt` only for supplied reference ARNs
-- environment examples use fake account ID `123456789012` and placeholder Secrets Manager or SSM Parameter Store paths; no secret values are committed
+- environment examples keep optional extra ARN lists empty and use module-created Secrets Manager ARNs for ECS injection; no secret values are committed
 - production use should review per-service task roles, exact ARN scoping, permissions boundaries, IAM Access Analyzer findings, KMS key policy alignment, and secret rotation ownership
 
 The ECS service module now models private workload placement and secret injection boundaries:
@@ -48,7 +51,7 @@ The ECS service module now models private workload placement and secret injectio
 - tasks use the private ECS service security group and receive traffic through ALB target groups only
 - container images are constrained in examples to fake `public.ecr.aws/example/...:demo` URIs
 - non-secret environment variables are separated from `secret_references`
-- `secret_references` must be Secrets Manager or SSM Parameter Store ARNs, not secret values
+- `secret_references` are populated from metadata-only Secrets Manager ARNs by default and may accept only approved ARN references, not secret values
 - listener rules are wired to the load-balancer module HTTP listener by default, keeping route ownership explicit
 
 The RDS PostgreSQL module now models the private database boundary:
@@ -81,4 +84,4 @@ The observability module now models CloudWatch visibility without committing pri
 
 The current egress model is intentionally strict and incomplete for real workloads. ECS services may need reviewed egress through VPC endpoints, NAT, or narrow rules for image pulls, logs, secret references, telemetry, and third-party APIs. Real database use also needs reviewed migration roles, least-privilege database users, connection pooling, audit logging, and secret rotation ownership. Real cache use should review Redis AUTH/ACLs, TLS client compatibility, cache parameter groups, eviction policy, and whether cached data includes tenant-sensitive or regulated content.
 
-Future content will expand validation-only CI notes, secret lifecycle details, and production hardening gaps.
+Secret lifecycle details are expanded in `docs/secrets.md`. Future content will expand validation-only CI notes, runbooks, and production hardening gaps.

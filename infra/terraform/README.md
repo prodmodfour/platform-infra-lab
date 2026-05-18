@@ -45,6 +45,11 @@ infra/terraform/
 │   │   ├── variables.tf
 │   │   ├── outputs.tf
 │   │   └── README.md
+│   ├── secrets-manager-references/
+│   │   ├── main.tf
+│   │   ├── variables.tf
+│   │   ├── outputs.tf
+│   │   └── README.md
 │   ├── observability/
 │   │   ├── main.tf
 │   │   ├── variables.tf
@@ -80,7 +85,7 @@ infra/terraform/
         └── README.md
 ```
 
-The `dev` and `prod` environment roots now both wire the shared `network`, `security-groups`, `iam`, `load-balancer`, `ecs-service`, `rds-postgres`, `redis-cache`, and `observability` modules. Future tickets continue adding docs, CI, and secret-reference details while preserving the same environment structure.
+The `dev` and `prod` environment roots now both wire the shared `network`, `security-groups`, `secrets-manager-references`, `iam`, `load-balancer`, `ecs-service`, `rds-postgres`, `redis-cache`, and `observability` modules. Future tickets continue adding docs, CI, and review polish while preserving the same environment structure.
 
 ## Naming guidance
 
@@ -154,6 +159,7 @@ Implemented modules:
 - `modules/network` — VPC, public/private subnets, internet gateway, route tables, and optional NAT gateway.
 - `modules/security-groups` — public ALB, private ECS service, private PostgreSQL, and optional private Redis security group boundaries.
 - `modules/iam` — ECS task execution role, application task role, and optional secret-reference read policies.
+- `modules/secrets-manager-references` — metadata-only Secrets Manager secret containers and ECS secret reference outputs, with no secret values or versions.
 - `modules/load-balancer` — public ALB edge with an HTTP listener, optional HTTPS listener variables, optional access-log references, and listener outputs for ECS service rules.
 - `modules/ecs-service` — private ECS/Fargate service pattern with task definition, service, log group, target group, listener rule, health checks, and autoscaling.
 - `modules/rds-postgres` — private RDS PostgreSQL instance pattern with a private subnet group, backups, deletion protection variables, storage sizing, log exports, and RDS-managed Secrets Manager master credentials.

@@ -32,6 +32,35 @@ load_balancer_access_logs_enabled         = false
 load_balancer_access_logs_bucket          = null
 load_balancer_access_logs_prefix          = null
 
+# Secrets Manager references. Terraform creates metadata-only secret containers; values stay outside this repo.
+secrets_manager_recovery_window_in_days = 30
+secrets_manager_kms_key_id              = null
+
+ecs_secret_definitions = {
+  carbon-platform-api = {
+    DATABASE_URL = {
+      secret_name = "database-url"
+      description = "Placeholder database URL reference for carbon-platform-api. The value is created outside this public repository."
+    }
+  }
+  job-runner-platform = {
+    JOB_RUNNER_API_KEY = {
+      secret_name = "api-key"
+      description = "Placeholder API key reference for job-runner-platform. The value is created outside this public repository."
+    }
+  }
+  multi-tenant-saas-api = {
+    DATABASE_URL = {
+      secret_name = "database-url"
+      description = "Placeholder database URL reference for multi-tenant-saas-api. The value is created outside this public repository."
+    }
+    JWT_SIGNING_KEY = {
+      secret_name = "jwt-signing-key"
+      description = "Placeholder JWT signing key reference for multi-tenant-saas-api. The value is created outside this public repository."
+    }
+  }
+}
+
 ecs_services = {
   carbon-platform-api = {
     image                       = "public.ecr.aws/example/carbon-platform-api:demo"
@@ -46,9 +75,7 @@ ecs_services = {
       LOG_LEVEL     = "info"
       DATABASE_MODE = "placeholder"
     }
-    secret_references = {
-      DATABASE_URL = "arn:aws:secretsmanager:us-east-1:123456789012:secret:platform-infra-lab/prod/ecs-execution/carbon-platform-api/database-url-demo"
-    }
+    secret_references = {}
     enable_autoscaling              = true
     autoscaling_min_capacity        = 2
     autoscaling_max_capacity        = 6
@@ -69,9 +96,7 @@ ecs_services = {
       WORKER_MODE = "demo"
       QUEUE_NAME  = "demo-jobs"
     }
-    secret_references = {
-      JOB_RUNNER_API_KEY = "arn:aws:ssm:us-east-1:123456789012:parameter/platform-infra-lab/prod/ecs-execution/job-runner-platform/api-key-demo"
-    }
+    secret_references = {}
     enable_autoscaling              = true
     autoscaling_min_capacity        = 2
     autoscaling_max_capacity        = 4
@@ -92,10 +117,7 @@ ecs_services = {
       TENANCY_MODE  = "demo"
       DATABASE_MODE = "placeholder"
     }
-    secret_references = {
-      DATABASE_URL    = "arn:aws:secretsmanager:us-east-1:123456789012:secret:platform-infra-lab/prod/ecs-execution/multi-tenant-saas-api/database-url-demo"
-      JWT_SIGNING_KEY = "arn:aws:ssm:us-east-1:123456789012:parameter/platform-infra-lab/prod/ecs-execution/multi-tenant-saas-api/jwt-signing-key-demo"
-    }
+    secret_references = {}
     enable_autoscaling              = true
     autoscaling_min_capacity        = 2
     autoscaling_max_capacity        = 6
@@ -175,21 +197,14 @@ rds_cpu_alarm_threshold_percent         = 75
 rds_free_storage_space_threshold_bytes  = 10737418240
 rds_alarm_evaluation_periods            = 3
 
-# Placeholder secret references only. Do not put secret values in tfvars files.
-execution_secret_reference_arns = [
-  "arn:aws:secretsmanager:us-east-1:123456789012:secret:platform-infra-lab/prod/ecs-execution/*",
-]
-execution_ssm_parameter_arns = [
-  "arn:aws:ssm:us-east-1:123456789012:parameter/platform-infra-lab/prod/ecs-execution/*",
-]
-execution_kms_key_arns = []
-task_secret_reference_arns = [
-  "arn:aws:secretsmanager:us-east-1:123456789012:secret:platform-infra-lab/prod/application/*",
-]
-task_ssm_parameter_arns = [
-  "arn:aws:ssm:us-east-1:123456789012:parameter/platform-infra-lab/prod/application/*",
-]
-task_kms_key_arns = []
+# Optional additional secret-reference scopes. Module-created Secrets Manager references feed the execution role automatically.
+# Keep these empty in committed examples unless you are showing public-safe extra ARNs.
+execution_secret_reference_arns = []
+execution_ssm_parameter_arns    = []
+execution_kms_key_arns          = []
+task_secret_reference_arns      = []
+task_ssm_parameter_arns         = []
+task_kms_key_arns               = []
 
 additional_tags = {
   Owner   = "portfolio-demo"

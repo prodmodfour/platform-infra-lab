@@ -421,7 +421,7 @@ Commit when complete.
 
 ## 012 — Add secrets/reference pattern
 
-Status: TODO
+Status: DONE
 
 Add Terraform and docs for secret references.
 

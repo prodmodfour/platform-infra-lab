@@ -15,6 +15,15 @@ The load-balancer module adds cost drivers if manually provisioned:
 - public edge data transfer
 - optional ALB access log storage and requests when a user-owned bucket is supplied
 
+The Secrets Manager reference module adds cost drivers if manually provisioned:
+
+- one Secrets Manager secret metadata container per modeled service secret
+- Secrets Manager API usage when ECS resolves secrets at task start
+- optional customer-managed KMS key requests if a user-owned key is supplied
+- any separate secure pipeline that creates or rotates secret values
+
+The module intentionally creates no secret versions or values in Terraform, but Secrets Manager resources themselves can still incur cost.
+
 The ECS service module adds cost drivers if manually provisioned:
 
 - Fargate vCPU and memory for each running task

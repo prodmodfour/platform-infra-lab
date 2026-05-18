@@ -18,6 +18,7 @@ required_paths=(
   BUILD_NOTES.md
   scripts
   docs
+  docs/secrets.md
   docs/decisions
   docs/diagrams
   infra
@@ -53,6 +54,10 @@ required_paths=(
   infra/terraform/modules/observability/variables.tf
   infra/terraform/modules/observability/outputs.tf
   infra/terraform/modules/observability/README.md
+  infra/terraform/modules/secrets-manager-references/main.tf
+  infra/terraform/modules/secrets-manager-references/variables.tf
+  infra/terraform/modules/secrets-manager-references/outputs.tf
+  infra/terraform/modules/secrets-manager-references/README.md
   infra/terraform/modules/security-groups/main.tf
   infra/terraform/modules/security-groups/variables.tf
   infra/terraform/modules/security-groups/outputs.tf
@@ -133,6 +138,25 @@ for env in dev prod; do
   grep -q 'module "iam"' "infra/terraform/environments/$env/main.tf"
   grep -q 'output "ecs_task_execution_role_arn"' "infra/terraform/environments/$env/outputs.tf"
   grep -q 'execution_secret_reference_arns' "infra/terraform/environments/$env/terraform.tfvars.example"
+done
+
+echo "== Terraform Secrets Manager reference module checks =="
+grep -q 'resource "aws_secretsmanager_secret" "ecs_execution"' infra/terraform/modules/secrets-manager-references/main.tf
+if grep -R 'resource "aws_secretsmanager_secret_version"' infra/terraform >/dev/null; then
+  echo "ERROR: secret value resources are not allowed in this public repo; use references only." >&2
+  exit 1
+fi
+grep -qi "Secret references, not values" infra/terraform/modules/secrets-manager-references/README.md
+grep -qi "Value ownership" infra/terraform/modules/secrets-manager-references/README.md
+grep -qi "Rotation considerations" infra/terraform/modules/secrets-manager-references/README.md
+grep -qi "created outside this public repository" docs/secrets.md
+grep -qi "does not create.*aws_secretsmanager_secret_version" docs/secrets.md
+for env in dev prod; do
+  grep -q 'module "secrets_manager_references"' "infra/terraform/environments/$env/main.tf"
+  grep -q 'module.secrets_manager_references.ecs_secret_references_by_service' "infra/terraform/environments/$env/main.tf"
+  grep -q 'output "secrets_manager_metadata_summary"' "infra/terraform/environments/$env/outputs.tf"
+  grep -q 'ecs_secret_definitions' "infra/terraform/environments/$env/terraform.tfvars.example"
+  grep -q 'secrets_manager_kms_key_id              = null' "infra/terraform/environments/$env/terraform.tfvars.example"
 done
 
 echo "== Terraform load balancer module checks =="

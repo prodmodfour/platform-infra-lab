@@ -43,7 +43,7 @@ Endpoints are outputs for wiring and review only. They are not credentials.
 
 The module enables at-rest and in-transit encryption by default. Committed examples keep user-owned KMS key inputs as `null` so no real key ARN is stored in this public repo.
 
-This module does **not** manage a Redis AUTH token, ACL user group, or application connection-string secret. Those values are sensitive and should be created through a secure secret-management workflow outside this public repository, then referenced by applications through Secrets Manager or SSM Parameter Store. The dedicated secret-reference ticket will expand that pattern.
+This module does **not** manage a Redis AUTH token, ACL user group, or application connection-string secret. Those values are sensitive and should be created through a secure secret-management workflow outside this public repository, then referenced by applications through AWS Secrets Manager. The current `secrets-manager-references` module covers ECS service secret references and can be extended by a user-owned design for cache connection secrets.
 
 Production use should review:
 

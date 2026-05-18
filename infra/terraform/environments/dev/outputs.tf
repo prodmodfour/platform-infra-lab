@@ -293,6 +293,31 @@ output "load_balancer_target_group_wiring_pattern" {
   value       = module.load_balancer.target_group_wiring_pattern
 }
 
+output "secrets_manager_reference_defaults" {
+  description = "Review-friendly defaults for metadata-only Secrets Manager reference containers."
+  value       = local.secrets_manager_reference_defaults
+}
+
+output "secrets_manager_ecs_secret_names_by_service" {
+  description = "Secrets Manager secret names created for ECS secret injection, keyed by service and environment variable. Names are not values."
+  value       = module.secrets_manager_references.ecs_secret_names_by_service
+}
+
+output "secrets_manager_ecs_secret_arns" {
+  description = "Secrets Manager ARNs created for ECS secret injection. These are references only, not secret values."
+  value       = module.secrets_manager_references.ecs_execution_secret_arns
+}
+
+output "secrets_manager_metadata_summary" {
+  description = "Review-friendly summary of Secrets Manager metadata-only resources."
+  value       = module.secrets_manager_references.secret_metadata_summary
+}
+
+output "secrets_manager_value_management_summary" {
+  description = "Summary of how secret values stay outside this public Terraform repository."
+  value       = module.secrets_manager_references.value_management_summary
+}
+
 output "iam_defaults" {
   description = "IAM secret-reference inputs passed to the IAM module. These are references only, not secret values."
   value       = local.iam_defaults

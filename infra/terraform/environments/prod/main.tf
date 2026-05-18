@@ -40,6 +40,8 @@ locals {
     rds_deletion_protection_enabled    = var.rds_deletion_protection_enabled
     rds_managed_master_user_secret     = true
     rds_publicly_accessible_by_default = false
+    secrets_manager_reference_count    = length(flatten([for _, secrets in var.ecs_secret_definitions : keys(secrets)]))
+    secrets_managed_as_references      = true
   }
 
   load_balancer_defaults = {
@@ -105,8 +107,19 @@ locals {
     redis_port        = var.redis_port
   }
 
+  secrets_manager_reference_defaults = {
+    secret_manager                     = "aws-secrets-manager"
+    secret_path_prefix                 = "${var.project_name}/${local.environment}"
+    recovery_window_in_days            = var.secrets_manager_recovery_window_in_days
+    kms_key_supplied                   = var.secrets_manager_kms_key_id != null
+    services_with_secret_references    = sort(keys(var.ecs_secret_definitions))
+    secret_reference_count             = length(flatten([for _, secrets in var.ecs_secret_definitions : keys(secrets)]))
+    secret_values_created_in_repo      = false
+    secret_values_created_in_terraform = false
+  }
+
   iam_defaults = {
-    execution_secret_reference_arns = var.execution_secret_reference_arns
+    execution_secret_reference_arns = concat(module.secrets_manager_references.ecs_execution_secret_arns, var.execution_secret_reference_arns)
     execution_ssm_parameter_arns    = var.execution_ssm_parameter_arns
     execution_kms_key_arns          = var.execution_kms_key_arns
     task_secret_reference_arns      = var.task_secret_reference_arns
@@ -139,14 +152,15 @@ locals {
   }
 
   planned_module_contract = {
-    network         = "implemented-ticket-004"
-    security_groups = "implemented-ticket-005"
-    iam             = "implemented-ticket-006"
-    ecs_service     = "implemented-ticket-007"
-    load_balancer   = "implemented-ticket-008"
-    rds_postgres    = "implemented-ticket-009"
-    redis_cache     = "implemented-ticket-010"
-    observability   = "implemented-ticket-011"
+    network                    = "implemented-ticket-004"
+    security_groups            = "implemented-ticket-005"
+    iam                        = "implemented-ticket-006"
+    ecs_service                = "implemented-ticket-007"
+    load_balancer              = "implemented-ticket-008"
+    rds_postgres               = "implemented-ticket-009"
+    redis_cache                = "implemented-ticket-010"
+    observability              = "implemented-ticket-011"
+    secrets_manager_references = "implemented-ticket-012"
   }
 }
 
@@ -178,17 +192,29 @@ module "security_groups" {
   common_tags       = local.common_tags
 }
 
+module "secrets_manager_references" {
+  source = "../../modules/secrets-manager-references"
+
+  name_prefix                      = local.name_prefix
+  environment                      = local.environment
+  secret_path_prefix               = "${var.project_name}/${local.environment}"
+  ecs_execution_secret_definitions = var.ecs_secret_definitions
+  kms_key_id                       = var.secrets_manager_kms_key_id
+  recovery_window_in_days          = var.secrets_manager_recovery_window_in_days
+  common_tags                      = local.common_tags
+}
+
 module "iam" {
   source = "../../modules/iam"
 
   name_prefix                     = local.name_prefix
   environment                     = local.environment
-  execution_secret_reference_arns = var.execution_secret_reference_arns
-  execution_ssm_parameter_arns    = var.execution_ssm_parameter_arns
-  execution_kms_key_arns          = var.execution_kms_key_arns
-  task_secret_reference_arns      = var.task_secret_reference_arns
-  task_ssm_parameter_arns         = var.task_ssm_parameter_arns
-  task_kms_key_arns               = var.task_kms_key_arns
+  execution_secret_reference_arns = local.iam_defaults.execution_secret_reference_arns
+  execution_ssm_parameter_arns    = local.iam_defaults.execution_ssm_parameter_arns
+  execution_kms_key_arns          = local.iam_defaults.execution_kms_key_arns
+  task_secret_reference_arns      = local.iam_defaults.task_secret_reference_arns
+  task_ssm_parameter_arns         = local.iam_defaults.task_ssm_parameter_arns
+  task_kms_key_arns               = local.iam_defaults.task_kms_key_arns
   common_tags                     = local.common_tags
 }
 
@@ -320,7 +346,10 @@ module "ecs_services" {
     },
     each.value.environment_variables
   )
-  secret_references = each.value.secret_references
+  secret_references = merge(
+    each.value.secret_references,
+    lookup(module.secrets_manager_references.ecs_secret_references_by_service, each.key, {})
+  )
 
   create_listener_rule        = var.create_ecs_listener_rules
   listener_arn                = var.ecs_listener_arn == null ? module.load_balancer.http_listener_arn : var.ecs_listener_arn

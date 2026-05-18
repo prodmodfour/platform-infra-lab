@@ -1,6 +1,6 @@
 # Dev Terraform environment
 
-This root module is the public-safe `dev` environment for `platform-infra-lab`. It establishes provider configuration, backend examples, variable defaults, outputs, naming, tagging, the shared network module, shared security-groups module, shared IAM module, shared load-balancer module, ECS/Fargate service examples, private RDS PostgreSQL example, and optional Redis cache example.
+This root module is the public-safe `dev` environment for `platform-infra-lab`. It establishes provider configuration, backend examples, variable defaults, outputs, naming, tagging, the shared network module, shared security-groups module, metadata-only Secrets Manager reference module, shared IAM module, shared load-balancer module, ECS/Fargate service examples, private RDS PostgreSQL example, and optional Redis cache example.
 
 ## Current scope
 
@@ -18,13 +18,14 @@ The dev environment now wires `../../modules/network` with cost-aware defaults:
 - optional HTTPS listener variables kept disabled until a user-owned ACM certificate ARN is supplied outside this repo
 - optional ALB access-log wiring kept disabled by default because no real log bucket is committed
 - private service-to-database rules scoped by security group reference rather than public CIDRs
-- ECS task execution and application task IAM roles with placeholder secret-reference read policies
+- metadata-only Secrets Manager containers for ECS-injected service secret references; no secret versions or values are created by Terraform
+- ECS task execution and application task IAM roles with secret-reference read policies scoped to module outputs plus optional empty extra ARN lists
 - a shared ECS cluster for private Fargate services
 - ECS service examples for `carbon-platform-api`, `job-runner-platform`, and `multi-tenant-saas-api`
 - fake public image URIs under `public.ecr.aws/example/...:demo`
 - per-service CloudWatch log groups, task definitions, services, target groups, health checks, and desired-count autoscaling
 - ALB listener rules that forward path patterns from the HTTP listener to each service target group
-- fake Secrets Manager and SSM Parameter Store ARNs as references only; no secret values are stored
+- ECS service secret inputs populated from Secrets Manager ARNs emitted by the secret-reference module; per-service extra references stay empty in committed examples
 - a private RDS PostgreSQL instance in the private subnet group
 - PostgreSQL public accessibility fixed to false
 - RDS-managed Secrets Manager master user credential; no database password value is committed or read by this Terraform
@@ -34,7 +35,7 @@ The dev environment now wires `../../modules/network` with cost-aware defaults:
 - CloudWatch observability module with a dev dashboard, ALB 5xx alarm, per-service unhealthy-target alarms, per-service ECS CPU/memory alarms, RDS CPU/free-storage alarms, and ECS log-group naming convention output
 - empty alarm action lists by default; real paging or incident-routing ARNs must be supplied only outside this repo
 
-Future tickets add secret-reference modeling details, CI, diagrams, and fuller operating documentation.
+Future tickets add CI, diagrams, service-example polish, and fuller operating documentation.
 
 ## Dev posture
 
@@ -49,7 +50,7 @@ Dev is intentionally small and cost-aware:
 - default ECS desired count is one task for each service example
 - autoscaling ranges are intentionally small for review
 - observability thresholds are visible variables, with empty alarm action lists to avoid committing real routing ARNs
-- placeholder IAM and container secret-reference scopes use dev paths and a fake account ID for review only
+- Secrets Manager reference containers use dev paths and metadata only; secret values remain outside this repository
 
 These are placeholders for review and validation, not a production recommendation.
 
@@ -59,7 +60,7 @@ Public subnets are intended for internet-facing components only. Private subnets
 
 The security group boundary is intentionally narrow: internet CIDRs reach only the ALB security group, the ALB reaches ECS services only on the service port through listener rules and target groups, ECS services reach PostgreSQL only on port 5432, and Redis rules/resources are created only when Redis is enabled. No public database or cache ingress is modeled. The RDS PostgreSQL module consumes the private RDS security group and private subnets, and fixes `publicly_accessible = false`. The Redis cache module consumes private subnets and the private Redis security group only when enabled.
 
-The IAM boundary separates the ECS task execution role from the application task role. The execution role is for ECS runtime integration such as image pulls, log delivery, and ECS-managed secret injection. The application task role starts with only explicitly supplied secret-reference read permissions. ECS service examples pass secret references as ARNs only, never values. All example ARNs are placeholders and must be replaced or removed before any real manual provisioning.
+The IAM boundary separates the ECS task execution role from the application task role. The execution role is for ECS runtime integration such as image pulls, log delivery, and ECS-managed secret injection. The Secrets Manager reference module creates metadata-only secret containers and passes ARNs to the ECS service module; it does not create secret versions or values. The application task role starts with no direct secret-read permissions unless explicit additional ARNs are supplied in a user-owned environment.
 
 If NAT is enabled for a real dev experiment, it can create ongoing cloud cost. Keep it disabled unless the workload needs private outbound internet access, and clean up user-owned resources after review. Real workloads may also need reviewed egress through VPC endpoints, NAT, or narrow outbound rules for image pulls, logging, secret references, and AWS APIs.
 

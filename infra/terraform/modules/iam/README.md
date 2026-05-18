@@ -23,7 +23,7 @@ Keeping these roles separate makes review easier: platform runtime permissions d
 
 ## Secret references, not values
 
-This module never accepts or stores secret values. It accepts only ARNs for existing AWS Secrets Manager secrets, SSM Parameter Store parameters, and optional KMS keys.
+This module never accepts or stores secret values. It accepts only ARNs for AWS Secrets Manager secrets, optional SSM Parameter Store parameters, and optional KMS keys. Environment roots now feed it Secrets Manager ARNs from the metadata-only `secrets-manager-references` module plus any explicitly supplied additional user-owned references.
 
 Example placeholder references are safe for this public repo:
 
@@ -32,8 +32,8 @@ execution_secret_reference_arns = [
   "arn:aws:secretsmanager:us-east-1:123456789012:secret:platform-infra-lab/dev/ecs-execution/*",
 ]
 
-task_ssm_parameter_arns = [
-  "arn:aws:ssm:us-east-1:123456789012:parameter/platform-infra-lab/dev/application/*",
+task_secret_reference_arns = [
+  "arn:aws:secretsmanager:us-east-1:123456789012:secret:platform-infra-lab/dev/application/*",
 ]
 ```
 
@@ -74,7 +74,7 @@ Outputs include resource identifiers and secret-reference ARNs only. They do not
 - The application task role starts with no broad AWS permissions.
 - Secret-read policies are created only when reference ARN inputs are supplied.
 - Policies scope reads to the supplied Secrets Manager, SSM Parameter Store, and KMS ARNs instead of using account-wide `*` resources.
-- This module does not create secrets or parameters. It only models IAM access to references that should exist outside this public repo.
+- This module does not create secret values or parameters. It only models IAM access to references created by the metadata-only Secrets Manager module or supplied from a user-owned environment.
 
 ## Cost notes
 

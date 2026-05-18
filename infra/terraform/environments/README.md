@@ -1,6 +1,6 @@
 # Terraform environment conventions
 
-This directory contains Terraform root modules for deployable environments. The `dev` and `prod` roots include provider configuration, backend examples, variables, outputs, per-environment documentation, and the shared network, security-groups, IAM, load-balancer, ECS service, RDS PostgreSQL, Redis cache, and observability modules.
+This directory contains Terraform root modules for deployable environments. The `dev` and `prod` roots include provider configuration, backend examples, variables, outputs, per-environment documentation, and the shared network, security-groups, Secrets Manager reference, IAM, load-balancer, ECS service, RDS PostgreSQL, Redis cache, and observability modules.
 
 Environment roots are responsible for composing reusable modules with environment-specific inputs. They are the main review surface for proposed infrastructure changes. Module calls are added ticket-by-ticket as modules are implemented.
 
@@ -21,8 +21,8 @@ Each environment must include:
 
 Current environments:
 
-- `dev` — cost-aware lab defaults such as disabled NAT, two public/private subnet pairs, HTTP ALB listener wiring, shorter log retention, disabled cache resources/cache security group, one task per demo ECS service, a small single-AZ private PostgreSQL instance, dev-scoped placeholder IAM/container secret references, and empty alarm action lists.
-- `prod` — production-intent examples such as three public/private subnet pairs, enabled NAT, HTTP ALB listener wiring, longer log retention, deletion protection, enabled private Redis cache with one replica/Multi-AZ intent, two tasks per demo ECS service, a Multi-AZ private PostgreSQL instance, prod-scoped placeholder IAM/container secret references, and empty alarm action lists until a user-owned environment supplies routing ARNs.
+- `dev` — cost-aware lab defaults such as disabled NAT, two public/private subnet pairs, HTTP ALB listener wiring, shorter log retention, disabled cache resources/cache security group, one task per demo ECS service, a small single-AZ private PostgreSQL instance, dev-scoped metadata-only Secrets Manager references, and empty alarm action lists.
+- `prod` — production-intent examples such as three public/private subnet pairs, enabled NAT, HTTP ALB listener wiring, longer log retention, deletion protection, enabled private Redis cache with one replica/Multi-AZ intent, two tasks per demo ECS service, a Multi-AZ private PostgreSQL instance, prod-scoped metadata-only Secrets Manager references, and empty alarm action lists until a user-owned environment supplies routing ARNs.
 
 Do not commit real `.tfvars` files, real backend configuration, generated plan files, Terraform state, local credentials, or local `.env` files.
 

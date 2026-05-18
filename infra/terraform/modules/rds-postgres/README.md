@@ -33,7 +33,7 @@ manage_master_user_password = true
 
 If a user manually provisions the lab, AWS creates and stores the master credential in Secrets Manager. The module outputs `master_user_secret_arn` as a reference only. The secret value itself is not read by Terraform code in this repository, not written to examples, and not exposed in outputs.
 
-Application connection strings should be stored as separate user-owned Secrets Manager or SSM Parameter Store references outside this repository or by a secure user-owned pipeline. The existing ECS service examples continue to use placeholder secret-reference ARNs for `DATABASE_URL`.
+Application connection strings should be stored as separate user-owned Secrets Manager references outside this repository or by a secure user-owned pipeline. The `secrets-manager-references` module creates metadata-only secret containers for service-level `DATABASE_URL` references and passes their ARNs to ECS without storing values.
 
 ## Backups and deletion protection
 

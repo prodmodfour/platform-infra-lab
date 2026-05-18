@@ -7,13 +7,14 @@ This document is a living placeholder for the target AWS/Terraform architecture.
 - `infra/terraform/modules/network` models the base VPC, public subnets, private subnets, an internet gateway, route tables, and an optional NAT gateway.
 - `infra/terraform/modules/security-groups` models public ALB, private ECS service, private PostgreSQL/RDS, and optional private Redis/ElastiCache security group boundaries.
 - `infra/terraform/modules/iam` models the ECS task execution role, application task role, and optional read policies for secret references.
+- `infra/terraform/modules/secrets-manager-references` models metadata-only AWS Secrets Manager secret containers and reference outputs for ECS task-definition secret injection. It creates no secret versions or values.
 - `infra/terraform/modules/load-balancer` models an internet-facing Application Load Balancer, required HTTP listener, optional HTTPS listener variables, optional access-log references, and listener outputs for service rules.
 - `infra/terraform/modules/ecs-service` models a private Fargate service with task definition, ECS service, CloudWatch log group, ALB target group, listener rule, health checks, and desired-count autoscaling.
 - `infra/terraform/modules/rds-postgres` models a private RDS PostgreSQL instance with a private DB subnet group, no public accessibility, backup/deletion-protection settings, storage variables, log exports, optional monitoring settings, and RDS-managed Secrets Manager master credentials.
 - `infra/terraform/modules/redis-cache` models an optional private ElastiCache Redis/Valkey-style replication group with a private subnet group, private security group input, enable/disable behavior, encryption settings, snapshots, and replica/Multi-AZ variables.
 - `infra/terraform/modules/observability` models a CloudWatch dashboard, ALB 5xx alarm, per-service unhealthy-target alarms, per-service ECS CPU/memory alarms, RDS CPU/free-storage alarms, and ECS log-group naming conventions.
-- `infra/terraform/environments/dev` wires the network, security-groups, IAM, load-balancer, ECS service, RDS PostgreSQL, Redis cache, and observability modules with two public/private subnet pairs, NAT disabled by default, Redis resources disabled by default, one task per demo service, a small single-AZ private PostgreSQL instance, dev-scoped placeholder secret-reference ARNs, empty alarm action lists, and fake service images.
-- `infra/terraform/environments/prod` wires the network, security-groups, IAM, load-balancer, ECS service, RDS PostgreSQL, Redis cache, and observability modules with three public/private subnet pairs, NAT enabled by default to demonstrate private egress intent, Redis resources enabled to show the optional cache tier with one replica/Multi-AZ intent, two tasks per demo service, a Multi-AZ private PostgreSQL instance with deletion protection, prod-scoped placeholder secret-reference ARNs, empty alarm action lists, and fake service images.
+- `infra/terraform/environments/dev` wires the network, security-groups, Secrets Manager reference, IAM, load-balancer, ECS service, RDS PostgreSQL, Redis cache, and observability modules with two public/private subnet pairs, NAT disabled by default, Redis resources disabled by default, metadata-only dev secret references, one task per demo service, a small single-AZ private PostgreSQL instance, empty alarm action lists, and fake service images.
+- `infra/terraform/environments/prod` wires the network, security-groups, Secrets Manager reference, IAM, load-balancer, ECS service, RDS PostgreSQL, Redis cache, and observability modules with three public/private subnet pairs, NAT enabled by default to demonstrate private egress intent, Redis resources enabled to show the optional cache tier with one replica/Multi-AZ intent, metadata-only prod secret references, two tasks per demo service, a Multi-AZ private PostgreSQL instance with deletion protection, empty alarm action lists, and fake service images.
 
 ## Target architecture themes
 
@@ -36,12 +37,14 @@ Current ECS service intent:
 - each service has a CloudWatch log group, target group, target-group health check, container health check, deployment circuit breaker, listener rule, and autoscaling settings
 - listener rules use the load-balancer module's HTTP listener ARN by default and forward service path patterns to private Fargate target groups
 
-Current IAM intent:
+Current secret-reference and IAM intent:
 
+- the Secrets Manager reference module creates metadata-only `aws_secretsmanager_secret` resources for ECS-injected service secrets
+- no `aws_secretsmanager_secret_version`, generated password, secret string, or real value is stored by Terraform
 - the ECS task execution role is reserved for ECS runtime integration, including image pulls, log delivery, and ECS-managed secret injection
-- the application task role is separate and starts with only explicitly supplied secret-reference read permissions
-- secret policies use variable-provided Secrets Manager and SSM Parameter Store ARNs, plus optional KMS key ARNs, rather than committed secret values
-- example ARNs use a fake account ID and placeholder paths only
+- the application task role is separate and starts with no direct secret-read permissions unless explicit additional reference ARNs are supplied
+- secret policies combine module-created Secrets Manager ARNs with optional user-owned extra ARNs, plus optional KMS key ARNs, rather than committed secret values
+- secret names and descriptions are public-safe placeholders only; real values are created outside this repo or by secure user-owned pipelines
 
 Current RDS PostgreSQL intent:
 
@@ -59,7 +62,7 @@ Current Redis/Valkey cache intent:
 - the module is disabled in dev by default to avoid unnecessary lab cost
 - prod enables a small private replication group with one replica, automatic failover, Multi-AZ, at-rest encryption, in-transit encryption, snapshot retention, and a final snapshot identifier
 - endpoint outputs are references for application configuration and review, not credentials
-- no Redis AUTH token or ACL secret value is stored in Terraform; secure secret-reference wiring is deferred to the dedicated secrets ticket
+- no Redis AUTH token or ACL secret value is stored in Terraform; the current Secrets Manager module covers ECS service secrets and can be extended with cache connection references in a user-owned design
 
 Current observability intent:
 

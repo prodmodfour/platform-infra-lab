@@ -12,6 +12,7 @@ Planned documents:
 - `operations.md` and `runbook.md` — operational checks and incident response notes.
 - `cost-notes.md` — qualitative cost drivers and cleanup guidance.
 - `security.md` — public-safety, IAM, network, and secret-reference posture.
+- `secrets.md` — Secrets Manager reference pattern without committed values.
 - `review-guide.md` — suggested path for portfolio reviewers.
 - `decisions/` — architecture decision records.
 - `diagrams/` — public-safe text or Mermaid diagrams.

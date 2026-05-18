@@ -7,6 +7,7 @@ This directory contains reusable Terraform modules for the AWS platform lab. Mod
 - `network` — VPC, public/private subnets, route tables, an internet gateway, and an optional NAT gateway for private subnet egress.
 - `security-groups` — ALB, ECS service, PostgreSQL/RDS, and optional Redis/ElastiCache security group boundaries.
 - `iam` — ECS task execution role, application task role, and optional read policies for Secrets Manager or SSM Parameter Store references.
+- `secrets-manager-references` — metadata-only AWS Secrets Manager secret containers and ECS reference outputs, with values managed outside this public repo.
 - `load-balancer` — public Application Load Balancer, HTTP listener, optional HTTPS listener variables, optional access-log references, and listener outputs for ECS service rules.
 - `ecs-service` — ECS/Fargate task definition, service, CloudWatch log group, ALB target group, listener rule, health checks, and desired-count autoscaling.
 - `rds-postgres` — private RDS PostgreSQL instance, subnet group, backup/deletion-protection settings, storage variables, log exports, and RDS-managed Secrets Manager master credentials.
@@ -92,7 +93,7 @@ Every module README should explain the security boundary it models. Examples:
 - security group resources keep database and cache ingress private
 - ECS modules separate task execution role needs from application task role permissions
 - RDS and Redis modules avoid public accessibility by default
-- secret-related inputs accept references, not committed values
+- secret-related inputs accept references or metadata only, not committed values
 
 Least-privilege intent should be visible in variables, IAM policy scope, and security group wiring. Production hardening gaps should be called out instead of hidden.
 

@@ -241,6 +241,81 @@ variable "load_balancer_access_logs_prefix" {
   }
 }
 
+variable "secrets_manager_recovery_window_in_days" {
+  description = "Secrets Manager recovery window for metadata-only ECS secret containers in prod. No secret values are managed by Terraform."
+  type        = number
+  default     = 30
+
+  validation {
+    condition     = var.secrets_manager_recovery_window_in_days >= 7 && var.secrets_manager_recovery_window_in_days <= 30
+    error_message = "secrets_manager_recovery_window_in_days must be between 7 and 30 days."
+  }
+}
+
+variable "secrets_manager_kms_key_id" {
+  description = "Optional user-owned KMS key ID/ARN/alias for Secrets Manager encryption. Keep null in committed examples."
+  type        = string
+  default     = null
+  nullable    = true
+
+  validation {
+    condition     = var.secrets_manager_kms_key_id == null ? true : length(trimspace(var.secrets_manager_kms_key_id)) > 0
+    error_message = "secrets_manager_kms_key_id must be null or a non-empty KMS key identifier."
+  }
+}
+
+variable "ecs_secret_definitions" {
+  description = "Secrets Manager metadata containers for ECS-injected secret references. Values describe references only; secret values are created outside this repo."
+  type = map(map(object({
+    secret_name = string
+    description = string
+  })))
+  default = {
+    carbon-platform-api = {
+      DATABASE_URL = {
+        secret_name = "database-url"
+        description = "Placeholder database URL reference for carbon-platform-api. The value is created outside this public repository."
+      }
+    }
+    job-runner-platform = {
+      JOB_RUNNER_API_KEY = {
+        secret_name = "api-key"
+        description = "Placeholder API key reference for job-runner-platform. The value is created outside this public repository."
+      }
+    }
+    multi-tenant-saas-api = {
+      DATABASE_URL = {
+        secret_name = "database-url"
+        description = "Placeholder database URL reference for multi-tenant-saas-api. The value is created outside this public repository."
+      }
+      JWT_SIGNING_KEY = {
+        secret_name = "jwt-signing-key"
+        description = "Placeholder JWT signing key reference for multi-tenant-saas-api. The value is created outside this public repository."
+      }
+    }
+  }
+
+  validation {
+    condition = alltrue([
+      for service_name, secrets in var.ecs_secret_definitions :
+      can(regex("^[a-z][a-z0-9-]+$", service_name)) && length(secrets) > 0
+    ])
+    error_message = "ecs_secret_definitions service keys must be lowercase kebab-case and each service must include at least one secret."
+  }
+
+  validation {
+    condition = alltrue(flatten([
+      for _, secrets in var.ecs_secret_definitions : [
+        for environment_variable_name, config in secrets :
+        can(regex("^[A-Z_][A-Z0-9_]*$", environment_variable_name)) &&
+        can(regex("^[a-z][a-z0-9-]+$", config.secret_name)) &&
+        length(trimspace(config.description)) >= 20
+      ]
+    ]))
+    error_message = "Secret environment variable names must be uppercase identifiers, secret_name must be lowercase kebab-case, and descriptions must explain the placeholder reference."
+  }
+}
+
 variable "ecs_services" {
   description = "Public-safe ECS/Fargate service examples keyed by service name. Images and secret references must be placeholders only."
   type = map(object({
@@ -274,9 +349,7 @@ variable "ecs_services" {
         LOG_LEVEL     = "info"
         DATABASE_MODE = "placeholder"
       }
-      secret_references = {
-        DATABASE_URL = "arn:aws:secretsmanager:us-east-1:123456789012:secret:platform-infra-lab/prod/ecs-execution/carbon-platform-api/database-url-demo"
-      }
+      secret_references               = {}
       enable_autoscaling              = true
       autoscaling_min_capacity        = 2
       autoscaling_max_capacity        = 6
@@ -297,9 +370,7 @@ variable "ecs_services" {
         WORKER_MODE = "demo"
         QUEUE_NAME  = "demo-jobs"
       }
-      secret_references = {
-        JOB_RUNNER_API_KEY = "arn:aws:ssm:us-east-1:123456789012:parameter/platform-infra-lab/prod/ecs-execution/job-runner-platform/api-key-demo"
-      }
+      secret_references               = {}
       enable_autoscaling              = true
       autoscaling_min_capacity        = 2
       autoscaling_max_capacity        = 4
@@ -320,10 +391,7 @@ variable "ecs_services" {
         TENANCY_MODE  = "demo"
         DATABASE_MODE = "placeholder"
       }
-      secret_references = {
-        DATABASE_URL    = "arn:aws:secretsmanager:us-east-1:123456789012:secret:platform-infra-lab/prod/ecs-execution/multi-tenant-saas-api/database-url-demo"
-        JWT_SIGNING_KEY = "arn:aws:ssm:us-east-1:123456789012:parameter/platform-infra-lab/prod/ecs-execution/multi-tenant-saas-api/jwt-signing-key-demo"
-      }
+      secret_references               = {}
       enable_autoscaling              = true
       autoscaling_min_capacity        = 2
       autoscaling_max_capacity        = 6
@@ -997,45 +1065,37 @@ variable "rds_alarm_evaluation_periods" {
 }
 
 variable "execution_secret_reference_arns" {
-  description = "Public-safe placeholder Secrets Manager ARNs that the ECS task execution role may read for task-definition secret injection. References only; no secret values."
+  description = "Optional additional user-owned Secrets Manager ARNs that the ECS task execution role may read beyond module-created metadata references. Keep empty in committed examples."
   type        = list(string)
-  default = [
-    "arn:aws:secretsmanager:us-east-1:123456789012:secret:platform-infra-lab/prod/ecs-execution/*",
-  ]
+  default     = []
 }
 
 variable "execution_ssm_parameter_arns" {
-  description = "Public-safe placeholder SSM Parameter Store ARNs that the ECS task execution role may read for task-definition secret injection. References only; no parameter values."
+  description = "Optional additional SSM Parameter Store ARNs for ECS task-definition secret injection. Kept empty because this ticket models Secrets Manager references."
   type        = list(string)
-  default = [
-    "arn:aws:ssm:us-east-1:123456789012:parameter/platform-infra-lab/prod/ecs-execution/*",
-  ]
+  default     = []
 }
 
 variable "execution_kms_key_arns" {
-  description = "Optional placeholder KMS key ARNs for execution-role decrypt access when secret references use customer-managed keys. Empty by default."
+  description = "Optional user-owned KMS key ARNs for execution-role decrypt access when secret references use customer-managed keys. Empty by default."
   type        = list(string)
   default     = []
 }
 
 variable "task_secret_reference_arns" {
-  description = "Public-safe placeholder Secrets Manager ARNs that application code may read through the ECS task role. References only; no secret values."
+  description = "Optional Secrets Manager ARNs that application code may read through the ECS task role. ECS-injected secrets normally use the execution role instead."
   type        = list(string)
-  default = [
-    "arn:aws:secretsmanager:us-east-1:123456789012:secret:platform-infra-lab/prod/application/*",
-  ]
+  default     = []
 }
 
 variable "task_ssm_parameter_arns" {
-  description = "Public-safe placeholder SSM Parameter Store ARNs that application code may read through the ECS task role. References only; no parameter values."
+  description = "Optional SSM Parameter Store ARNs that application code may read through the ECS task role. Kept empty in committed examples."
   type        = list(string)
-  default = [
-    "arn:aws:ssm:us-east-1:123456789012:parameter/platform-infra-lab/prod/application/*",
-  ]
+  default     = []
 }
 
 variable "task_kms_key_arns" {
-  description = "Optional placeholder KMS key ARNs for application task-role decrypt access when secret references use customer-managed keys. Empty by default."
+  description = "Optional user-owned KMS key ARNs for application task-role decrypt access when direct application secret reads use customer-managed keys. Empty by default."
   type        = list(string)
   default     = []
 }
