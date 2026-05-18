@@ -26,6 +26,8 @@ locals {
     deletion_protection_enabled   = var.deletion_protection_enabled
     enable_redis                  = var.enable_redis
     service_desired_count_default = var.service_desired_count_default
+    ecs_service_count             = length(var.ecs_services)
+    ecs_listener_rules_enabled    = var.create_ecs_listener_rules
   }
 
   security_group_defaults = {
@@ -46,11 +48,18 @@ locals {
     task_kms_key_arns               = var.task_kms_key_arns
   }
 
+  ecs_service_defaults = {
+    cluster_name           = "${local.name_prefix}-ecs-cluster"
+    service_names          = sort(keys(var.ecs_services))
+    listener_rules_enabled = var.create_ecs_listener_rules
+    listener_arn_supplied  = var.ecs_listener_arn != null
+  }
+
   planned_module_contract = {
     network         = "implemented-ticket-004"
     security_groups = "implemented-ticket-005"
     iam             = "implemented-ticket-006"
-    ecs_service     = "ticket-007"
+    ecs_service     = "implemented-ticket-007"
     load_balancer   = "ticket-008"
     rds_postgres    = "ticket-009"
     redis_cache     = "ticket-010"
@@ -98,4 +107,59 @@ module "iam" {
   task_ssm_parameter_arns         = var.task_ssm_parameter_arns
   task_kms_key_arns               = var.task_kms_key_arns
   common_tags                     = local.common_tags
+}
+
+resource "aws_ecs_cluster" "platform" {
+  name = local.ecs_service_defaults.cluster_name
+
+  tags = merge(local.common_tags, {
+    Name      = local.ecs_service_defaults.cluster_name
+    Component = "ecs-cluster"
+  })
+}
+
+module "ecs_services" {
+  source   = "../../modules/ecs-service"
+  for_each = var.ecs_services
+
+  name_prefix             = local.name_prefix
+  environment             = local.environment
+  service_name            = each.key
+  aws_region              = var.aws_region
+  vpc_id                  = module.network.vpc_id
+  cluster_arn             = aws_ecs_cluster.platform.arn
+  cluster_name            = aws_ecs_cluster.platform.name
+  private_subnet_ids      = module.network.private_subnet_ids
+  security_group_ids      = [module.security_groups.ecs_service_security_group_id]
+  task_execution_role_arn = module.iam.ecs_task_execution_role_arn
+  task_role_arn           = module.iam.ecs_task_role_arn
+
+  container_image    = each.value.image
+  container_port     = each.value.container_port
+  cpu                = each.value.cpu
+  memory             = each.value.memory
+  desired_count      = each.value.desired_count
+  log_retention_days = var.log_retention_days
+  health_check_path  = each.value.health_check_path
+  environment_variables = merge(
+    {
+      APP_ENV      = local.environment
+      SERVICE_NAME = each.key
+    },
+    each.value.environment_variables
+  )
+  secret_references = each.value.secret_references
+
+  create_listener_rule        = var.create_ecs_listener_rules
+  listener_arn                = var.ecs_listener_arn
+  listener_rule_priority      = each.value.listener_rule_priority
+  listener_rule_path_patterns = each.value.listener_rule_path_patterns
+
+  enable_autoscaling              = each.value.enable_autoscaling
+  autoscaling_min_capacity        = each.value.autoscaling_min_capacity
+  autoscaling_max_capacity        = each.value.autoscaling_max_capacity
+  autoscaling_cpu_target_value    = each.value.autoscaling_cpu_target_value
+  autoscaling_memory_target_value = each.value.autoscaling_memory_target_value
+
+  common_tags = local.common_tags
 }

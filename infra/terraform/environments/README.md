@@ -1,6 +1,6 @@
 # Terraform environment conventions
 
-This directory contains Terraform root modules for deployable environments. The `dev` and `prod` roots include provider configuration, backend examples, variables, outputs, per-environment documentation, and the shared network, security-groups, and IAM modules.
+This directory contains Terraform root modules for deployable environments. The `dev` and `prod` roots include provider configuration, backend examples, variables, outputs, per-environment documentation, and the shared network, security-groups, IAM, and ECS service modules.
 
 Environment roots are responsible for composing reusable modules with environment-specific inputs. They are the main review surface for proposed infrastructure changes. Module calls are added ticket-by-ticket as modules are implemented.
 
@@ -21,8 +21,8 @@ Each environment must include:
 
 Current environments:
 
-- `dev` — cost-aware lab defaults such as disabled NAT, two public/private subnet pairs, shorter log retention, disabled cache/cache security group, one default service task, and dev-scoped placeholder IAM secret references.
-- `prod` — production-intent examples such as three public/private subnet pairs, enabled NAT, longer log retention, deletion protection, cache security group enabled, two default service tasks, and prod-scoped placeholder IAM secret references.
+- `dev` — cost-aware lab defaults such as disabled NAT, two public/private subnet pairs, shorter log retention, disabled cache/cache security group, one task per demo ECS service, and dev-scoped placeholder IAM/container secret references.
+- `prod` — production-intent examples such as three public/private subnet pairs, enabled NAT, longer log retention, deletion protection, cache security group enabled, two tasks per demo ECS service, and prod-scoped placeholder IAM/container secret references.
 
 Do not commit real `.tfvars` files, real backend configuration, generated plan files, Terraform state, local credentials, or local `.env` files.
 
@@ -44,7 +44,7 @@ Each environment root should:
 
 `prod` should demonstrate production intent rather than guarantee production readiness. Examples include higher availability settings, stronger log retention, deletion protection for stateful services, tighter scaling thresholds, and clear notes about remaining hardening work.
 
-Both environments must remain public-safe and should use generic demo services only.
+Both environments must remain public-safe and should use generic demo services only. Current service examples are `carbon-platform-api`, `job-runner-platform`, and `multi-tenant-saas-api`, all using fake `public.ecr.aws/example/...:demo` images.
 
 ## Variable files
 

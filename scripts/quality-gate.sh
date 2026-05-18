@@ -25,6 +25,10 @@ required_paths=(
   infra/terraform/README.md
   infra/terraform/modules
   infra/terraform/modules/README.md
+  infra/terraform/modules/ecs-service/main.tf
+  infra/terraform/modules/ecs-service/variables.tf
+  infra/terraform/modules/ecs-service/outputs.tf
+  infra/terraform/modules/ecs-service/README.md
   infra/terraform/modules/iam/main.tf
   infra/terraform/modules/iam/variables.tf
   infra/terraform/modules/iam/outputs.tf
@@ -113,6 +117,28 @@ for env in dev prod; do
   grep -q 'module "iam"' "infra/terraform/environments/$env/main.tf"
   grep -q 'output "ecs_task_execution_role_arn"' "infra/terraform/environments/$env/outputs.tf"
   grep -q 'execution_secret_reference_arns' "infra/terraform/environments/$env/terraform.tfvars.example"
+done
+
+echo "== Terraform ECS service module checks =="
+grep -q 'resource "aws_cloudwatch_log_group" "this"' infra/terraform/modules/ecs-service/main.tf
+grep -q 'resource "aws_ecs_task_definition" "this"' infra/terraform/modules/ecs-service/main.tf
+grep -q 'resource "aws_ecs_service" "this"' infra/terraform/modules/ecs-service/main.tf
+grep -q 'resource "aws_lb_target_group" "this"' infra/terraform/modules/ecs-service/main.tf
+grep -q 'resource "aws_lb_listener_rule" "this"' infra/terraform/modules/ecs-service/main.tf
+grep -q 'resource "aws_appautoscaling_target" "desired_count"' infra/terraform/modules/ecs-service/main.tf
+grep -q 'public.ecr.aws/example' infra/terraform/modules/ecs-service/variables.tf
+grep -qi "Load-balancer wiring" infra/terraform/modules/ecs-service/README.md
+grep -qi "Secret references" infra/terraform/modules/ecs-service/README.md
+grep -qi "Autoscaling" infra/terraform/modules/ecs-service/README.md
+for env in dev prod; do
+  grep -q 'resource "aws_ecs_cluster" "platform"' "infra/terraform/environments/$env/main.tf"
+  grep -q 'module "ecs_services"' "infra/terraform/environments/$env/main.tf"
+  grep -q 'output "ecs_cluster_name"' "infra/terraform/environments/$env/outputs.tf"
+  grep -q 'output "ecs_service_summaries"' "infra/terraform/environments/$env/outputs.tf"
+  grep -q 'carbon-platform-api' "infra/terraform/environments/$env/terraform.tfvars.example"
+  grep -q 'job-runner-platform' "infra/terraform/environments/$env/terraform.tfvars.example"
+  grep -q 'multi-tenant-saas-api' "infra/terraform/environments/$env/terraform.tfvars.example"
+  grep -q 'create_ecs_listener_rules = false' "infra/terraform/environments/$env/terraform.tfvars.example"
 done
 
 echo "== Terraform security group boundary checks =="

@@ -2,7 +2,7 @@
 
 This directory contains public-safe documentation for the `platform-infra-lab` AWS/Terraform portfolio project.
 
-Detailed guides will be completed as the Terraform modules and environments are added. Current files are placeholders that establish the expected review structure without exposing private systems, credentials, real account IDs, or non-public architecture.
+Detailed guides will be completed as the Terraform modules and environments are added. Current files are intentionally public-safe and evolve ticket-by-ticket without exposing private systems, credentials, real account IDs, or non-public architecture.
 
 Planned documents:
 

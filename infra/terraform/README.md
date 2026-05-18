@@ -20,6 +20,11 @@ infra/terraform/
 ├── README.md
 ├── modules/
 │   ├── README.md
+│   ├── ecs-service/
+│   │   ├── main.tf
+│   │   ├── variables.tf
+│   │   ├── outputs.tf
+│   │   └── README.md
 │   ├── iam/
 │   │   ├── main.tf
 │   │   ├── variables.tf
@@ -55,7 +60,7 @@ infra/terraform/
         └── README.md
 ```
 
-The `dev` and `prod` environment roots now both wire the shared `network`, `security-groups`, and `iam` modules. Future tickets add the remaining modules and continue wiring the same module set into both environments.
+The `dev` and `prod` environment roots now both wire the shared `network`, `security-groups`, `iam`, and `ecs-service` modules. Future tickets add the remaining modules and continue wiring the same module set into both environments.
 
 ## Naming guidance
 
@@ -129,6 +134,7 @@ Implemented modules:
 - `modules/network` — VPC, public/private subnets, internet gateway, route tables, and optional NAT gateway.
 - `modules/security-groups` — public ALB, private ECS service, private PostgreSQL, and optional private Redis security group boundaries.
 - `modules/iam` — ECS task execution role, application task role, and optional secret-reference read policies.
+- `modules/ecs-service` — private ECS/Fargate service pattern with task definition, service, log group, target group, optional listener rule, health checks, and autoscaling.
 
 See `modules/README.md` for detailed module interface conventions.
 

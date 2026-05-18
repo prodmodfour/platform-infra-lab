@@ -17,6 +17,82 @@ deletion_protection_enabled   = false
 enable_redis                  = false
 service_desired_count_default = 1
 
+# ALB listener rules stay disabled until the load-balancer module supplies a listener ARN.
+create_ecs_listener_rules = false
+ecs_listener_arn          = null
+
+ecs_services = {
+  carbon-platform-api = {
+    image                       = "public.ecr.aws/example/carbon-platform-api:demo"
+    container_port              = 8080
+    cpu                         = 256
+    memory                      = 512
+    desired_count               = 1
+    health_check_path           = "/health"
+    listener_rule_priority      = 110
+    listener_rule_path_patterns = ["/carbon*", "/carbon/*"]
+    environment_variables = {
+      LOG_LEVEL     = "debug"
+      DATABASE_MODE = "placeholder"
+    }
+    secret_references = {
+      DATABASE_URL = "arn:aws:secretsmanager:us-east-1:123456789012:secret:platform-infra-lab/dev/ecs-execution/carbon-platform-api/database-url-demo"
+    }
+    enable_autoscaling              = true
+    autoscaling_min_capacity        = 1
+    autoscaling_max_capacity        = 2
+    autoscaling_cpu_target_value    = 60
+    autoscaling_memory_target_value = 70
+  }
+  job-runner-platform = {
+    image                       = "public.ecr.aws/example/job-runner-platform:demo"
+    container_port              = 8080
+    cpu                         = 256
+    memory                      = 512
+    desired_count               = 1
+    health_check_path           = "/healthz"
+    listener_rule_priority      = 120
+    listener_rule_path_patterns = ["/jobs*", "/jobs/*"]
+    environment_variables = {
+      LOG_LEVEL   = "debug"
+      WORKER_MODE = "demo"
+      QUEUE_NAME  = "demo-jobs"
+    }
+    secret_references = {
+      JOB_RUNNER_API_KEY = "arn:aws:ssm:us-east-1:123456789012:parameter/platform-infra-lab/dev/ecs-execution/job-runner-platform/api-key-demo"
+    }
+    enable_autoscaling              = true
+    autoscaling_min_capacity        = 1
+    autoscaling_max_capacity        = 2
+    autoscaling_cpu_target_value    = 65
+    autoscaling_memory_target_value = 75
+  }
+  multi-tenant-saas-api = {
+    image                       = "public.ecr.aws/example/multi-tenant-saas-api:demo"
+    container_port              = 8080
+    cpu                         = 256
+    memory                      = 512
+    desired_count               = 1
+    health_check_path           = "/ready"
+    listener_rule_priority      = 130
+    listener_rule_path_patterns = ["/saas*", "/saas/*"]
+    environment_variables = {
+      LOG_LEVEL     = "debug"
+      TENANCY_MODE  = "demo"
+      DATABASE_MODE = "placeholder"
+    }
+    secret_references = {
+      DATABASE_URL    = "arn:aws:secretsmanager:us-east-1:123456789012:secret:platform-infra-lab/dev/ecs-execution/multi-tenant-saas-api/database-url-demo"
+      JWT_SIGNING_KEY = "arn:aws:ssm:us-east-1:123456789012:parameter/platform-infra-lab/dev/ecs-execution/multi-tenant-saas-api/jwt-signing-key-demo"
+    }
+    enable_autoscaling              = true
+    autoscaling_min_capacity        = 1
+    autoscaling_max_capacity        = 2
+    autoscaling_cpu_target_value    = 60
+    autoscaling_memory_target_value = 70
+  }
+}
+
 alb_ingress_cidrs = ["0.0.0.0/0"]
 alb_ingress_ports = [80]
 service_port      = 8080

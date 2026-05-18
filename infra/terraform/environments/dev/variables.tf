@@ -111,13 +111,171 @@ variable "enable_redis" {
 }
 
 variable "service_desired_count_default" {
-  description = "Default desired task count for future dev ECS service examples."
+  description = "Default desired task count for dev ECS service examples. Kept for review summaries; per-service desired counts live in ecs_services."
   type        = number
   default     = 1
 
   validation {
     condition     = var.service_desired_count_default >= 1
     error_message = "service_desired_count_default must be at least 1."
+  }
+}
+
+variable "create_ecs_listener_rules" {
+  description = "Whether ECS service modules should create ALB listener rules. Dev keeps this false until the load-balancer module provides a listener ARN."
+  type        = bool
+  default     = false
+}
+
+variable "ecs_listener_arn" {
+  description = "Optional ALB listener ARN used when create_ecs_listener_rules is true. Keep placeholder-only in committed examples."
+  type        = string
+  default     = null
+  nullable    = true
+
+  validation {
+    condition = var.ecs_listener_arn == null ? true : can(regex(
+      "^arn:aws[a-zA-Z-]*:elasticloadbalancing:[a-z0-9-]+:[0-9]{12}:listener/app/.+",
+      var.ecs_listener_arn
+    ))
+    error_message = "ecs_listener_arn must be an ALB listener ARN when provided."
+  }
+}
+
+variable "ecs_services" {
+  description = "Public-safe ECS/Fargate service examples keyed by service name. Images and secret references must be placeholders only."
+  type = map(object({
+    image                           = string
+    container_port                  = number
+    cpu                             = number
+    memory                          = number
+    desired_count                   = number
+    health_check_path               = string
+    listener_rule_priority          = number
+    listener_rule_path_patterns     = list(string)
+    environment_variables           = map(string)
+    secret_references               = map(string)
+    enable_autoscaling              = bool
+    autoscaling_min_capacity        = number
+    autoscaling_max_capacity        = number
+    autoscaling_cpu_target_value    = number
+    autoscaling_memory_target_value = number
+  }))
+  default = {
+    carbon-platform-api = {
+      image                       = "public.ecr.aws/example/carbon-platform-api:demo"
+      container_port              = 8080
+      cpu                         = 256
+      memory                      = 512
+      desired_count               = 1
+      health_check_path           = "/health"
+      listener_rule_priority      = 110
+      listener_rule_path_patterns = ["/carbon*", "/carbon/*"]
+      environment_variables = {
+        LOG_LEVEL     = "debug"
+        DATABASE_MODE = "placeholder"
+      }
+      secret_references = {
+        DATABASE_URL = "arn:aws:secretsmanager:us-east-1:123456789012:secret:platform-infra-lab/dev/ecs-execution/carbon-platform-api/database-url-demo"
+      }
+      enable_autoscaling              = true
+      autoscaling_min_capacity        = 1
+      autoscaling_max_capacity        = 2
+      autoscaling_cpu_target_value    = 60
+      autoscaling_memory_target_value = 70
+    }
+    job-runner-platform = {
+      image                       = "public.ecr.aws/example/job-runner-platform:demo"
+      container_port              = 8080
+      cpu                         = 256
+      memory                      = 512
+      desired_count               = 1
+      health_check_path           = "/healthz"
+      listener_rule_priority      = 120
+      listener_rule_path_patterns = ["/jobs*", "/jobs/*"]
+      environment_variables = {
+        LOG_LEVEL   = "debug"
+        WORKER_MODE = "demo"
+        QUEUE_NAME  = "demo-jobs"
+      }
+      secret_references = {
+        JOB_RUNNER_API_KEY = "arn:aws:ssm:us-east-1:123456789012:parameter/platform-infra-lab/dev/ecs-execution/job-runner-platform/api-key-demo"
+      }
+      enable_autoscaling              = true
+      autoscaling_min_capacity        = 1
+      autoscaling_max_capacity        = 2
+      autoscaling_cpu_target_value    = 65
+      autoscaling_memory_target_value = 75
+    }
+    multi-tenant-saas-api = {
+      image                       = "public.ecr.aws/example/multi-tenant-saas-api:demo"
+      container_port              = 8080
+      cpu                         = 256
+      memory                      = 512
+      desired_count               = 1
+      health_check_path           = "/ready"
+      listener_rule_priority      = 130
+      listener_rule_path_patterns = ["/saas*", "/saas/*"]
+      environment_variables = {
+        LOG_LEVEL     = "debug"
+        TENANCY_MODE  = "demo"
+        DATABASE_MODE = "placeholder"
+      }
+      secret_references = {
+        DATABASE_URL    = "arn:aws:secretsmanager:us-east-1:123456789012:secret:platform-infra-lab/dev/ecs-execution/multi-tenant-saas-api/database-url-demo"
+        JWT_SIGNING_KEY = "arn:aws:ssm:us-east-1:123456789012:parameter/platform-infra-lab/dev/ecs-execution/multi-tenant-saas-api/jwt-signing-key-demo"
+      }
+      enable_autoscaling              = true
+      autoscaling_min_capacity        = 1
+      autoscaling_max_capacity        = 2
+      autoscaling_cpu_target_value    = 60
+      autoscaling_memory_target_value = 70
+    }
+  }
+
+  validation {
+    condition     = length(var.ecs_services) > 0
+    error_message = "ecs_services must include at least one service example."
+  }
+
+  validation {
+    condition = alltrue([
+      for service_name, config in var.ecs_services :
+      can(regex("^[a-z][a-z0-9-]+$", service_name)) &&
+      can(regex("^public\\.ecr\\.aws/example/[a-z0-9-]+:demo$", config.image)) &&
+      config.container_port >= 1 && config.container_port <= 65535 &&
+      contains([256, 512, 1024, 2048, 4096], config.cpu) &&
+      config.memory >= 512 &&
+      config.desired_count >= 1 &&
+      startswith(config.health_check_path, "/") &&
+      config.listener_rule_priority >= 1 && config.listener_rule_priority <= 50000 &&
+      config.autoscaling_min_capacity >= 1 &&
+      config.autoscaling_max_capacity >= config.autoscaling_min_capacity &&
+      config.autoscaling_cpu_target_value > 0 && config.autoscaling_cpu_target_value <= 100 &&
+      config.autoscaling_memory_target_value > 0 && config.autoscaling_memory_target_value <= 100
+    ])
+    error_message = "ecs_services entries must use fake images, valid ports/sizing, health paths, listener priorities, and autoscaling ranges."
+  }
+
+  validation {
+    condition = alltrue(flatten([
+      for _, config in var.ecs_services : [
+        for name in concat(keys(config.environment_variables), keys(config.secret_references)) :
+        can(regex("^[A-Z_][A-Z0-9_]*$", name))
+      ]
+    ]))
+    error_message = "ECS environment variable and secret names must be uppercase shell-style identifiers."
+  }
+
+  validation {
+    condition = alltrue(flatten([
+      for _, config in var.ecs_services : [
+        for arn in values(config.secret_references) :
+        can(regex("^arn:aws[a-zA-Z-]*:secretsmanager:[a-z0-9-]+:[0-9]{12}:secret:.+", arn)) ||
+        can(regex("^arn:aws[a-zA-Z-]*:ssm:[a-z0-9-]+:[0-9]{12}:parameter/.+", arn))
+      ]
+    ]))
+    error_message = "ECS secret references must be Secrets Manager or SSM Parameter Store ARNs, not values."
   }
 }
 

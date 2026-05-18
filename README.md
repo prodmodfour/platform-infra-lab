@@ -30,7 +30,7 @@ This repository must remain safe to publish and safe to review.
 
 ## Current status
 
-Bootstrap skeleton, validation guardrails, Terraform conventions, dev/prod Terraform environments, the shared network module, shared security-groups module, and shared IAM module are in place. Remaining Terraform modules, diagrams, and detailed operating documentation will be added ticket-by-ticket.
+Bootstrap skeleton, validation guardrails, Terraform conventions, dev/prod Terraform environments, the shared network module, shared security-groups module, shared IAM module, and ECS/Fargate service module are in place. Remaining load balancing, data, observability, diagrams, and detailed operating documentation will be added ticket-by-ticket.
 
 ## Quick start validation
 
@@ -72,6 +72,7 @@ The quality gate checks shell syntax, repository structure, public-safety rules,
 └── infra/
     └── terraform/
         ├── modules/
+        │   ├── ecs-service/
         │   ├── iam/
         │   ├── network/
         │   └── security-groups/
@@ -85,6 +86,7 @@ The quality gate checks shell syntax, repository structure, public-safety rules,
 - VPC with public and private subnet intent implemented by the network module.
 - Security group boundaries for public ALB ingress, private ECS services, private PostgreSQL/RDS, and optional private Redis/ElastiCache.
 - IAM separation between the ECS task execution role and the application task role, with placeholder secret-reference read policies.
+- ECS/Fargate service definitions for `carbon-platform-api`, `job-runner-platform`, and `multi-tenant-saas-api` using fake images, private subnet placement, log groups, target groups, health checks, and autoscaling settings.
 - Public Application Load Balancer in front of private ECS/Fargate services.
 - Private PostgreSQL/RDS and optional Redis/ElastiCache patterns.
 - Secret references via AWS-native services rather than committed secret values.

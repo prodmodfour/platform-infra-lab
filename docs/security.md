@@ -34,6 +34,15 @@ The IAM module now models role separation and secret-reference access:
 - environment examples use fake account ID `123456789012` and placeholder Secrets Manager or SSM Parameter Store paths; no secret values are committed
 - production use should review per-service task roles, exact ARN scoping, permissions boundaries, IAM Access Analyzer findings, KMS key policy alignment, and secret rotation ownership
 
-The current egress model is intentionally strict and incomplete for real workloads. Future ECS services may need reviewed egress through VPC endpoints, NAT, or narrow rules for image pulls, logs, secret references, telemetry, and third-party APIs.
+The ECS service module now models private workload placement and secret injection boundaries:
+
+- Fargate services run in private subnets with no public task IPs by default
+- tasks use the private ECS service security group and receive traffic through ALB target groups only
+- container images are constrained in examples to fake `public.ecr.aws/example/...:demo` URIs
+- non-secret environment variables are separated from `secret_references`
+- `secret_references` must be Secrets Manager or SSM Parameter Store ARNs, not secret values
+- listener-rule creation is disabled until an ALB listener is explicitly wired by a later load-balancer module
+
+The current egress model is intentionally strict and incomplete for real workloads. ECS services may need reviewed egress through VPC endpoints, NAT, or narrow rules for image pulls, logs, secret references, telemetry, and third-party APIs.
 
 Future content will expand validation-only CI notes, secret lifecycle details, and production hardening gaps.

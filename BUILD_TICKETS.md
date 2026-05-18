@@ -253,7 +253,7 @@ Commit when complete.
 
 ## 007 — Add ECS service module
 
-Status: TODO
+Status: DONE
 
 Create `infra/terraform/modules/ecs-service/`.
 

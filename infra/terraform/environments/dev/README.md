@@ -1,6 +1,6 @@
 # Dev Terraform environment
 
-This root module is the public-safe `dev` environment for `platform-infra-lab`. It establishes provider configuration, backend examples, variable defaults, outputs, naming, tagging, the shared network module, shared security-groups module, and shared IAM module.
+This root module is the public-safe `dev` environment for `platform-infra-lab`. It establishes provider configuration, backend examples, variable defaults, outputs, naming, tagging, the shared network module, shared security-groups module, shared IAM module, and ECS/Fargate service examples.
 
 ## Current scope
 
@@ -16,9 +16,14 @@ The dev environment now wires `../../modules/network` with cost-aware defaults:
 - public ingress limited to the future ALB edge on HTTP by default
 - private service-to-database rules scoped by security group reference rather than public CIDRs
 - ECS task execution and application task IAM roles with placeholder secret-reference read policies
+- a shared ECS cluster for private Fargate services
+- ECS service examples for `carbon-platform-api`, `job-runner-platform`, and `multi-tenant-saas-api`
+- fake public image URIs under `public.ecr.aws/example/...:demo`
+- per-service CloudWatch log groups, task definitions, services, target groups, health checks, and desired-count autoscaling
+- optional ALB listener-rule wiring kept disabled until the load-balancer module supplies a listener ARN
 - fake Secrets Manager and SSM Parameter Store ARNs as references only; no secret values are stored
 
-Future tickets add ECS service patterns, load balancing, RDS PostgreSQL, optional Redis resources, and observability.
+Future tickets add the load balancer, RDS PostgreSQL, optional Redis resources, and observability.
 
 ## Dev posture
 
@@ -29,8 +34,9 @@ Dev is intentionally small and cost-aware:
 - log retention defaults to a short demo-friendly window for future log groups
 - deletion protection defaults to disabled for disposable lab experiments
 - Redis/cache usage defaults to disabled, so the Redis security group is omitted by default
-- default ECS desired count is one task for future service examples
-- placeholder IAM secret-reference scopes use dev paths and a fake account ID for review only
+- default ECS desired count is one task for each service example
+- autoscaling ranges are intentionally small for review
+- placeholder IAM and container secret-reference scopes use dev paths and a fake account ID for review only
 
 These are placeholders for review and validation, not a production recommendation.
 
@@ -40,7 +46,7 @@ Public subnets are intended for internet-facing components only. Private subnets
 
 The security group boundary is intentionally narrow: internet CIDRs reach only the ALB security group, the ALB reaches ECS services only on the service port, ECS services reach PostgreSQL only on port 5432, and Redis rules are created only when Redis is enabled. No public database or cache ingress is modeled.
 
-The IAM boundary separates the ECS task execution role from the application task role. The execution role is for ECS runtime integration such as image pulls, log delivery, and ECS-managed secret injection. The application task role starts with only explicitly supplied secret-reference read permissions. All example ARNs are placeholders and must be replaced or removed before any real manual provisioning.
+The IAM boundary separates the ECS task execution role from the application task role. The execution role is for ECS runtime integration such as image pulls, log delivery, and ECS-managed secret injection. The application task role starts with only explicitly supplied secret-reference read permissions. ECS service examples pass secret references as ARNs only, never values. All example ARNs are placeholders and must be replaced or removed before any real manual provisioning.
 
 If NAT is enabled for a real dev experiment, it can create ongoing cloud cost. Keep it disabled unless the workload needs private outbound internet access, and clean up user-owned resources after review. Real workloads may also need reviewed egress through VPC endpoints, NAT, or narrow outbound rules for image pulls, logging, secret references, and AWS APIs.
 

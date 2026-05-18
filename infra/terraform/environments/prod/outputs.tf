@@ -138,6 +138,36 @@ output "secret_reference_policy_summary" {
   value       = module.iam.secret_reference_policy_summary
 }
 
+output "ecs_service_defaults" {
+  description = "Review-friendly summary of ECS service module wiring."
+  value       = local.ecs_service_defaults
+}
+
+output "ecs_cluster_name" {
+  description = "Name of the shared ECS cluster for private Fargate services."
+  value       = aws_ecs_cluster.platform.name
+}
+
+output "ecs_cluster_arn" {
+  description = "ARN of the shared ECS cluster for private Fargate services."
+  value       = aws_ecs_cluster.platform.arn
+}
+
+output "ecs_service_summaries" {
+  description = "Review-friendly ECS service summaries keyed by service name. Secret references are names only in module summaries."
+  value       = { for service_name, service in module.ecs_services : service_name => service.service_summary }
+}
+
+output "ecs_service_target_group_arns" {
+  description = "ALB target group ARNs created for each ECS service."
+  value       = { for service_name, service in module.ecs_services : service_name => service.target_group_arn }
+}
+
+output "ecs_service_log_group_names" {
+  description = "CloudWatch log group names created for each ECS service."
+  value       = { for service_name, service in module.ecs_services : service_name => service.log_group_name }
+}
+
 output "platform_defaults" {
   description = "Cost and availability defaults that future modules will consume."
   value       = local.platform_defaults
